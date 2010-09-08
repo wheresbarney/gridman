@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config-3.6.dtd">
+
+<cache-config>
+
+    <!-- Allow non pof stuff to work for now. -->
+    <defaults>
+        <serializer>
+            <class-name>com.tangosol.io.pof.SafeConfigurablePofContext</class-name>
+        </serializer>
+    </defaults>
+
+  <caching-scheme-mapping>
+    <cache-mapping>
+      <cache-name>*</cache-name>
+      <scheme-name>extend-dist</scheme-name>
+    </cache-mapping>
+
+  </caching-scheme-mapping>
+
+  <caching-schemes>
+
+    <remote-cache-scheme>
+      <scheme-name>extend-dist</scheme-name>
+      <service-name>ExtendTcpCacheService</service-name>
+      <initiator-config>
+        <tcp-initiator>
+          <remote-addresses>
+            <socket-address>
+              <address>localhost</address>
+              <port system-property="coherence.extend.port"/>
+            </socket-address>
+          </remote-addresses>
+          <connect-timeout>10s</connect-timeout>
+        </tcp-initiator>
+      </initiator-config>
+    </remote-cache-scheme>
+
+    <remote-invocation-scheme>
+        <scheme-name>InvokeService</scheme-name>
+        <service-name>InvokeService</service-name>
+      <initiator-config>
+        <tcp-initiator>
+          <remote-addresses>
+            <socket-address>
+              <address>localhost</address>
+              <port system-property="coherence.extend.port"/>
+            </socket-address>
+          </remote-addresses>
+          <connect-timeout>10s</connect-timeout>
+        </tcp-initiator>
+      </initiator-config>        
+    </remote-invocation-scheme>
+    
+  </caching-schemes>
+</cache-config>
