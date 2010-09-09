@@ -6,9 +6,22 @@
   <name>sandbox</name>
   <description>sandbox</description>
   
-  
+  <scm>
+    <connection>scm:svn:http://gridman.googlecode.com/svn/trunk/sandbox</connection>
+    <developerConnection>scm:svn:https://gridman.googlecode.com/svn/trunk/sandbox</developerConnection>
+    <url>http://gridman.googlecode.com/svn/</url>
+  </scm>
+	
   <build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<version>1.4</version>
+				<configuration>
+				  <goals>install</goals>
+				</configuration>
+			  </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
