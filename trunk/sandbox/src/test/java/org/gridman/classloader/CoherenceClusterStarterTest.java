@@ -19,7 +19,7 @@ public class CoherenceClusterStarterTest extends TestCase {
         System.out.println("*** 3 : " + new Date());
         cluster.setCluster("/coherence/classloader/cluster.properties");
         System.out.println("*** 4 : " + new Date());
-        CacheFactory.getCache("test").put(1,"A");
+        //CacheFactory.getCache("test").put(1,"A");
     }
 
     public void testClusterFail() {}
