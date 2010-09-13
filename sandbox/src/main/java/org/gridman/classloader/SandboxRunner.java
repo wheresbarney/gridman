@@ -19,7 +19,7 @@ public class SandboxRunner {
     private volatile Throwable throwable;
     private Properties args;
     private Object instance;
-    private Class aClass;
+    private Class<?> aClass;
 
     public SandboxRunner(String className, Properties args) throws Throwable {
         logger.debug("In SandboxRunner");
@@ -36,12 +36,12 @@ public class SandboxRunner {
 
     public boolean isStarted() throws Exception {
         logger.info("Calling isStarted");
-        return (Boolean)aClass.getMethod("isStarted",null).invoke(instance,null);
+        return (Boolean)aClass.getMethod("isStarted").invoke(instance);
     }
 
     public void shutdown() throws Exception {
         logger.info("Calling shutdown");
-        aClass.getMethod("shutdown",null).invoke(instance,null);
+        aClass.getMethod("shutdown").invoke(instance);
         logger.info("Called shutdown");        
     }
 
@@ -55,17 +55,23 @@ public class SandboxRunner {
             try {
                 logger.debug("ClassPath is" + System.getProperty("java.class.path"));
                 String[] vals = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
-                List<URL> urls = new ArrayList();
-                for (int i = 0; i < vals.length; i++) {
-                    logger.debug("Adding classpath : " + vals[i]);
-                    String ending = vals[i].endsWith(".jar") ? "" : "/";
-                    urls.add(new URL("file:///" + vals[i] + ending));
+                List<URL> urls = new ArrayList<URL>();
+                for (String val : vals) {
+                    logger.debug("Adding classpath : " + val);
+                    String ending = val.endsWith(".jar") ? "" : "/";
+                    urls.add(new URL("file:///" + val + ending));
                 }
-                ClassLoader loader = new ChildFirstClassLoader(urls.toArray(new URL[0]), this.getClass().getClassLoader());
+
+                ClassLoaderProperties.use();
+
+                ChildFirstClassLoader loader = new ChildFirstClassLoader(urls.toArray(new URL[urls.size()]), this.getClass().getClassLoader());
+                loader.setProperties(System.getProperties());
+                loader.setProperties(args);
+
                 Thread.currentThread().setContextClassLoader(loader);
                 aClass = loader.loadClass(className);
                 instance = aClass.newInstance();
-                aClass.getMethod("start",Properties.class).invoke(instance,args);
+                aClass.getMethod("start").invoke(instance);
                 throwable = ALL_OK;
                 logger.info("Succeeded in starting " + className);
             } catch(Throwable t) {

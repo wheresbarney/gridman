@@ -15,12 +15,8 @@ public class SandboxCoherenceServer implements SandboxServer {
     
     public SandboxCoherenceServer() {} // default constructor required
 
-    @Override public void start(Properties properties) {
+    @Override public void start() {
         logger.info("Starting Server");
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            logger.debug("Setting : " + entry.getKey() + " : " + entry.getValue());
-            System.setProperty((String)entry.getKey(), (String)entry.getValue());
-        }
         DefaultCacheServer.startDaemon();
         logger.info("Started Server");
     }

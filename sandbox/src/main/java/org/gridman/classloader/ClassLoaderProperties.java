@@ -12,14 +12,17 @@ public class ClassLoaderProperties extends Properties {
 
     public static ClassLoaderProperties getInstance() { return sInstance; }
 
+    public static void use() {
+        System.setProperties(ClassLoaderProperties.getInstance());
+    }
+
     private Properties systemProperties;
 
     private ClassLoaderProperties() {
         systemProperties = System.getProperties();
-        System.setProperties(this);
     }
 
-    private Properties getPropertiesToUse() {
+    Properties getPropertiesToUse() {
         Properties props;
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl instanceof ChildFirstClassLoader) {
