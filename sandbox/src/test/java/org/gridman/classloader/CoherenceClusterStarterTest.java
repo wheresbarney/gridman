@@ -1,7 +1,6 @@
 package org.gridman.classloader;
 
 import junit.framework.TestCase;
-import com.tangosol.net.CacheFactory;
 
 import java.util.Date;
 
