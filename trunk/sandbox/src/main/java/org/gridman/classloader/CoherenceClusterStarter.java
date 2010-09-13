@@ -2,25 +2,19 @@ package org.gridman.classloader;
 
 import org.apache.log4j.Logger;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
-import org.gridman.classloader.SandboxServer;
-
 /**
- * Created by IntelliJ IDEA.
- * User: wilsane
- * Date: 06-Sep-2010
- * Time: 14:16:35
- * To change this template use File | Settings | File Templates.
+ *
  */
 public class CoherenceClusterStarter {
     private static final Logger logger = Logger.getLogger(CoherenceClusterStarter.class);
 
     private String clusterFilename;
     private static CoherenceClusterStarter sInstance;
-    private List<SandboxRunner> services = new ArrayList();
+    private List<SandboxRunner> services = new ArrayList<SandboxRunner>();
 
     private static final String CLUSTER_PREFIX = "coherence.incubator.cluster.";
 

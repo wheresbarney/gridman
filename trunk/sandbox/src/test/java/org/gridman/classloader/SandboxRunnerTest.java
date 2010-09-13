@@ -1,5 +1,7 @@
 package org.gridman.classloader;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -10,9 +12,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class SandboxRunnerTest {
+    private Properties savedProperties;
+    private ClassLoader savedClassLoader;
+
+    @Before
+    public void save() {
+        savedProperties = System.getProperties();
+        savedClassLoader = Thread.currentThread().getContextClassLoader();
+    }
+
+    @After
+    public void restore() {
+        System.setProperties(savedProperties);
+        Thread.currentThread().setContextClassLoader(savedClassLoader);
+    }
 
     @Test
     public void shouldRunWithIsolatedProperties() throws Throwable {
@@ -68,16 +84,10 @@ public class SandboxRunnerTest {
         assertEquals(expected.toString(), actual.toString());
     }
 
-    public void runSandbox(final Properties properties) {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    new SandboxRunner(PropertyDumper.class.getCanonicalName(), properties);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-            }
-        }.start();
+    public void runSandbox(final Properties properties) throws Throwable {
+        SandboxRunner runner = new SandboxRunner(PropertyDumper.class.getCanonicalName(), properties);
+        while (!runner.isStarted()) {
+            Thread.sleep(100);
+        }
     }
 }

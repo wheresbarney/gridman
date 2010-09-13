@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 public class PropertyDumper implements SandboxServer {
     public static final String FILE_PROPERTY = "org.gridman.PropertyDumper";
@@ -17,6 +15,8 @@ public class PropertyDumper implements SandboxServer {
             "line.separator",
             "idea.launcher.port"
     };
+
+    private boolean done = false;
 
     public PropertyDumper() {
     }
@@ -46,11 +46,12 @@ public class PropertyDumper implements SandboxServer {
                 writer.close();
             }
         }
+        done = true;
     }
 
     @Override
     public boolean isStarted() {
-        return true;
+        return done;
     }
 
     @Override

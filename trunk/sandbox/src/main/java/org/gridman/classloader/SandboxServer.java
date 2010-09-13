@@ -1,7 +1,5 @@
 package org.gridman.classloader;
 
-import java.util.Properties;
-
 /**
  * 
  */
