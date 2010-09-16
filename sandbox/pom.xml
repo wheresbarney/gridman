@@ -13,6 +13,7 @@
   </scm>
 	
   <build>
+	<finalName>gridman-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
