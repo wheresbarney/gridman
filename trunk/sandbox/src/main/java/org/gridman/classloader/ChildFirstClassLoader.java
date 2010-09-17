@@ -1,12 +1,15 @@
 package org.gridman.classloader;
 
+import org.apache.log4j.Logger;
+
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.security.Permissions;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -14,13 +17,36 @@ import java.util.Properties;
  * This is a ChildFirst (also called ParentLast) ClassLoader.
  * It allows us to Sandbox things (in this case Coherence nodes).
  */
-public class ChildFirstClassLoader extends URLClassLoader {
+public class ChildFirstClassLoader extends PropertyIsolatingClassLoader {
+    private static final Logger logger = Logger.getLogger(ChildFirstClassLoader.class);
 
-	Map<String, Class> loadedClasses = new HashMap<String, Class>();
-	Map<String, URL> loadedResources = new HashMap<String, URL>();
-    ClassLoader root;
+	private Map<String, Class> loadedClasses = new HashMap<String, Class>();
+	private Map<String, URL> loadedResources = new HashMap<String, URL>();
+    private ClassLoader root;
 
-    Properties properties = new Properties();
+    public static ChildFirstClassLoader newInstance() throws Exception {
+        logger.debug("ClassPath is" + System.getProperty("java.class.path"));
+        String[] vals = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
+        List<URL> urls = new ArrayList<URL>();
+        for (String val : vals) {
+            logger.debug("Adding classpath : " + val);
+            String ending = val.endsWith(".jar") ? "" : "/";
+            urls.add(new URL("file:///" + val + ending));
+        }
+
+        ClassLoaderProperties.use();
+
+        ClassLoader parentLoader = ChildFirstClassLoader.class.getClassLoader();
+        ChildFirstClassLoader loader = new ChildFirstClassLoader(urls.toArray(new URL[urls.size()]), parentLoader);
+        loader.setProperties(System.getProperties());
+        return loader;
+    }
+
+    public static ChildFirstClassLoader newInstance(Properties localProperties) throws Exception {
+        ChildFirstClassLoader loader = newInstance();
+        loader.setProperties(localProperties);
+        return loader;
+    }
 
 	public ChildFirstClassLoader(URL[] urls, ClassLoader parent) {
 		super(urls,null);
@@ -41,14 +67,6 @@ public class ChildFirstClassLoader extends URLClassLoader {
 		addURL(url);
 	}
 	*/
-
-    public Properties getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Properties props) {
-        properties.putAll(props);
-    }
 
 	public Class loadClass(String name) throws ClassNotFoundException {
 		Class c = loadedClasses.get(name);
