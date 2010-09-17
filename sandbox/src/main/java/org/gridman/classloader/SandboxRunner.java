@@ -2,14 +2,14 @@ package org.gridman.classloader;
 
 import org.apache.log4j.Logger;
 
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 /**
  * The Sandbox Runner will start the given class in a SandboxClassLoader.
  * This uses the ClientFirstClassLoader to make sure that any classes not beginning with java are loaded in a sandbox.
+ *
+ * @author Andrew Wilson
+ * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
 public class SandboxRunner {
     public static final Logger logger = Logger.getLogger(SandboxRunner.class);
@@ -17,14 +17,14 @@ public class SandboxRunner {
     
     private final String className;
     private volatile Throwable throwable;
-    private Properties args;
+    private Properties localSystemProperties;
     private Object instance;
     private Class<?> aClass;
 
-    public SandboxRunner(String className, Properties args) throws Throwable {
+    public SandboxRunner(String className, Properties localSystemProperties) throws Throwable {
         logger.debug("In SandboxRunner");
         this.className = className;
-        this.args = args;
+        this.localSystemProperties = localSystemProperties;
         MyRunner myRunner = new MyRunner();
         if(throwable == null) {
             synchronized(myRunner) { myRunner.wait(); }
@@ -53,21 +53,7 @@ public class SandboxRunner {
 
         public void run() {
             try {
-                logger.debug("ClassPath is" + System.getProperty("java.class.path"));
-                String[] vals = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
-                List<URL> urls = new ArrayList<URL>();
-                for (String val : vals) {
-                    logger.debug("Adding classpath : " + val);
-                    String ending = val.endsWith(".jar") ? "" : "/";
-                    urls.add(new URL("file:///" + val + ending));
-                }
-
-                ClassLoaderProperties.use();
-
-                ChildFirstClassLoader loader = new ChildFirstClassLoader(urls.toArray(new URL[urls.size()]), this.getClass().getClassLoader());
-                loader.setProperties(System.getProperties());
-                loader.setProperties(args);
-
+                ClassLoader loader = ChildFirstClassLoader.newInstance(localSystemProperties);
                 Thread.currentThread().setContextClassLoader(loader);
                 aClass = loader.loadClass(className);
                 instance = aClass.newInstance();
@@ -86,7 +72,7 @@ public class SandboxRunner {
         final StringBuilder sb = new StringBuilder();
         sb.append("SandboxRunner");
         sb.append("{className='").append(className).append('\'');
-        sb.append(", args=").append(args);
+        sb.append(", args=").append(localSystemProperties);
         sb.append('}');
         return sb.toString();
     }

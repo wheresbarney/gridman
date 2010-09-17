@@ -14,8 +14,11 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * @todo this is not currently used, but we'd like to hook it in to give us isolation.
- * @author Jonathan Knight
+ * An extension of the {@link java.util.Properties} class that is used in combination with {@link PropertyIsolatingClassLoader}
+ * to isolate System property sets to a specific classloader. This allows code that makes use of System properties
+ * to be run in sand box where it will not affect the System properties of other code in the same JVM.
+ *
+ * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
 public class ClassLoaderProperties extends Properties {
     private static ClassLoaderProperties sInstance = new ClassLoaderProperties();
@@ -35,8 +38,8 @@ public class ClassLoaderProperties extends Properties {
     Properties getPropertiesToUse() {
         Properties props;
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl instanceof ChildFirstClassLoader) {
-            props = ((ChildFirstClassLoader)cl).getProperties();
+        if (cl instanceof PropertyIsolatingClassLoader) {
+            props = ((PropertyIsolatingClassLoader)cl).getProperties();
         } else {
             props = systemProperties;
         }
