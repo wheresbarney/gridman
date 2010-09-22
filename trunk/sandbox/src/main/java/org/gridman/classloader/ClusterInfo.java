@@ -1,11 +1,13 @@
 package org.gridman.classloader;
 
+import org.gridman.classloader.coherence.CoherenceClassloaderLifecycle;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 /**
- * A class to hold information about a sandboxed cluster.
+ * A class to hold information about an isolated classloader cluster.
  *
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
@@ -18,14 +20,14 @@ public class ClusterInfo {
 
     private Properties clusterProperties;
     private Map<Integer, Properties> localPropertyMap;
-    private Map<Integer, Class<? extends SandboxServer>> serverClasses;
+    private Map<Integer, Class<? extends CoherenceClassloaderLifecycle>> serverClasses;
 
     private int groupCount;
 
     public ClusterInfo(String clusterFilename) {
         clusterProperties = SystemPropertyLoader.getSystemProperties(clusterFilename);
         localPropertyMap = new HashMap<Integer, Properties>();
-        serverClasses = new HashMap<Integer, Class<? extends SandboxServer>>();
+        serverClasses = new HashMap<Integer, Class<? extends CoherenceClassloaderLifecycle>>();
 
         groupCount = 0;
         while (getServerClassName(groupCount) != null) {
@@ -48,7 +50,7 @@ public class ClusterInfo {
     }
 
     @SuppressWarnings({"unchecked"})
-    public Class<? extends SandboxServer> getServerClass(int groupId) {
+    public Class<? extends CoherenceClassloaderLifecycle> getServerClass(int groupId) {
         if (!serverClasses.containsKey(groupId)) {
             String serverClassName = getServerClassName(groupId);
             if(serverClassName == null) {
@@ -56,15 +58,15 @@ public class ClusterInfo {
                         PROP_CLUSTER_PREFIX + groupId + PROP_SUFFIX_SERVERCLASS + "must not be blank");
             }
 
-            Class<? extends SandboxServer> serverClass = null;
+            Class<? extends CoherenceClassloaderLifecycle> serverClass = null;
             try {
-                serverClass = (Class<? extends SandboxServer>) Class.forName(serverClassName);
+                serverClass = (Class<? extends CoherenceClassloaderLifecycle>) Class.forName(serverClassName);
             } catch (ClassNotFoundException e) {
                 throw new IllegalArgumentException("Server Class Not Found: " + serverClassName);
             }
 
-            if(!SandboxServer.class.isAssignableFrom(serverClass)) {
-                throw new ClassCastException(serverClass.getCanonicalName() + " class should implement " + SandboxServer.class.getCanonicalName());
+            if(!CoherenceClassloaderLifecycle.class.isAssignableFrom(serverClass)) {
+                throw new ClassCastException(serverClass.getCanonicalName() + " class should implement " + CoherenceClassloaderLifecycle.class.getCanonicalName());
             }
 
             serverClasses.put(groupId, serverClass);

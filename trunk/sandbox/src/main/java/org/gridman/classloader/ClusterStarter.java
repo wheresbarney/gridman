@@ -4,6 +4,7 @@ import com.tangosol.util.Base;
 import com.tangosol.util.LongArray;
 import com.tangosol.util.SimpleLongArray;
 import org.apache.log4j.Logger;
+import org.gridman.classloader.coherence.CoherenceClassloaderLifecycle;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,10 +20,10 @@ import java.util.Properties;
  * @author Andrew Wilson
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
-public class CoherenceClusterStarter extends Base {
-    private static final Logger logger = Logger.getLogger(CoherenceClusterStarter.class);
+public class ClusterStarter extends Base {
+    private static final Logger logger = Logger.getLogger(ClusterStarter.class);
 
-    private static CoherenceClusterStarter sInstance;
+    private static ClusterStarter sInstance;
 
     private Map<String, ClusterInfo> clusters;
     private Map<String, LongArray> services;
@@ -30,21 +31,21 @@ public class CoherenceClusterStarter extends Base {
     private static final String CLUSTER_PREFIX = "coherence.incubator.cluster.";
 
     public static void main(String[] args) {
-        new CoherenceClusterStarter().ensureCluster(args[0]);
+        new ClusterStarter().ensureCluster(args[0]);
     }
 
-    private CoherenceClusterStarter() {
+    private ClusterStarter() {
         clusters = new HashMap<String, ClusterInfo>();
         services = new HashMap<String, LongArray>();
     }
 
     /**
-     * Returns the singleton instance of CoherenceClusterStarter
-     * @return the singleton instance of CoherenceClusterStarter
+     * Returns the singleton instance of ClusterStarter
+     * @return the singleton instance of ClusterStarter
      */
-    public static synchronized CoherenceClusterStarter getInstance() {
+    public static synchronized ClusterStarter getInstance() {
         if(sInstance == null) {
-            sInstance = new CoherenceClusterStarter();
+            sInstance = new ClusterStarter();
         }
         return sInstance;
     }
@@ -107,12 +108,12 @@ public class CoherenceClusterStarter extends Base {
         LongArray serviceList = getServiceList(clusterFile, groupId);
         if (!serviceList.exists(instanceId)) {
             ClusterInfo clusterInfo = getClusterInfo(clusterFile);
-            Class<? extends SandboxServer> serverClass = clusterInfo.getServerClass(groupId);
+            Class<? extends CoherenceClassloaderLifecycle> serverClass = clusterInfo.getServerClass(groupId);
             Properties localProperties = clusterInfo.getLocalProperties(groupId);
 
-            SandboxRunner runner;
+            ClassloaderRunner runner;
             try {
-                runner = new SandboxRunner(serverClass.getCanonicalName(), localProperties);
+                runner = new ClassloaderRunner(serverClass.getCanonicalName(), localProperties);
             } catch (Throwable throwable) {
                 throw ensureRuntimeException(throwable, "Error starting server clusterFile=" + clusterFile +
                         " groupId=" + groupId + " instance=" + instanceId);
@@ -192,9 +193,9 @@ public class CoherenceClusterStarter extends Base {
         Iterator<LongArray> it = clusterServicesList.iterator();
         while (it.hasNext()) {
             LongArray serviceList = it.next();
-            Iterator<SandboxRunner> serviceIterator = serviceList.iterator();
+            Iterator<ClassloaderRunner> serviceIterator = serviceList.iterator();
             while (serviceIterator.hasNext()) {
-                SandboxRunner service = serviceIterator.next();
+                ClassloaderRunner service = serviceIterator.next();
                 if (visitor.visit(service)) {
                     serviceIterator.remove();
                 }
@@ -207,9 +208,9 @@ public class CoherenceClusterStarter extends Base {
         LongArray clusterServicesList = getClusterServiceList(filename);
         LongArray serviceList = (LongArray) clusterServicesList.get(groupId);
         if (serviceList != null) {
-            Iterator<SandboxRunner> serviceIterator = serviceList.iterator();
+            Iterator<ClassloaderRunner> serviceIterator = serviceList.iterator();
             while (serviceIterator.hasNext()) {
-                SandboxRunner service = serviceIterator.next();
+                ClassloaderRunner service = serviceIterator.next();
                 if (visitor.visit(service)) {
                     serviceIterator.remove();
                 }
@@ -222,7 +223,7 @@ public class CoherenceClusterStarter extends Base {
         LongArray clusterServicesList = getClusterServiceList(filename);
         LongArray serviceList = (LongArray) clusterServicesList.get(groupId);
         if (serviceList != null) {
-            SandboxRunner service = (SandboxRunner) serviceList.get(instance);
+            ClassloaderRunner service = (ClassloaderRunner) serviceList.get(instance);
             if (service != null) {
                 if (visitor.visit(service)) {
                     serviceList.remove(instance);
@@ -233,15 +234,15 @@ public class CoherenceClusterStarter extends Base {
 
     /**
      * Interface used by classes that can perform an operation on (visit)
-     * SandboxRunner instances.
+     * ClassloaderRunner instances.
      */
     private static interface ServiceVisitor {
         /**
-         * Perform an operation (visit) the specified SandboxRunner
-         * @param service the SandboxRunner to visit
+         * Perform an operation (visit) the specified ClassloaderRunner
+         * @param service the ClassloaderRunner to visit
          * @return true if the service should be considered dead
          */
-        boolean visit(SandboxRunner service);
+        boolean visit(ClassloaderRunner service);
     }
 
     /**
@@ -249,11 +250,11 @@ public class CoherenceClusterStarter extends Base {
      */
     private static class ServiceStartupWaitVisitor implements ServiceVisitor {
         /**
-         * Wait until the specified SandboxRunner's isStarted method returns true
-         * @param service the SandboxRunner to visit
+         * Wait until the specified ClassloaderRunner's isStarted method returns true
+         * @param service the ClassloaderRunner to visit
          */
         @Override
-        public boolean visit(SandboxRunner service) {
+        public boolean visit(ClassloaderRunner service) {
             try {
                 while(!service.isStarted()) {
                     logger.debug("Waiting for " + service);
@@ -271,11 +272,11 @@ public class CoherenceClusterStarter extends Base {
      */
     private static class ServiceShutdownVisitor implements ServiceVisitor {
         /**
-         * Shutdown the specified SandboxRunner
-         * @param service the SandboxRunner to visit
+         * Shutdown the specified ClassloaderRunner
+         * @param service the ClassloaderRunner to visit
          */
         @Override
-        public boolean visit(SandboxRunner service) {
+        public boolean visit(ClassloaderRunner service) {
             try {
                 logger.debug("Shutting down " + service);
                 service.shutdown();

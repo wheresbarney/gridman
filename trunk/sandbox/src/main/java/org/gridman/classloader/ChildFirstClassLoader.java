@@ -15,7 +15,7 @@ import java.util.Properties;
 
 /**
  * This is a ChildFirst (also called ParentLast) ClassLoader.
- * It allows us to Sandbox things (in this case Coherence nodes).
+ * It allows us to Isolate things (eg Coherence nodes).
  */
 public class ChildFirstClassLoader extends PropertyIsolatingClassLoader {
     private static final Logger logger = Logger.getLogger(ChildFirstClassLoader.class);

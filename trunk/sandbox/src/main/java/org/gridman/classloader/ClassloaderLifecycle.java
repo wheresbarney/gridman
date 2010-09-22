@@ -4,7 +4,7 @@ package org.gridman.classloader;
  * 
  * @author Andrew Wilson
  */
-public interface SandboxServer {
+public interface ClassloaderLifecycle {
 
     // Start the server
     public void start();

@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 
-public class PropertyDumper implements SandboxServer {
+public class PropertyDumper implements ClassloaderLifecycle {
     public static final String FILE_PROPERTY = "org.gridman.PropertyDumper";
 
     public static final String[] ignored = {

@@ -5,14 +5,14 @@ import org.apache.log4j.Logger;
 import java.util.Properties;
 
 /**
- * The Sandbox Runner will start the given class in a SandboxClassLoader.
- * This uses the ClientFirstClassLoader to make sure that any classes not beginning with java are loaded in a sandbox.
+ * The ClassloaderRunner will start the given class in an isolated ClassLoader.
+ * This uses the ClientFirstClassLoader to make sure that any classes not beginning with java are loaded in an isolated classloader.
  *
  * @author Andrew Wilson
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
-public class SandboxRunner {
-    public static final Logger logger = Logger.getLogger(SandboxRunner.class);
+public class ClassloaderRunner {
+    public static final Logger logger = Logger.getLogger(ClassloaderRunner.class);
     private static Throwable ALL_OK = new Throwable("ALL_OK");
     
     private final String className;
@@ -21,8 +21,8 @@ public class SandboxRunner {
     private Object instance;
     private Class<?> aClass;
 
-    public SandboxRunner(String className, Properties localSystemProperties) throws Throwable {
-        logger.debug("In SandboxRunner");
+    public ClassloaderRunner(String className, Properties localSystemProperties) throws Throwable {
+        logger.debug("In ClassloaderRunner");
         this.className = className;
         this.localSystemProperties = localSystemProperties;
         MyRunner myRunner = new MyRunner();
@@ -70,7 +70,7 @@ public class SandboxRunner {
 
     @Override public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("SandboxRunner");
+        sb.append("ClassloaderRunner");
         sb.append("{className='").append(className).append('\'');
         sb.append(", args=").append(localSystemProperties);
         sb.append('}');

@@ -85,7 +85,7 @@ public class SandboxRunnerTest {
     }
 
     public void runSandbox(final Properties properties) throws Throwable {
-        SandboxRunner runner = new SandboxRunner(PropertyDumper.class.getCanonicalName(), properties);
+        ClassloaderRunner runner = new ClassloaderRunner(PropertyDumper.class.getCanonicalName(), properties);
         while (!runner.isStarted()) {
             Thread.sleep(100);
         }

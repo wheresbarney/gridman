@@ -58,7 +58,7 @@ public class CoherenceClusterStarterTest {
         // subtract 1 from the size to account for the node we started in
         // the startCluster() method.
         // We only want to assert the correct number started/stopped by
-        // the CoherenceClusterStarter.
+        // the ClusterStarter.
         Set members = cluster.getMemberSet();
         return members.size() - 1;
     }
@@ -67,7 +67,7 @@ public class CoherenceClusterStarterTest {
     public void shouldStartAndStopCluster() throws Throwable {
         String clusterFile = "/coherence/classloader/cluster.properties";
 
-        CoherenceClusterStarter clusterStarter = CoherenceClusterStarter.getInstance();
+        ClusterStarter clusterStarter = ClusterStarter.getInstance();
         clusterStarter.ensureCluster(clusterFile);
         int membersStarted = getClusterSize();
         clusterStarter.shutdown(clusterFile);
@@ -80,7 +80,7 @@ public class CoherenceClusterStarterTest {
     public void shouldStartAndStopClusterGroup() throws Throwable {
         String clusterFile = "/coherence/classloader/cluster.properties";
 
-        CoherenceClusterStarter clusterStarter = CoherenceClusterStarter.getInstance();
+        ClusterStarter clusterStarter = ClusterStarter.getInstance();
 
         clusterStarter.ensureAllServersInClusterGroup(clusterFile, 0);
         int membersStarted = getClusterSize();
@@ -94,7 +94,7 @@ public class CoherenceClusterStarterTest {
     public void shouldStartAndStopSingleInstance() throws Throwable {
         String clusterFile = "/coherence/classloader/cluster.properties";
 
-        CoherenceClusterStarter clusterStarter = CoherenceClusterStarter.getInstance();
+        ClusterStarter clusterStarter = ClusterStarter.getInstance();
 
         clusterStarter.ensureServerInstance(clusterFile, 0, 0);
         int membersStarted = getClusterSize();
@@ -108,7 +108,7 @@ public class CoherenceClusterStarterTest {
     public void shouldStartWholeClusterAndStopGroup() throws Throwable {
         String clusterFile = "/coherence/classloader/cluster.properties";
 
-        CoherenceClusterStarter clusterStarter = CoherenceClusterStarter.getInstance();
+        ClusterStarter clusterStarter = ClusterStarter.getInstance();
 
         clusterStarter.ensureCluster(clusterFile);
         int membersStarted = getClusterSize();
@@ -125,7 +125,7 @@ public class CoherenceClusterStarterTest {
     public void shouldStartWholeClusterAndStopSingleNode() throws Throwable {
         String clusterFile = "/coherence/classloader/cluster.properties";
 
-        CoherenceClusterStarter clusterStarter = CoherenceClusterStarter.getInstance();
+        ClusterStarter clusterStarter = ClusterStarter.getInstance();
 
         clusterStarter.ensureCluster(clusterFile);
         int membersStarted = getClusterSize();
