@@ -1,9 +1,10 @@
-package org.gridman.classloader;
+package org.gridman.classloader.coherence;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
 import com.tangosol.net.DefaultCacheServer;
 import org.apache.log4j.Logger;
+import org.gridman.classloader.ClassloaderLifecycle;
 
 /**
  * Start up a Coherence Server for use in a Classloader.
@@ -11,13 +12,13 @@ import org.apache.log4j.Logger;
  * @author Andrew Wilson
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
-public class SandboxCoherenceServer implements SandboxServer {
-    private static final Logger logger = Logger.getLogger(SandboxCoherenceServer.class);
+public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
+    private static final Logger logger = Logger.getLogger(CoherenceClassloaderLifecycle.class);
 
     private ClassLoader classLoader;
     private Cluster cluster;
 
-    public SandboxCoherenceServer() {} // default constructor required
+    public CoherenceClassloaderLifecycle() {} // default constructor required
 
     @Override public void start() {
         logger.info("Starting Server");
