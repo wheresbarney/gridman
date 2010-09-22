@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config-3.6.dtd">
+
+<!-- secureConfig - config for secure solution -->
+<cache-config>
+
+    <caching-scheme-mapping>
+
+        <cache-mapping>
+            <cache-name>securityTest</cache-name>
+            <scheme-name>secureScheme</scheme-name>
+        </cache-mapping>
+
+    </caching-scheme-mapping>
+
+    <caching-schemes>
+
+        <distributed-scheme>
+            <scheme-name>secureScheme</scheme-name>
+            <lease-granularity>member</lease-granularity>
+            <backing-map-scheme><local-scheme/></backing-map-scheme>
+            <autostart system-property="coherence.isStorage"/>
+        </distributed-scheme>
+
+        <proxy-scheme>
+            <service-name>ExtendTcpProxyService</service-name>
+            <thread-count>5</thread-count>
+            <acceptor-config>
+                <tcp-acceptor>
+                    <local-address>
+                        <address>localhost</address>
+                        <port system-property="coherence.extend.port"/>
+                    </local-address>
+                </tcp-acceptor>
+            </acceptor-config>
+            <proxy-config>
+                <invocation-service-proxy>
+                    <class-name>org.gridman.coherence.security.simple.CheckInvokeServiceProxy</class-name>
+                      <init-params>
+                        <init-param>
+                          <param-type>com.tangosol.net.InvocationService</param-type>
+                          <param-value>{service}</param-value>
+                        </init-param>
+                      </init-params>
+                    <enabled>true</enabled>
+                </invocation-service-proxy>
+                <cache-service-proxy>
+                    <class-name>org.gridman.coherence.security.simple.CheckCacheServiceProxy</class-name>
+                      <init-params>
+                        <init-param>
+                          <param-type>com.tangosol.net.CacheService</param-type>
+                          <param-value>{service}</param-value>
+                        </init-param>
+                      </init-params>
+                    <enabled>true</enabled>
+                </cache-service-proxy>
+            </proxy-config>
+            <autostart system-property="coherence.isProxy"/>
+        </proxy-scheme>
+
+    </caching-schemes>
+</cache-config>
