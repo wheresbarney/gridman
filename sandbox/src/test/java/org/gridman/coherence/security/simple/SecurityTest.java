@@ -47,7 +47,7 @@ public class SecurityTest extends TestCase {
         // @todo commented out for now - need to get code checked in.
         if(true) { return; }
         
-        CoherenceClusterStarter.getInstance().ensureCluster("/coherence/security/simple/simpSecCluster.properties");
+        ClusterStarter.getInstance().ensureCluster("/coherence/security/simple/simpSecCluster.properties");
 
         // CHECK WE CAN GET IN TO START WITH
         checkAllowed();
