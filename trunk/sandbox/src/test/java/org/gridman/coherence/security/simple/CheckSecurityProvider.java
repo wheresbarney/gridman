@@ -17,7 +17,7 @@ public class CheckSecurityProvider implements SecurityProvider {
         logger.debug("CheckSecurityProvider");
     }
 
-    public boolean checkAccess(Subject subject, boolean readOnly) {
+    public boolean checkAccess(Subject subject, boolean readOnly, String cacheName) {
         // Only allow the allowed user.
         logger.debug("checkAccess" + subject );
         if(readOnly) {

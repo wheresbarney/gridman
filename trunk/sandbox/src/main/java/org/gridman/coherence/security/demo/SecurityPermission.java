@@ -1,11 +1,16 @@
 package org.gridman.coherence.security.demo;
 
+import java.io.Serializable;
 /**
  * This object is just meant to be a POJO
  *
  * @todo - Lots - eg. Add POF
  */
-public class SecurityPermission {
+public class SecurityPermission implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    public static final String PERMISSION_CACHE = "PermissionCache";
+    public static final String INVOKE_SERVICE = "InvokeService";    
 
     // @todo make these into an enum;
     public static final int PERMISSION_READ = 0;
@@ -13,23 +18,18 @@ public class SecurityPermission {
     public static final int PERMISSION_ADMIN = 2;
     public static final int PERMISSION_INVOKE = 3;
 
-    private long key;
     private String role;
     private String resourceName;
     private int permission;
 
 
+
     public SecurityPermission() {}  // required by POF
 
-    public SecurityPermission(long key, String role, String resourceName, int permission) {
-        this.key = key;
+    public SecurityPermission(String role, String resourceName, int permission) {
         this.role = role;
         this.resourceName = resourceName;
         this.permission = permission;
-    }
-
-    public long getKey() {
-        return key;
     }
 
     public String getRole() {
@@ -52,16 +52,15 @@ public class SecurityPermission {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SecurityPermission that = (SecurityPermission) o;
-        if (key != that.key) return false;
         if (permission != that.permission) return false;
         if (!resourceName.equals(that.resourceName)) return false;
         if (!role.equals(that.role)) return false;
+
         return true;
     }
 
     @Override public int hashCode() {
-        int result = (int) (key ^ (key >>> 32));
-        result = 31 * result + role.hashCode();
+        int result = role.hashCode();
         result = 31 * result + resourceName.hashCode();
         result = 31 * result + permission;
         return result;
@@ -69,7 +68,6 @@ public class SecurityPermission {
 
     @Override public String toString() {
         return "org.gridman.coherence.security.demo.SecurityPermission{" +
-                "key=" + key +
                 ", role='" + role + '\'' +
                 ", resourceName='" + resourceName + '\'' +
                 ", permission=" + permission +
