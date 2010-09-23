@@ -15,11 +15,13 @@ import static org.junit.Assert.assertEquals;
  *
  *  @author Jonathan
  */
-public class CoherenceClusterStarterTest {
+public class ClusterStarterTest {
+
+	private final ClusterStarter clusterStarter = ClusterStarter.getInstance();
 
     private Cluster cluster;
 
-    @Before
+	@Before
     public void startIsolatedClusterMember() throws Exception {
 
         Properties localProperties = SystemPropertyLoader.loadProperties(
@@ -30,7 +32,6 @@ public class CoherenceClusterStarterTest {
         // Start an isolated Cluster node with the above properties
         // We can then use this to check member counts etc in our tests
         cluster = PropertyIsolation.runIsolated(localProperties, new PropertyIsolation.Action<Cluster>() {
-            @Override
             public Cluster run() {
                 Cluster cluster = CacheFactory.ensureCluster();
                 while (!cluster.isRunning()) {
@@ -64,14 +65,30 @@ public class CoherenceClusterStarterTest {
     }
 
     @Test
-    public void shouldStartAndStopCluster() throws Throwable {
+    public void shouldStartAndStopClusterUsingAPropertiesInstance() throws Throwable {
         String clusterFile = "/coherence/classloader/cluster.properties";
+        Properties clusterProperties = SystemPropertyLoader.getSystemProperties(clusterFile);
 
-        ClusterStarter clusterStarter = ClusterStarter.getInstance();
-        clusterStarter.ensureCluster(clusterFile);
+		clusterStarter.ensureCluster(clusterFile, clusterProperties);
         int membersStarted = getClusterSize();
+
         clusterStarter.shutdown(clusterFile);
         int finalSize = getClusterSize();
+
+        assertEquals("Expected to start 4 members", 4, membersStarted);
+        assertEquals("Expected to shutdown all members", 0, finalSize);
+    }
+
+    @Test
+    public void shouldStartAndStopClusterUsingAClusterFile() throws Throwable {
+        String clusterFile = "/coherence/classloader/cluster.properties";
+
+        clusterStarter.ensureCluster(clusterFile);
+        int membersStarted = getClusterSize();
+
+        clusterStarter.shutdown(clusterFile);
+        int finalSize = getClusterSize();
+
         assertEquals("Expected to start 4 members", 4, membersStarted);
         assertEquals("Expected to shutdown all members", 0, finalSize);
     }
@@ -79,13 +96,14 @@ public class CoherenceClusterStarterTest {
     @Test
     public void shouldStartAndStopClusterGroup() throws Throwable {
         String clusterFile = "/coherence/classloader/cluster.properties";
+        Properties properties = SystemPropertyLoader.getSystemProperties(clusterFile);
 
-        ClusterStarter clusterStarter = ClusterStarter.getInstance();
-
-        clusterStarter.ensureAllServersInClusterGroup(clusterFile, 0);
+        clusterStarter.ensureAllServersInClusterGroup(clusterFile, properties, 0);
         int membersStarted = getClusterSize();
+
         clusterStarter.shutdown(clusterFile, 0);
         int finalSize = getClusterSize();
+
         assertEquals("Expected to start 3 members", 3, membersStarted);
         assertEquals("Expected to shutdown all members", 0, finalSize);
     }
@@ -93,10 +111,9 @@ public class CoherenceClusterStarterTest {
     @Test
     public void shouldStartAndStopSingleInstance() throws Throwable {
         String clusterFile = "/coherence/classloader/cluster.properties";
+        Properties properties = SystemPropertyLoader.getSystemProperties(clusterFile);
 
-        ClusterStarter clusterStarter = ClusterStarter.getInstance();
-
-        clusterStarter.ensureServerInstance(clusterFile, 0, 0);
+        clusterStarter.ensureServerInstance(clusterFile, properties, 0, 0);
         int membersStarted = getClusterSize();
         clusterStarter.shutdown(clusterFile, 0, 0);
         int finalSize = getClusterSize();
@@ -108,14 +125,15 @@ public class CoherenceClusterStarterTest {
     public void shouldStartWholeClusterAndStopGroup() throws Throwable {
         String clusterFile = "/coherence/classloader/cluster.properties";
 
-        ClusterStarter clusterStarter = ClusterStarter.getInstance();
-
         clusterStarter.ensureCluster(clusterFile);
         int membersStarted = getClusterSize();
+
         clusterStarter.shutdown(clusterFile, 0);
         int afterGroupShutdownSize = getClusterSize();
+
         clusterStarter.shutdown(clusterFile);
         int finalSize = getClusterSize();
+
         assertEquals("Expected to start 4 members", 4, membersStarted);
         assertEquals("Expected to start 1 member after shutdown of group 0", 1, afterGroupShutdownSize);
         assertEquals("Expected to shutdown all members", 0, finalSize);
@@ -125,17 +143,17 @@ public class CoherenceClusterStarterTest {
     public void shouldStartWholeClusterAndStopSingleNode() throws Throwable {
         String clusterFile = "/coherence/classloader/cluster.properties";
 
-        ClusterStarter clusterStarter = ClusterStarter.getInstance();
-
         clusterStarter.ensureCluster(clusterFile);
         int membersStarted = getClusterSize();
+
         clusterStarter.shutdown(clusterFile, 0, 1);
         int afterNodeShutdownSize = getClusterSize();
+
         clusterStarter.shutdown(clusterFile);
         int finalSize = getClusterSize();
+
         assertEquals("Expected to start 4 members", 4, membersStarted);
         assertEquals("Expected to start 3 members after shutdown of node", 3, afterNodeShutdownSize);
         assertEquals("Expected to shutdown all members", 0, finalSize);
     }
-
 }
