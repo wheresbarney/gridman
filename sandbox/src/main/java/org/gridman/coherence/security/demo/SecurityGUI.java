@@ -1,4 +1,4 @@
-package org.gridman.coherence.security.demo.security;
+package org.gridman.coherence.security.demo;
 
 import javax.swing.*;
 
