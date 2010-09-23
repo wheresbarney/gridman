@@ -6,16 +6,16 @@ import javax.security.auth.Subject;
 
 import org.apache.log4j.Logger;
 
-public class CheckIdentityTransformer implements IdentityTransformer {
-    private static final Logger logger = Logger.getLogger(CheckIdentityTransformer.class);
+public class SimpleIdentityTransformer implements IdentityTransformer {
+    private static final Logger logger = Logger.getLogger(SimpleIdentityTransformer.class);
 
-    public CheckIdentityTransformer() {
-        logger.debug("CheckIdentityTransformer");
+    public SimpleIdentityTransformer() {
+        logger.debug("SimpleIdentityTransformer");
     }
 
     @Override public Object transformIdentity(Subject subject) throws SecurityException {
         String name = CoherenceUtils.getFirstPrincipalName(subject);
-        logger.debug("CheckIdentityTransformer : " + subject + " : " + name);
+        logger.debug("SimpleIdentityTransformer : " + subject + " : " + name);
         return name;
     }
 }

@@ -28,7 +28,7 @@
           <remote-addresses>
             <socket-address>
               <address>localhost</address>
-              <port system-property="coherence.extend.port"/>
+              <port system-property="coherence.extend.port">NOT_SET</port>
             </socket-address>
           </remote-addresses>
           <connect-timeout>10s</connect-timeout>
@@ -44,7 +44,7 @@
           <remote-addresses>
             <socket-address>
               <address>localhost</address>
-              <port system-property="coherence.extend.port"/>
+              <port system-property="coherence.extend.port">NOT_SET</port>
             </socket-address>
           </remote-addresses>
           <connect-timeout>10s</connect-timeout>
