@@ -31,7 +31,13 @@
                     <reuse-address>true</reuse-address>
                 </tcp-acceptor>
             </acceptor-config>
-            <autostart system-property="coherence.isProxy">X</autostart>
+            <proxy-config>
+                <cache-service-proxy>
+                    <class-name>org.gridman.coherence.security.demo.security.SimpleCacheProxy1</class-name>
+                    <enabled>true</enabled>
+                </cache-service-proxy>
+            </proxy-config>
+            <autostart>true</autostart>
         </proxy-scheme>
 
         <invocation-scheme>
