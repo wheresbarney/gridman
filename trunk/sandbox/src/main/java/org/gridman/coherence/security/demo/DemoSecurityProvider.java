@@ -27,8 +27,6 @@ public class DemoSecurityProvider implements SecurityProvider {
     
     @Override public boolean checkAccess(Subject subject, boolean readOnly, String cacheName) {
         logger.debug("checkAccess " + cacheName + " : " + readOnly + " : " + subject);
-        // @todo check we didn't expose the permissions cache!!!
-        if(cacheName.equals(SecurityPermission.PERMISSION_CACHE)) { return true; }
         permissionCache = CacheFactory.getCache(SecurityPermission.PERMISSION_CACHE);        
         String firstPrincipalName = CoherenceUtils.getFirstPrincipalName(subject);
         int permission = readOnly ? SecurityPermission.PERMISSION_READ : SecurityPermission.PERMISSION_WRITE;
