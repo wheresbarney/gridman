@@ -15,12 +15,7 @@ public class DemoInvokeServiceProxy extends SimpleInvokeServiceProxy {
 
     public DemoInvokeServiceProxy(InvocationService invocationService) throws Throwable {
         super(invocationService);
-        try {
         permissionCache = CacheFactory.getCache(SecurityPermission.PERMISSION_CACHE);
-        } catch(Throwable t) {
-            t.printStackTrace();
-            throw t;
-        }
     }
 
     @Override protected void check(Invocable invocable) {
