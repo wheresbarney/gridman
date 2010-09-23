@@ -1,4 +1,4 @@
-package org.gridman.coherence.security.demo.security;
+package org.gridman.coherence.security.demo;
 
 /**
  * This object is just meant to be a POJO
@@ -68,7 +68,7 @@ public class SecurityPermission {
     }
 
     @Override public String toString() {
-        return "org.gridman.coherence.security.demo.security.SecurityPermission{" +
+        return "org.gridman.coherence.security.demo.SecurityPermission{" +
                 "key=" + key +
                 ", role='" + role + '\'' +
                 ", resourceName='" + resourceName + '\'' +
