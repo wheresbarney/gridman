@@ -28,8 +28,6 @@ public class ClusterStarter extends Base {
     private Map<String, ClusterInfo> clusters;
     private Map<String, LongArray> services;
     
-    private static final String CLUSTER_PREFIX = "coherence.incubator.cluster.";
-
     public static void main(String[] args) {
         new ClusterStarter().ensureCluster(args[0]);
     }
@@ -57,38 +55,53 @@ public class ClusterStarter extends Base {
      * @param clusterFile - the properties file for the cluster to ensure
      */
     public void ensureCluster(String clusterFile) {
-        ClusterInfo clusterInfo = getClusterInfo(clusterFile);
+        if (clusterFile == null || clusterFile.length() == 0) {
+            throw new IllegalArgumentException("clusterFile argument cannot be null or empty String and must specifiy a valid properties file");
+        }
+        ensureCluster(clusterFile, SystemPropertyLoader.getSystemProperties(clusterFile));
+    }
 
-        for (int groupId=0; groupId<clusterInfo.getGroupCount(); groupId++) {
-            startAllServersInGroupInternal(clusterFile, groupId, false);
+    /**
+     * Ensure all the servers in all the server groups of the specified
+     * cluster properties are started.
+     *
+     * @param identifier - an identifier for the cluster
+     * @param properties - the properties for the cluster to ensure
+     */
+    public void ensureCluster(String identifier, Properties properties) {
+        ClusterInfo clusterInfo = getClusterInfo(identifier, properties);
+
+        for (int groupId = 0; groupId < clusterInfo.getGroupCount(); groupId++) {
+            startAllServersInGroupInternal(identifier, properties, groupId, false);
         }
 
         // Wait for the Services to come up...
-        visitAllServices(clusterFile, new ServiceStartupWaitVisitor());
+        visitAllServices(identifier, new ServiceStartupWaitVisitor());
     }
 
     /**
      * Ensure all the servers in the specified group within the specified
      * cluster properties file are started.
      *
-     * @param clusterFile - the properties file for the cluster
+     * @param identifier - an identifier for the cluster
+     * @param properties - the properties for the cluster
      * @param groupId - the group of servers to start
      */
-    public void ensureAllServersInClusterGroup(String clusterFile, int groupId) {
-        startAllServersInGroupInternal(clusterFile, groupId, true);
+    public void ensureAllServersInClusterGroup(String identifier, Properties properties, int groupId) {
+        startAllServersInGroupInternal(identifier, properties, groupId, true);
     }
 
-    private void startAllServersInGroupInternal(String filename, int groupId, boolean waitForStart) {
-        ClusterInfo clusterInfo = getClusterInfo(filename);
+    private void startAllServersInGroupInternal(String identifier, Properties properties, int groupId, boolean waitForStart) {
+        ClusterInfo clusterInfo = getClusterInfo(identifier, properties);
         if (groupId < clusterInfo.getGroupCount()) {
             for (int instance=0; instance<clusterInfo.getServerCount(groupId); instance++) {
-                startServiceInstanceInternal(filename, groupId, instance, false);
+                startServiceInstanceInternal(identifier, properties, groupId, instance, false);
             }
         }
 
         if (waitForStart) {
             // Wait for the Services to come up...
-            visitAllServices(filename, new ServiceStartupWaitVisitor());
+            visitAllServices(identifier, new ServiceStartupWaitVisitor());
         }
     }
 
@@ -96,18 +109,19 @@ public class ClusterStarter extends Base {
      * Ensure all the specified server instance within the specified group within the specified
      * cluster properties file is started.
      *
-     * @param clusterFile - the properties file for the cluster
+     * @param identifier - an identifier for the cluster
+     * @param properties - the properties for the cluster
      * @param groupId - the group of the servers to start belongs to
      * @param instanceId - the instance of the server to start
      */
-    public void ensureServerInstance(String clusterFile, int groupId, int instanceId) {
-        startServiceInstanceInternal(clusterFile, groupId, instanceId, true);
+    public void ensureServerInstance(String identifier, Properties properties, int groupId, int instanceId) {
+        startServiceInstanceInternal(identifier, properties, groupId, instanceId, true);
     }
 
-    private void startServiceInstanceInternal(String clusterFile, int groupId, int instanceId, boolean waitForStart) {
-        LongArray serviceList = getServiceList(clusterFile, groupId);
+    private void startServiceInstanceInternal(String identifier, Properties properties, int groupId, int instanceId, boolean waitForStart) {
+        LongArray serviceList = getServiceList(identifier, groupId);
         if (!serviceList.exists(instanceId)) {
-            ClusterInfo clusterInfo = getClusterInfo(clusterFile);
+            ClusterInfo clusterInfo = getClusterInfo(identifier, properties);
             Class<? extends CoherenceClassloaderLifecycle> serverClass = clusterInfo.getServerClass(groupId);
             Properties localProperties = clusterInfo.getLocalProperties(groupId);
 
@@ -115,7 +129,7 @@ public class ClusterStarter extends Base {
             try {
                 runner = new ClassloaderRunner(serverClass.getCanonicalName(), localProperties);
             } catch (Throwable throwable) {
-                throw ensureRuntimeException(throwable, "Error starting server clusterFile=" + clusterFile +
+                throw ensureRuntimeException(throwable, "Error starting server clusterFile=" + identifier +
                         " groupId=" + groupId + " instance=" + instanceId);
             }
 
@@ -124,7 +138,7 @@ public class ClusterStarter extends Base {
 
         if (waitForStart) {
             // Wait for the Services to come up...
-            visitAllServices(clusterFile, new ServiceStartupWaitVisitor());
+            visitAllServices(identifier, new ServiceStartupWaitVisitor());
         }
     }
 
@@ -161,15 +175,11 @@ public class ClusterStarter extends Base {
         logger.info("Shut down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
     }
 
-    ClusterInfo getClusterInfo(String filename) {
-        if (filename == null || filename.length() == 0) {
-            throw new IllegalArgumentException("filename argument cannot be null or empty String and must specifiy a valid properties file");
+    ClusterInfo getClusterInfo(String identifier, Properties properties) {
+        if (!clusters.containsKey(identifier)) {
+            clusters.put(identifier, new ClusterInfo(properties));
         }
-
-        if (!clusters.containsKey(filename)) {
-            clusters.put(filename, new ClusterInfo(filename));
-        }
-        return clusters.get(filename);
+        return clusters.get(identifier);
     }
 
     LongArray getClusterServiceList(String filename) {
@@ -253,7 +263,6 @@ public class ClusterStarter extends Base {
          * Wait until the specified ClassloaderRunner's isStarted method returns true
          * @param service the ClassloaderRunner to visit
          */
-        @Override
         public boolean visit(ClassloaderRunner service) {
             try {
                 while(!service.isStarted()) {
@@ -275,7 +284,6 @@ public class ClusterStarter extends Base {
          * Shutdown the specified ClassloaderRunner
          * @param service the ClassloaderRunner to visit
          */
-        @Override
         public boolean visit(ClassloaderRunner service) {
             try {
                 logger.debug("Shutting down " + service);

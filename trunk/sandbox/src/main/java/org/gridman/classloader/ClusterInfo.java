@@ -12,6 +12,7 @@ import java.util.Properties;
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
 public class ClusterInfo {
+
     public static final String PROP_CLUSTER_PREFIX = "coherence.incubator.cluster.";
     public static final String PROP_DEFAULT_PROPERTIES = PROP_CLUSTER_PREFIX + "defaultProperties";
     public static final String PROP_SUFFIX_SERVERCLASS = ".server";
@@ -24,8 +25,8 @@ public class ClusterInfo {
 
     private int groupCount;
 
-    public ClusterInfo(String clusterFilename) {
-        clusterProperties = SystemPropertyLoader.getSystemProperties(clusterFilename);
+    public ClusterInfo(Properties properties) {
+        clusterProperties = properties;
         localPropertyMap = new HashMap<Integer, Properties>();
         serverClasses = new HashMap<Integer, Class<? extends CoherenceClassloaderLifecycle>>();
 
