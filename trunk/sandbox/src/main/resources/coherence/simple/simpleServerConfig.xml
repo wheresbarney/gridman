@@ -9,7 +9,7 @@
             <class-name>com.tangosol.io.pof.SafeConfigurablePofContext</class-name>
         </serializer>
     </defaults>
-    
+
     <caching-scheme-mapping>
         <cache-mapping>
             <cache-name>*</cache-name>
@@ -22,6 +22,7 @@
         <distributed-scheme>
             <scheme-name>dist-default</scheme-name>
             <backing-map-scheme><local-scheme/></backing-map-scheme>
+            <autostart>true</autostart>
         </distributed-scheme>
 
         <proxy-scheme>
@@ -40,7 +41,7 @@
         <invocation-scheme>
             <service-name>InvokeService</service-name>
             <thread-count>5</thread-count>
-            <autostart system-property="coherence.isProxy"/>            
+            <autostart system-property="coherence.isProxy"/>
         </invocation-scheme>
 
     </caching-schemes>
