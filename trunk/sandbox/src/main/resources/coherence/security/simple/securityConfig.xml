@@ -7,9 +7,12 @@
     <!-- Allow non pof stuff to work for now. -->
     <defaults>
         <serializer>
-            <class-name>com.tangosol.io.pof.SafeConfigurablePofContext</class-name>
+            <instance>
+                <class-name system-property="org.gridman.coherence.serializer">com.tangosol.io.pof.SafeConfigurablePofContext</class-name>
+            </instance>
         </serializer>
     </defaults>
+    
     
     <caching-scheme-mapping>
 
@@ -58,7 +61,7 @@
                         </init-param>
                         <init-param>
                             <param-type>java.lang.String</param-type>
-                            <param-value system-property="org.gridman.coherence.security.simple.securityProvider">NOT_SET</param-value>
+                            <param-value system-property="org.gridman.coherence.security.cacheSecurityProvider">NOT_SET</param-value>
                         </init-param>                          
                       </init-params>
                     <enabled>true</enabled>

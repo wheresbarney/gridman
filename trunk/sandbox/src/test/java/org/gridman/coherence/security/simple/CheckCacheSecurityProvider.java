@@ -10,11 +10,11 @@ import org.apache.log4j.Logger;
  * This will be replaced by CacheServiceProxy when it is released by Jason Howse.
  * @author Andrew Wilson
  */
-public class CheckSecurityProvider implements SecurityProvider {
-    private static final Logger logger = Logger.getLogger(CheckSecurityProvider.class);
+public class CheckCacheSecurityProvider implements CacheSecurityProvider {
+    private static final Logger logger = Logger.getLogger(CheckCacheSecurityProvider.class);
 
-    public CheckSecurityProvider() {
-        logger.debug("CheckSecurityProvider");
+    public CheckCacheSecurityProvider() {
+        logger.debug("CheckCacheSecurityProvider");
     }
 
     public boolean checkAccess(Subject subject, boolean readOnly, String cacheName) {

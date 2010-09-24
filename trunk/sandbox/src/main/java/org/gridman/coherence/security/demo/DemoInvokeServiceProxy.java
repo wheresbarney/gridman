@@ -9,6 +9,9 @@ import org.gridman.coherence.security.simple.SimpleInvokeServiceProxy;
 
 /**
  * The Demo Invoke Service Proxy.
+ * This is how we secure Invocation.
+ * I choose to do it by classname, but you could extend as much as you want.
+ * eg. by parameters in the invocation service etc.
  */
 public class DemoInvokeServiceProxy extends SimpleInvokeServiceProxy {
     private NamedCache permissionCache;
@@ -20,7 +23,7 @@ public class DemoInvokeServiceProxy extends SimpleInvokeServiceProxy {
 
     @Override protected void check(Invocable invocable) {
         String principal = CoherenceUtils.getFirstPrincipalName(CoherenceUtils.getCurrentSubject());
-        boolean result = permissionCache.containsKey(new SecurityPermission(principal, SecurityPermission.INVOKE_SERVICE, SecurityPermission.PERMISSION_INVOKE));
+        boolean result = permissionCache.containsKey(new SecurityPermission(principal, invocable.getClass().getName(), SecurityPermission.PERMISSION_INVOKE));
         if(!result) {
             throw new SecurityException("Failed Invoke : " + principal);
         }

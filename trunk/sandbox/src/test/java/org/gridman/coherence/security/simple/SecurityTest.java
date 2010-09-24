@@ -5,6 +5,7 @@ import org.gridman.classloader.*;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.InvocationService;
 import org.apache.log4j.Logger;
+import org.gridman.coherence.util.NullInvokable;
 
 import javax.security.auth.Subject;
 import java.security.PrivilegedAction;
@@ -38,7 +39,7 @@ public class SecurityTest extends TestCase {
 
     private PrivilegedAction<Object> invokeAction = new PrivilegedAction<Object>() {
         @Override public Object run() {
-            return ((InvocationService)CacheFactory.getService("InvokeService")).query(new InvokeClient(),null);
+            return ((InvocationService)CacheFactory.getService("InvokeService")).query(new NullInvokable(),null);
         }
     };
 

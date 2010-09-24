@@ -28,11 +28,13 @@ import org.apache.log4j.Logger;
 public class PermissionedNamedCache extends WrapperNamedCache {
     private static final Logger logger = Logger.getLogger(PermissionedNamedCache.class);
 
-    private SecurityProvider sProvider;
+    private CacheSecurityProvider provider;
+    private String cacheName;
 
-    public PermissionedNamedCache(NamedCache cache, SecurityProvider provider) {
+    public PermissionedNamedCache(NamedCache cache, CacheSecurityProvider provider) {
         super(cache, cache.getCacheName());
-        sProvider = provider;
+        cacheName = cache.getCacheName();
+        this.provider = provider;
     }
 
     /**
@@ -53,7 +55,7 @@ public class PermissionedNamedCache extends WrapperNamedCache {
      * @since 04/05/2008
      */
     public CacheService getCacheService() {
-        checkAccess(false);
+        checkAccess(true);
         return super.getCacheService();
     }
 
@@ -517,9 +519,9 @@ public class PermissionedNamedCache extends WrapperNamedCache {
      * @since 04/05/2008
      */
     private void checkAccess(boolean readOnly) {
-        logger.debug("Checking access readOnly="+ readOnly + " subject=" + CoherenceUtils.getCurrentSubject());
-        if (!sProvider.checkAccess(getCurrentSubject(), readOnly, getCacheName())) {
-            throw new SecurityException("Access denied, Insufficient privileges : " + getCacheName() + " : " + readOnly);
+        logger.debug("Checking access readOnly="+ readOnly + " subject=" + CoherenceUtils.getCurrentSubject() + " cacheName=" + cacheName);
+        if (!provider.checkAccess(getCurrentSubject(), readOnly, cacheName)) {
+            throw new SecurityException("Access denied, Insufficient privileges : " + cacheName + " : " + readOnly + " subject=" + CoherenceUtils.getCurrentSubject() + provider);
         }         
     }
 

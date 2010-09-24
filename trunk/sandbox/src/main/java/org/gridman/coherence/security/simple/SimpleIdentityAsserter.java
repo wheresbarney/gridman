@@ -9,11 +9,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 /**
- * Created by IntelliJ IDEA.
- * User: wilsane
- * Date: 23-Sep-2010
- * Time: 14:47:09
- * To change this template use File | Settings | File Templates.
+ * A simple asserter - it lets everyone in.  Subclass accordingly.
  */
 public class SimpleIdentityAsserter implements IdentityAsserter {
     private static final Logger logger = Logger.getLogger(SimpleIdentityAsserter.class);
@@ -25,7 +21,7 @@ public class SimpleIdentityAsserter implements IdentityAsserter {
     @Override public Subject assertIdentity(Object oToken) throws SecurityException {
         logger.debug("assertIdentity " + oToken);
         // @todo should we ban guests?
-        if(oToken == null) { oToken = "Guest"; }
+        // if(oToken == null) { oToken = "Guest"; }
         return new Subject(true, new HashSet(Arrays.asList(new PofPrincipal((String)oToken))),new HashSet(),new HashSet());
     }
 }

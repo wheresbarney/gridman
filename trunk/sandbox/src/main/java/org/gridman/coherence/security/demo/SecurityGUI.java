@@ -3,10 +3,9 @@ package org.gridman.coherence.security.demo;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.InvocationService;
 import com.tangosol.net.NamedCache;
-import org.gridman.classloader.ClusterStarter;
 import org.gridman.classloader.SystemPropertyLoader;
 import org.gridman.coherence.security.simple.CoherenceUtils;
-import org.gridman.coherence.security.simple.InvokeClient;
+import org.gridman.coherence.util.NullInvokable;
 
 import javax.security.auth.Subject;
 import javax.swing.*;
@@ -17,6 +16,7 @@ import java.security.PrivilegedAction;
 
 /**
  * Gui created for demo
+ * @author Andrew Wilson
  */
 public class SecurityGUI implements ActionListener {
 
@@ -27,8 +27,6 @@ public class SecurityGUI implements ActionListener {
     private JComboBox actionBox;
     private JTextField messageField;
 
-    private NamedCache permissionCache;
-
     private Object[] PERMISSIONS = {"Read", "Write", "Admin", "Invoke"};
     private Object[] ACTIONS = {"Add", "Remove", "Check"};
 
@@ -38,10 +36,8 @@ public class SecurityGUI implements ActionListener {
     
     private SecurityGUI() {
 
-        System.out.println("A");
-
         // Start the cluster.
-        ClusterStarter.getInstance().ensureCluster("/coherence/security/demo/securityDemoCluster.properties");
+        // ClusterStarter.getInstance().ensureCluster("/coherence/security/demo/securityDemoCluster.properties");
 
         SystemPropertyLoader.loadSystemProperties("/coherence/security/demo/securityDemoDefault.properties");
         SystemPropertyLoader.loadSystemProperties("/coherence/security/demo/securityDemoClient.properties");
@@ -93,24 +89,24 @@ public class SecurityGUI implements ActionListener {
 
     @Override public void actionPerformed(ActionEvent e) {
         try {
-            permissionCache = CacheFactory.getCache(SecurityPermission.PERMISSION_CACHE);
             String action = (String)actionBox.getSelectedItem();
             int offset = permissionBox.getSelectedIndex();
             final Object permissionCommand = permissionBox.getSelectedItem();
             final SecurityPermission permission = new SecurityPermission(roleField.getText(), resourceField.getText(), offset);
+            System.out.println("Permission " + permission);
             PrivilegedAction<Object> pAction;
             if(action.equals("Add")) {
                 pAction = new PrivilegedAction<Object>() {
                     @Override public Object run() {
                         System.out.println("Add!!!");
-                        return permissionCache.put(permission, permission);
+                        return CacheFactory.getCache(SecurityPermission.PERMISSION_CACHE).put(permission, permission);
                     }
                 };
             } else if(action.equals("Remove")) {
                 pAction = new PrivilegedAction<Object>() {
                     @Override public Object run() {
                         System.out.println("Remove!!!");
-                        return permissionCache.remove(permission);
+                        return CacheFactory.getCache(SecurityPermission.PERMISSION_CACHE).remove(permission);
                     }
                 };
             } else if(action.equals("Check")) {
@@ -125,7 +121,7 @@ public class SecurityGUI implements ActionListener {
                         } else if(permissionCommand.equals("Admin")) {
                             cache.destroy();
                         } else if(permissionCommand.equals("Invoke")) {
-                            ((InvocationService)CacheFactory.getService("InvokeService")).query(new InvokeClient(),null);
+                            ((InvocationService)CacheFactory.getService(SecurityPermission.INVOKE_SERVICE)).query(new NullInvokable(),null);
                         } else {
                             throw new RuntimeException("Invalid action : " + permissionCommand);
                         }
@@ -136,7 +132,7 @@ public class SecurityGUI implements ActionListener {
                 throw new Exception("Invalid action : " + action);
             }
             messageField.setText("OK");
-            System.out.println("Doing it...");
+            System.out.println("Doing it..." + userField.getText());
             Subject.doAs(CoherenceUtils.getSimpleSubject(userField.getText()), pAction);            
         } catch(Throwable t) {
             t.printStackTrace();
