@@ -6,9 +6,12 @@
     <!-- Allow non pof stuff to work for now. -->
     <defaults>
         <serializer>
-            <class-name>com.tangosol.io.pof.SafeConfigurablePofContext</class-name>
+            <instance>
+                <class-name system-property="org.gridman.coherence.serializer">com.tangosol.io.pof.SafeConfigurablePofContext</class-name>
+            </instance>
         </serializer>
     </defaults>
+    
 
   <caching-scheme-mapping>
     <cache-mapping>

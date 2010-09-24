@@ -1,12 +1,17 @@
 package org.gridman.coherence.security.demo;
 
+import org.apache.log4j.Logger;
+
 import java.io.Serializable;
 /**
- * This object is just meant to be a POJO
+ * This object is just meant to be a POJO.
+ * Its a very simple class to represent a permissions cache.
  *
- * @todo - Lots - eg. Add POF
+ * @todo - Add POF
  */
 public class SecurityPermission implements Serializable {
+    private static final Logger logger = Logger.getLogger(SecurityPermission.class);
+
     private static final long serialVersionUID = 1L;
 
     public static final String PERMISSION_CACHE = "PermissionCache";
@@ -21,8 +26,6 @@ public class SecurityPermission implements Serializable {
     private String role;
     private String resourceName;
     private int permission;
-
-
 
     public SecurityPermission() {}  // required by POF
 
@@ -44,8 +47,10 @@ public class SecurityPermission implements Serializable {
         return permission;
     }
 
-    public boolean checkPermission(String checkResource) {
-        return checkResource.matches(resourceName);
+    public boolean checkPermission(String checkResource, int perm, String myRole) {
+        boolean result = role.equals(myRole) && permission == perm && checkResource.matches(resourceName);
+        logger.info(toString() + ":" + result);
+        return result;
     }
 
     @Override public boolean equals(Object o) {
@@ -68,7 +73,7 @@ public class SecurityPermission implements Serializable {
 
     @Override public String toString() {
         return "org.gridman.coherence.security.demo.SecurityPermission{" +
-                ", role='" + role + '\'' +
+                "role='" + role + '\'' +
                 ", resourceName='" + resourceName + '\'' +
                 ", permission=" + permission +
                 '}';

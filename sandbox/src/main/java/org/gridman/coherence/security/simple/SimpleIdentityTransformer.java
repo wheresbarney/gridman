@@ -10,7 +10,7 @@ public class SimpleIdentityTransformer implements IdentityTransformer {
     private static final Logger logger = Logger.getLogger(SimpleIdentityTransformer.class);
 
     public SimpleIdentityTransformer() {
-        logger.debug("SimpleIdentityTransformer");
+        logger.debug(SimpleIdentityTransformer.class.getName());
     }
 
     @Override public Object transformIdentity(Subject subject) throws SecurityException {
