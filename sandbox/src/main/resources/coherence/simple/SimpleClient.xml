@@ -40,8 +40,8 @@
     </remote-cache-scheme>
 
     <remote-invocation-scheme>
-        <scheme-name>InvokeService</scheme-name>
-        <service-name>InvokeService</service-name>
+        <scheme-name>ClientInvokeService</scheme-name>
+        <service-name>ClientInvokeService</service-name>
       <initiator-config>
         <tcp-initiator>
           <remote-addresses>

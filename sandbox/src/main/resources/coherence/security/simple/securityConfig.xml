@@ -71,7 +71,7 @@
         </proxy-scheme>
 
         <invocation-scheme>
-            <service-name>InvokeService</service-name>
+            <service-name>ServerInvokeService</service-name>
             <thread-count>5</thread-count>
             <autostart>true</autostart>
         </invocation-scheme>        

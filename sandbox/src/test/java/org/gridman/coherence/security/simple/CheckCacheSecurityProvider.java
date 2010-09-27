@@ -17,7 +17,7 @@ public class CheckCacheSecurityProvider implements CacheSecurityProvider {
         logger.debug("CheckCacheSecurityProvider");
     }
 
-    public boolean checkAccess(Subject subject, boolean readOnly, String cacheName) {
+    @Override public boolean checkAccess(Subject subject, String cacheName, boolean readOnly) {
         // Only allow the allowed user.
         logger.debug("checkAccess" + subject );
         if(readOnly) {

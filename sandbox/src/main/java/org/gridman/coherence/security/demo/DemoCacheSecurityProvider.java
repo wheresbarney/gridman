@@ -1,15 +1,14 @@
 package org.gridman.coherence.security.demo;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.NamedCache;
-import com.tangosol.util.Filter;
-import com.tangosol.util.filter.AndFilter;
-import com.tangosol.util.filter.EqualsFilter;
+import com.tangosol.net.InvocationService;
+import com.tangosol.net.Member;
 import org.apache.log4j.Logger;
 import org.gridman.coherence.security.simple.CoherenceUtils;
 import org.gridman.coherence.security.simple.CacheSecurityProvider;
 
 import javax.security.auth.Subject;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,22 +21,17 @@ public class DemoCacheSecurityProvider implements CacheSecurityProvider {
     public DemoCacheSecurityProvider() {
         logger.debug(DemoCacheSecurityProvider.class.getName());
     }
-    
-    @Override public boolean checkAccess(Subject subject, boolean readOnly, String cacheName) {
-        logger.debug("checkAccess " + cacheName + " : " + readOnly + " : " + subject);
-        String firstPrincipalName = CoherenceUtils.getFirstPrincipalName(subject);
-        if(cacheName.equals(SecurityPermission.PERMISSION_CACHE) && readOnly) { return true; }
-        NamedCache permissionCache = CacheFactory.getCache(SecurityPermission.PERMISSION_CACHE);
-        int permission = readOnly ? SecurityPermission.PERMISSION_READ : SecurityPermission.PERMISSION_WRITE;
-        Filter filter = new AndFilter(new EqualsFilter("getRole", firstPrincipalName),new EqualsFilter("getPermission", permission));
-        Set<Map.Entry> set = permissionCache.entrySet(filter);
-        for(Map.Entry entry : set) {
-            SecurityPermission perm = (SecurityPermission) entry.getValue();
-            if(perm.checkPermission(cacheName, permission, firstPrincipalName)) {
-                return true;
-            }
-        }
-        return false;
 
+    /*
+     * We need to use an Invoke Service or we'll get cache loopback.
+     * Otherwise, we could make the PermissionCache read-only to everyone, which I don't like.
+     */
+    @Override public boolean checkAccess(Subject subject, String cacheName, boolean readOnly) {
+        logger.debug("checkAccess " + cacheName + " : " + readOnly + " : " + subject);
+        String role = CoherenceUtils.getFirstPrincipalName(subject);
+        InvocationService service = (InvocationService) CacheFactory.getService(DemoServer.SERVER_INVOKE_SERVICE);
+        Set<Member> memberSet = Collections.singleton(CacheFactory.getCluster().getLocalMember());
+        Map map = service.query(new DemoCachePermissionInvoke(role, cacheName, true, readOnly), memberSet);
+        return (Boolean)map.values().iterator().next();
     }
 }
