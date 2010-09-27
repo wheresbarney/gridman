@@ -41,5 +41,9 @@ public class CoherenceUtils {
     public static String getFirstPrincipalName(Subject subject) {
         if(subject == null) { return null; }
         return subject.getPrincipals().iterator().next().getName();
-    }    
+    }
+
+    public static String getCurrentFirstPrincipalName() {
+        return getFirstPrincipalName(getCurrentSubject());
+    }
 }

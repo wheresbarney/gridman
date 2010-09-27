@@ -15,7 +15,8 @@ import java.util.Date;
  */
 public class NullInvokable implements Invocable, PortableObject {
     private static final Logger logger = Logger.getLogger(NullInvokable.class);
-
+    private int a;
+    
     public NullInvokable() {
         logger.debug(NullInvokable.class.getName());
     }
@@ -34,4 +35,6 @@ public class NullInvokable implements Invocable, PortableObject {
     @Override public void readExternal(PofReader pofReader) throws IOException {}
 
     @Override public void writeExternal(PofWriter pofWriter) throws IOException {}
+
+    @Override public String toString() { return "NullInvokable" ; }
 }

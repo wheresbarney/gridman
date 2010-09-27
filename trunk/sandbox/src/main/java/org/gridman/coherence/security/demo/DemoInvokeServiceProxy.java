@@ -3,9 +3,13 @@ package org.gridman.coherence.security.demo;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Invocable;
 import com.tangosol.net.InvocationService;
-import com.tangosol.net.NamedCache;
+import com.tangosol.net.Member;
 import org.gridman.coherence.security.simple.CoherenceUtils;
 import org.gridman.coherence.security.simple.SimpleInvokeServiceProxy;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The Demo Invoke Service Proxy.
@@ -14,18 +18,16 @@ import org.gridman.coherence.security.simple.SimpleInvokeServiceProxy;
  * eg. by parameters in the invocation service etc.
  */
 public class DemoInvokeServiceProxy extends SimpleInvokeServiceProxy {
-    private NamedCache permissionCache;
 
     public DemoInvokeServiceProxy(InvocationService invocationService) throws Throwable {
         super(invocationService);
-        permissionCache = CacheFactory.getCache(SecurityPermission.PERMISSION_CACHE);
     }
 
-    @Override protected void check(Invocable invocable) {
-        String principal = CoherenceUtils.getFirstPrincipalName(CoherenceUtils.getCurrentSubject());
-        boolean result = permissionCache.containsKey(new SecurityPermission(principal, invocable.getClass().getName(), SecurityPermission.PERMISSION_INVOKE));
-        if(!result) {
-            throw new SecurityException("Failed Invoke : " + principal);
-        }
+    @Override protected boolean check(Invocable invocable) {
+        String checkRole = CoherenceUtils.getFirstPrincipalName(CoherenceUtils.getCurrentSubject());
+        InvocationService service = (InvocationService) CacheFactory.getService(DemoServer.SERVER_INVOKE_SERVICE);
+        Set<Member> localMemberSet = Collections.singleton(CacheFactory.getCluster().getLocalMember());
+        Map map = service.query(new DemoCachePermissionInvoke(checkRole, invocable.getClass().getName(), false, false), localMemberSet);
+        return (Boolean)map.values().iterator().next();
     }
 }

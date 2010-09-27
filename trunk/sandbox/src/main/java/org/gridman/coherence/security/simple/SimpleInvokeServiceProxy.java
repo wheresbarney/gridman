@@ -22,16 +22,22 @@ public class SimpleInvokeServiceProxy extends WrapperInvocationService {
 
     @Override public void execute(Invocable invocable, Set set, InvocationObserver invocationObserver) {
         logger.debug("execute invocable : " + invocable + " set : " + set + " invocationObserver : " + invocationObserver);
-        check(invocable);
+        checkInternal(invocable);
         super.execute(invocable,set,invocationObserver);
     }
 
     @Override public Map query(Invocable invocable, Set set) {
         logger.debug("query : invocable : " + invocable + " set : " + set);
-        check(invocable);
+        checkInternal(invocable);
         return super.query(invocable,set);
     }
 
+    private void checkInternal(Invocable invocable) {
+        if(!check(invocable)) {
+            throw new SecurityException("Failed Invoke : " + CoherenceUtils.getCurrentFirstPrincipalName() + " invocable : " + invocable);
+        }
+    }
+
     // This checks whether they are allowed, override accordingly.
-    protected void check(Invocable invocable) {}
+    protected boolean check(Invocable invocable) { throw new UnsupportedOperationException("Implement"); }
 }

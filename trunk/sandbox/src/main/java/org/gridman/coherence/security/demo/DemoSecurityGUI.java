@@ -18,23 +18,23 @@ import java.security.PrivilegedAction;
  * Gui created for demo
  * @author Andrew Wilson
  */
-public class SecurityGUI implements ActionListener {
+public class DemoSecurityGUI implements ActionListener {
 
     private JTextField userField;
     private JTextField roleField;
     private JTextField resourceField;
     private JComboBox permissionBox;
     private JComboBox actionBox;
-    private JTextField messageField;
+    private JFrame frame;
 
-    private Object[] PERMISSIONS = {"Read", "Write", "Admin", "Invoke"};
+    private Object[] PERMISSIONS = {"Read", "Write", "Invoke"};
     private Object[] ACTIONS = {"Add", "Remove", "Check"};
 
     public static void main(String[] args) {
-        new SecurityGUI();
+        new DemoSecurityGUI();
     }
     
-    private SecurityGUI() {
+    private DemoSecurityGUI() {
 
         // Start the cluster.
         // ClusterStarter.getInstance().ensureCluster("/coherence/security/demo/securityDemoCluster.properties");
@@ -42,7 +42,7 @@ public class SecurityGUI implements ActionListener {
         SystemPropertyLoader.loadSystemProperties("/coherence/security/demo/securityDemoDefault.properties");
         SystemPropertyLoader.loadSystemProperties("/coherence/security/demo/securityDemoClient.properties");
 
-        JPanel panel = new JPanel(new GridLayout(8,2,5,5));
+        JPanel panel = new JPanel(new GridLayout(6,2,5,5));
 
         // User
         panel.add(new JLabel("User"));
@@ -75,12 +75,7 @@ public class SecurityGUI implements ActionListener {
         button.addActionListener(this);
         panel.add(button);
 
-        // Message
-        panel.add(new JLabel("Message"));
-        messageField = new JTextField(20);
-        panel.add(messageField);        
-
-        JFrame frame = new JFrame("Security GUI");
+        frame = new JFrame("Security GUI");
         frame.getContentPane().add(panel);
         frame.pack();
         frame.setVisible(true);
@@ -90,23 +85,25 @@ public class SecurityGUI implements ActionListener {
     @Override public void actionPerformed(ActionEvent e) {
         try {
             String action = (String)actionBox.getSelectedItem();
-            int offset = permissionBox.getSelectedIndex();
-            final Object permissionCommand = permissionBox.getSelectedItem();
-            final SecurityPermission permission = new SecurityPermission(roleField.getText(), resourceField.getText(), offset);
+            final String permissionCommand = (String)permissionBox.getSelectedItem();
+            final DemoSecurityPermission permission = new DemoSecurityPermission(   roleField.getText(),
+                                                                            resourceField.getText(),
+                                                                            !permissionCommand.equals("Invoke"),
+                                                                            !permissionCommand.equals("Write"));
             System.out.println("Permission " + permission);
             PrivilegedAction<Object> pAction;
             if(action.equals("Add")) {
                 pAction = new PrivilegedAction<Object>() {
                     @Override public Object run() {
                         System.out.println("Add!!!");
-                        return CacheFactory.getCache(SecurityPermission.PERMISSION_CACHE).put(permission, permission);
+                        return CacheFactory.getCache(DemoServer.PERMISSION_CACHE).put(permission, permission);
                     }
                 };
             } else if(action.equals("Remove")) {
                 pAction = new PrivilegedAction<Object>() {
                     @Override public Object run() {
                         System.out.println("Remove!!!");
-                        return CacheFactory.getCache(SecurityPermission.PERMISSION_CACHE).remove(permission);
+                        return CacheFactory.getCache(DemoServer.PERMISSION_CACHE).remove(permission);
                     }
                 };
             } else if(action.equals("Check")) {
@@ -118,10 +115,8 @@ public class SecurityGUI implements ActionListener {
                             cache.get(1);
                         } else if(permissionCommand.equals("Write")) {
                             cache.put(1,"A");
-                        } else if(permissionCommand.equals("Admin")) {
-                            cache.destroy();
                         } else if(permissionCommand.equals("Invoke")) {
-                            ((InvocationService)CacheFactory.getService(SecurityPermission.INVOKE_SERVICE)).query(new NullInvokable(),null);
+                            ((InvocationService)CacheFactory.getService(DemoServer.CLIENT_INVOKE_SERVICE)).query(new NullInvokable(),null);
                         } else {
                             throw new RuntimeException("Invalid action : " + permissionCommand);
                         }
@@ -131,12 +126,12 @@ public class SecurityGUI implements ActionListener {
             } else {
                 throw new Exception("Invalid action : " + action);
             }
-            messageField.setText("OK");
             System.out.println("Doing it..." + userField.getText());
-            Subject.doAs(CoherenceUtils.getSimpleSubject(userField.getText()), pAction);            
+            Subject.doAs(CoherenceUtils.getSimpleSubject(userField.getText()), pAction);
+            JOptionPane.showMessageDialog(frame,"Rock on!","Success",JOptionPane.PLAIN_MESSAGE);
         } catch(Throwable t) {
+            JOptionPane.showMessageDialog(frame,t.toString(),"Failed",JOptionPane.ERROR_MESSAGE);
             t.printStackTrace();
-            messageField.setText(t.toString());
         }
     }
 }

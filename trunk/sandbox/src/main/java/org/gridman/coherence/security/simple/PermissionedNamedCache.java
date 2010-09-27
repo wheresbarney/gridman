@@ -520,9 +520,9 @@ public class PermissionedNamedCache extends WrapperNamedCache {
      */
     private void checkAccess(boolean readOnly) {
         logger.debug("Checking access readOnly="+ readOnly + " subject=" + CoherenceUtils.getCurrentSubject() + " cacheName=" + cacheName);
-        if (!provider.checkAccess(getCurrentSubject(), readOnly, cacheName)) {
-            throw new SecurityException("Access denied, Insufficient privileges : " + cacheName + " : " + readOnly + " subject=" + CoherenceUtils.getCurrentSubject() + provider);
-        }         
+        if (!provider.checkAccess(getCurrentSubject(), cacheName, readOnly)) {
+            throw new SecurityException("Access denied, Insufficient privileges : " + cacheName + " : " + readOnly + " subject=" + CoherenceUtils.getCurrentSubject());
+        }
     }
 
 }
