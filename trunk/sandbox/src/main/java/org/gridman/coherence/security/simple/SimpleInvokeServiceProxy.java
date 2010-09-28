@@ -15,10 +15,18 @@ import java.util.Set;
 public class SimpleInvokeServiceProxy extends WrapperInvocationService {
     private static final Logger logger = Logger.getLogger(SimpleInvokeServiceProxy.class);
 
-    public SimpleInvokeServiceProxy(InvocationService invocationService) {
+    private InvocationSecurityProvider invocationSecurityProvider;
+
+    public SimpleInvokeServiceProxy(InvocationService invocationService, InvocationSecurityProvider invocationSecurityProvider) {
         super(invocationService);
+        this.invocationSecurityProvider = invocationSecurityProvider;
         logger.debug("CheckInvokeServiceProxy()");
     }
+
+    public SimpleInvokeServiceProxy(InvocationService invocationService, String invocationSecurityProviderClass) throws Exception {
+        this(invocationService, (InvocationSecurityProvider)Class.forName(invocationSecurityProviderClass).newInstance());
+    }
+
 
     @Override public void execute(Invocable invocable, Set set, InvocationObserver invocationObserver) {
         logger.debug("execute invocable : " + invocable + " set : " + set + " invocationObserver : " + invocationObserver);
@@ -33,11 +41,8 @@ public class SimpleInvokeServiceProxy extends WrapperInvocationService {
     }
 
     private void checkInternal(Invocable invocable) {
-        if(!check(invocable)) {
+        if(!invocationSecurityProvider.checkInvocation(CoherenceUtils.getCurrentSubject(),invocable)) {
             throw new SecurityException("Failed Invoke : " + CoherenceUtils.getCurrentFirstPrincipalName() + " invocable : " + invocable);
         }
     }
-
-    // This checks whether they are allowed, override accordingly.
-    protected boolean check(Invocable invocable) { throw new UnsupportedOperationException("Implement"); }
 }

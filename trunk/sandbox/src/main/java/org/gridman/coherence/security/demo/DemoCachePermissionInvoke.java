@@ -17,6 +17,8 @@ import java.util.Set;
  * @todo Add POF 
  */
 public class DemoCachePermissionInvoke implements Invocable, Serializable {
+    private static final long serialVersionUID = 1L;
+    
     public static final Logger logger = Logger.getLogger(DemoCachePermissionInvoke.class);
 
     private String checkRole;

@@ -10,6 +10,8 @@ import java.io.Serializable;
  * @todo - Add POF
  */
 public class DemoSecurityPermission implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private static final Logger logger = Logger.getLogger(DemoSecurityPermission.class);
 
     private String role;

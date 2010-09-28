@@ -14,10 +14,14 @@ public class SimpleCacheServiceProxy extends WrapperCacheService {
 
     private CacheSecurityProvider securityProvider;
 
-    public SimpleCacheServiceProxy(CacheService cacheService, String securityProviderName) throws Throwable {
+    public SimpleCacheServiceProxy(CacheService cacheService, CacheSecurityProvider securityProvider) throws Exception {
         super(cacheService);
         logger.debug(SimpleCacheServiceProxy.class.getName());
-        securityProvider = (CacheSecurityProvider)Class.forName(securityProviderName).newInstance();
+        this.securityProvider = securityProvider;
+    }
+    
+    public SimpleCacheServiceProxy(CacheService cacheService, String securityProviderName) throws Throwable {
+        this(cacheService, (CacheSecurityProvider)Class.forName(securityProviderName).newInstance());
     }
 
     @Override public NamedCache ensureCache(String cache, ClassLoader classLoader) {

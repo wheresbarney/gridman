@@ -49,6 +49,10 @@
                           <param-type>com.tangosol.net.InvocationService</param-type>
                           <param-value>{service}</param-value>
                         </init-param>
+                        <init-param>
+                            <param-type>java.lang.String</param-type>
+                            <param-value system-property="org.gridman.coherence.security.invocationSecurityProvider">NOT_SET</param-value>
+                        </init-param>
                       </init-params>
                     <enabled>true</enabled>
                 </invocation-service-proxy>
