@@ -10,7 +10,7 @@ http://maven.apache.org/xsd/settings-1.0.0.xsd">
             <id>myproxy</id>
             <active>true</active>
             <protocol>http</protocol>
-            <host>FM-EU-LON-PROXY.fm.rbsgrp.net</host>
+            <host>XXX_PROXY_XXX</host>
             <port>8080</port>
             <username>XXX_USERNAME_XXX</username>
             <password>XXX_PASSWORD_XXX</password>
