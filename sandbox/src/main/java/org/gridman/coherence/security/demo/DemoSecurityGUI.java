@@ -2,7 +2,7 @@ package org.gridman.coherence.security.demo;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.InvocationService;
-import com.tangosol.net.NamedCache;
+import org.apache.log4j.Logger;
 import org.gridman.classloader.SystemPropertyLoader;
 import org.gridman.coherence.security.simple.CoherenceUtils;
 import org.gridman.coherence.util.NullInvokable;
@@ -19,6 +19,7 @@ import java.security.PrivilegedAction;
  * @author Andrew Wilson
  */
 public class DemoSecurityGUI implements ActionListener {
+    private static final Logger logger = Logger.getLogger(DemoSecurityGUI.class);
 
     private JTextField userField;
     private JTextField roleField;
@@ -90,31 +91,27 @@ public class DemoSecurityGUI implements ActionListener {
                                                                             resourceField.getText(),
                                                                             !permissionCommand.equals("Invoke"),
                                                                             !permissionCommand.equals("Write"));
-            System.out.println("Permission " + permission);
+            logger.debug("Permission " + permission);
             PrivilegedAction<Object> pAction;
             if(action.equals("Add")) {
                 pAction = new PrivilegedAction<Object>() {
                     @Override public Object run() {
-                        System.out.println("Add!!!");
                         return CacheFactory.getCache(DemoServer.PERMISSION_CACHE).put(permission, permission);
                     }
                 };
             } else if(action.equals("Remove")) {
                 pAction = new PrivilegedAction<Object>() {
                     @Override public Object run() {
-                        System.out.println("Remove!!!");
                         return CacheFactory.getCache(DemoServer.PERMISSION_CACHE).remove(permission);
                     }
                 };
             } else if(action.equals("Check")) {
                 pAction = new PrivilegedAction<Object>() {
                     @Override public Object run() {
-                        System.out.println("Check!!!");
-                        NamedCache cache = CacheFactory.getCache(resourceField.getText());
                         if(permissionCommand.equals("Read")) {
-                            cache.get(1);
+                            CacheFactory.getCache(resourceField.getText()).get(1);
                         } else if(permissionCommand.equals("Write")) {
-                            cache.put(1,"A");
+                            CacheFactory.getCache(resourceField.getText()).put(1,"A");
                         } else if(permissionCommand.equals("Invoke")) {
                             ((InvocationService)CacheFactory.getService(DemoServer.CLIENT_INVOKE_SERVICE)).query(new NullInvokable(),null);
                         } else {
@@ -126,9 +123,9 @@ public class DemoSecurityGUI implements ActionListener {
             } else {
                 throw new Exception("Invalid action : " + action);
             }
-            System.out.println("Doing it..." + userField.getText());
+            logger.debug("Doing it..." + userField.getText());
             Subject.doAs(CoherenceUtils.getSimpleSubject(userField.getText()), pAction);
-            JOptionPane.showMessageDialog(frame,"Rock on!","Success",JOptionPane.PLAIN_MESSAGE);
+            JOptionPane.showMessageDialog(frame,"Rock on!","Success",JOptionPane.INFORMATION_MESSAGE);
         } catch(Throwable t) {
             JOptionPane.showMessageDialog(frame,t.toString(),"Failed",JOptionPane.ERROR_MESSAGE);
             t.printStackTrace();
