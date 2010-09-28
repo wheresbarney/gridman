@@ -1,17 +1,11 @@
 package org.gridman.coherence.security.demo;
 
-import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Invocable;
-import com.tangosol.net.InvocationService;
-import com.tangosol.net.Member;
 import org.apache.log4j.Logger;
 import org.gridman.coherence.security.simple.CoherenceUtils;
 import org.gridman.coherence.security.simple.InvocationSecurityProvider;
 
 import javax.security.auth.Subject;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * The Demo Invoke Service Proxy.
@@ -27,11 +21,7 @@ public class DemoInvokeServiceProvider implements InvocationSecurityProvider {
     }
 
     @Override public boolean checkInvocation(Subject subject, Invocable invocable) {
-        String checkRole = CoherenceUtils.getFirstPrincipalName(CoherenceUtils.getCurrentSubject());
-        InvocationService service = (InvocationService) CacheFactory.getService(DemoServer.SERVER_INVOKE_SERVICE);
-        Set<Member> localMemberSet = Collections.singleton(CacheFactory.getCluster().getLocalMember());
-        Map map = service.query(new DemoCachePermissionInvoke(checkRole, invocable.getClass().getName(), false, true), localMemberSet);
-        return (Boolean)map.values().iterator().next();
+        return DemoServer.checkPermission(CoherenceUtils.getFirstPrincipalName(subject),invocable.getClass().getName(),false,true);
     }
 
 }

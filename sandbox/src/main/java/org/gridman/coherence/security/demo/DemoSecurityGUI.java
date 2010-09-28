@@ -102,7 +102,9 @@ public class DemoSecurityGUI implements ActionListener {
             } else if(action.equals("Remove")) {
                 pAction = new PrivilegedAction<Object>() {
                     @Override public Object run() {
-                        return CacheFactory.getCache(DemoServer.PERMISSION_CACHE).remove(permission);
+                        Object value = CacheFactory.getCache(DemoServer.PERMISSION_CACHE).remove(permission);
+                        if(value==null) { throw new RuntimeException("Nothing to remove!"); }
+                        return null;
                     }
                 };
             } else if(action.equals("Check")) {
