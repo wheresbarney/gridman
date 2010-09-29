@@ -6,6 +6,13 @@
 || Name || Description || Example ||
 || IdentityTransformer || Transforms the Subject -> Token (may be null) || Kerberos ||
 || IdentityAsserter || Transforms the Token -> Subject (may be null) || Kerberos ||
-|| 
+|| CacheServiceProxy || Intercepts cache requests || Use Gridmans! ||
+|| InvokeServiceProxy || Intercepts invoke requests || Use Gridmans! ||
+
+Gridman provides the following :
+
+|| CacheSecurityProvider || Subject, CacheName, Readonly || Use a cache or AD Groups ||
+|| InvokeSecurityProvider || Subject, Invocable || Use a cache or AD Groups ||
+ 
 
   All of these hooks can be used for audit as well as security
