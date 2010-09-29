@@ -1,7 +1,8 @@
 #summary Coherence Security
 
 
-
+== Relevant classes ==
+All of these hooks can be used for audit as well as security
 
 || Name || Description || Example || Signature ||
 || IdentityTransformer || Client transforms the Subject -> Token (may be null) || Kerberos || Object transformIdentity(Subject subject) ||
@@ -14,6 +15,7 @@ Gridman provides the following :
 
 || CacheSecurityProvider || Subject, CacheName, Readonly || Use a cache or AD Groups ||
 || InvokeSecurityProvider || Subject, Invocable || Use a cache or AD Groups ||
-|| PermissionedNamedCache || Wrapper named cache to provide read/write functionality ||
+|| PermissionedNamedCache || Wrapper named cache to provide read/write functionality || Could extend to provide object level security * ||
 
-  All of these hooks can be used for audit as well as security
+=== Object level security ===
+This could be provided using a WrapperCache.  However, remember Coherence is a *high performance* product.  
