@@ -18,4 +18,4 @@ Gridman provides the following :
 || PermissionedNamedCache || Wrapper named cache to provide read/write functionality || Could extend to provide object level security * ||
 
 === Object level security ===
-This could be provided using a WrapperCache.  However, remember Coherence is a *high performance* product.  
+This could be provided using a WrapperCache.  However, remember Coherence is a *high performance* product so you better make sure this is a fast call!  
