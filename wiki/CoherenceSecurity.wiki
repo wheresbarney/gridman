@@ -1,0 +1,11 @@
+#summary Coherence Security
+
+
+
+
+|| Name || Description || Example ||
+|| IdentityTransformer || Transforms the Subject -> Token (may be null) || Kerberos ||
+|| IdentityAsserter || Transforms the Token -> Subject (may be null) || Kerberos ||
+|| 
+
+  All of these hooks can be used for audit as well as security
