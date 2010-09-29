@@ -13,8 +13,9 @@ All of these hooks can be used for audit as well as security
 
 Gridman provides the following :
 
-|| CacheSecurityProvider || Subject, CacheName, Readonly || Use a cache or AD Groups ||
-|| InvokeSecurityProvider || Subject, Invocable || Use a cache or AD Groups ||
+|| Name || Description || Example || Signature ||
+|| CacheSecurityProvider || Simple interface for caches || Subject, CacheName, Readonly || Use a cache or AD Groups ||
+|| InvokeSecurityProvider || Simple interface for invocable || Subject, Invocable || Use a cache or AD Groups ||
 || PermissionedNamedCache || Wrapper named cache to provide read/write functionality || Could extend to provide object level security * ||
 ||AuthorizedHostFilter || A filter to restrict cluster membership ||
 
