@@ -16,7 +16,7 @@ Gridman provides the following :
 || Name || Description || Example || Signature ||
 || CacheSecurityProvider || Simple interface for caches || Use a cache or AD Groups || boolean checkAccess (Subject subject, String cacheName, boolean readOnly) ||
 || InvokeSecurityProvider || Simple interface for invocable || Use a cache or AD Groups || boolean checkInvocation(Subject subject, Invocable invocable) ||
-|| PermissionedNamedCache || Wrapper named cache to provide read/write functionality || Could extend to provide object level security * ||
+|| PermissionedNamedCache || Wrapper named cache to provide read/write functionality || Could extend to provide object level security * || N/A ||
 ||AuthorizedHostFilter || A filter to restrict cluster membership || Cache or database || boolean evaluate(Object iNetAddress) ||
 
 === Cache level session security ===
