@@ -16,6 +16,14 @@ Gridman provides the following :
 || CacheSecurityProvider || Subject, CacheName, Readonly || Use a cache or AD Groups ||
 || InvokeSecurityProvider || Subject, Invocable || Use a cache or AD Groups ||
 || PermissionedNamedCache || Wrapper named cache to provide read/write functionality || Could extend to provide object level security * ||
+||AuthorizedHostFilter || A filter to restrict cluster membership ||
+
+=== Cache level session security ===
+
+Our solution provides :
+
+  * Cache level security - you can read/write an entire cache.
+  * Session level - The Asserter/Transformer are only called once per session (actually they are called 3 times - socket / channel / cq.  However, the cost is low.
 
 === Object level security ===
 This could be provided using a WrapperCache.  However, remember Coherence is a *high performance* product so you better make sure this is a fast call!  
