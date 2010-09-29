@@ -7,8 +7,8 @@ All of these hooks can be used for audit as well as security
 || Name || Description || Example || Signature ||
 || IdentityTransformer || Client transforms the Subject -> Token (may be null) ||  Gridman Kerberos || Object transformIdentity(Subject subject) ||
 || IdentityAsserter || Proxy transforms the Token -> Subject (may be null) || Gridman Kerberos || Subject assertIdentity(Object oToken) ||
-|| CacheServiceProxy || Intercepts cache requests || Use Gridmans! || NamedCache ensureCache(String cache, ClassLoader classLoader) || 
-|| InvokeServiceProxy || Intercepts invoke requests || Use Gridmans! || execute + query methods ||
+|| CacheServiceProxy || Intercepts cache requests || Gridman Simple || NamedCache ensureCache(String cache, ClassLoader classLoader) || 
+|| InvokeServiceProxy || Intercepts invoke requests || Gridman Simple || execute + query methods ||
 
 
 Gridman provides the following :
