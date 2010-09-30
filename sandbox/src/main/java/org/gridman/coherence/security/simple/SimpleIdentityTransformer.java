@@ -14,7 +14,7 @@ public class SimpleIdentityTransformer implements IdentityTransformer {
     }
 
     @Override public Object transformIdentity(Subject subject) throws SecurityException {
-        String name = CoherenceUtils.getFirstPrincipalName(subject);
+        String name = CoherenceSecurityUtils.getFirstPrincipalName(subject);
         logger.debug("SimpleIdentityTransformer : " + subject + " : " + name);
         return name;
     }

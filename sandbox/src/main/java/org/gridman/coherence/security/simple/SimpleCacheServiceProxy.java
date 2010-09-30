@@ -25,7 +25,7 @@ public class SimpleCacheServiceProxy extends WrapperCacheService {
     }
 
     @Override public NamedCache ensureCache(String cache, ClassLoader classLoader) {
-        logger.debug("ensureCache : " + cache + " : " + CoherenceUtils.getCurrentSubject());
+        logger.debug("ensureCache : " + cache + " : " + CoherenceSecurityUtils.getCurrentSubject());
         return new PermissionedNamedCache(super.ensureCache(cache, classLoader), securityProvider);
     }
 }

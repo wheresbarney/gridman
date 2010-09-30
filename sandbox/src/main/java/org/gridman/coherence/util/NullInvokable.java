@@ -14,9 +14,10 @@ import java.util.Date;
  * @todo Why is there no NullImplementation.getInvocable();
  */
 public class NullInvokable implements Invocable, PortableObject {
+    private static final long serialVersionUID = 1L;
+
     private static final Logger logger = Logger.getLogger(NullInvokable.class);
-    private int a;
-    
+
     public NullInvokable() {
         logger.debug(NullInvokable.class.getName());
     }
@@ -25,7 +26,9 @@ public class NullInvokable implements Invocable, PortableObject {
         logger.debug("Calling init : " + invocationService);
     }
 
-    public void run() { logger.debug("Calling run"); }
+    public void run() {
+        logger.debug("Calling run");
+    }
 
     public Object getResult() {
         logger.debug("Calling getResult");
@@ -36,5 +39,5 @@ public class NullInvokable implements Invocable, PortableObject {
 
     @Override public void writeExternal(PofWriter pofWriter) throws IOException {}
 
-    @Override public String toString() { return "NullInvokable" ; }
+    @Override public String toString() { return this.getClass().getName() ; }
 }

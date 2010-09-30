@@ -41,8 +41,8 @@ public class SimpleInvokeServiceProxy extends WrapperInvocationService {
     }
 
     private void checkInternal(Invocable invocable) {
-        if(!invocationSecurityProvider.checkInvocation(CoherenceUtils.getCurrentSubject(),invocable)) {
-            throw new SecurityException("Failed Invoke : " + CoherenceUtils.getCurrentFirstPrincipalName() + " invocable : " + invocable);
+        if(!invocationSecurityProvider.checkInvocation(CoherenceSecurityUtils.getCurrentSubject(),invocable)) {
+            throw new SecurityException("Failed Invoke : " + CoherenceSecurityUtils.getCurrentFirstPrincipalName() + " invocable : " + invocable);
         }
     }
 }
