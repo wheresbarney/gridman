@@ -100,7 +100,7 @@ public class DemoSecurityGUI implements ActionListener {
                                                                             resourceField.getText(),
                                                                             !permissionCommand.equals("Invoke"),
                                                                             !permissionCommand.equals("Write"));
-                        return CacheFactory.getCache(DemoServer.PERMISSION_CACHE).put(permission, permission);
+                        return CacheFactory.getCache(DemoSecurityProvider.PERMISSION_CACHE).put(permission, permission);
                     }
                 };
             } else if(action.equals("Remove")) {
@@ -110,7 +110,7 @@ public class DemoSecurityGUI implements ActionListener {
                                                                             resourceField.getText(),
                                                                             !permissionCommand.equals("Invoke"),
                                                                             !permissionCommand.equals("Write"));
-                        Object value = CacheFactory.getCache(DemoServer.PERMISSION_CACHE).remove(permission);
+                        Object value = CacheFactory.getCache(DemoSecurityProvider.PERMISSION_CACHE).remove(permission);
                         if(value==null) { throw new RuntimeException("Nothing to remove!"); }
                         return null;
                     }
@@ -125,7 +125,7 @@ public class DemoSecurityGUI implements ActionListener {
                         } else if(permissionCommand.equals("Invoke")) {
                             try {
                                 Invocable invocable = (Invocable) Class.forName(resourceField.getText()).newInstance();
-                                ((InvocationService)CacheFactory.getService(DemoServer.CLIENT_INVOKE_SERVICE)).query(invocable,null);
+                                ((InvocationService)CacheFactory.getService(DemoSecurityProvider.CLIENT_INVOKE_SERVICE)).query(invocable,null);
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }

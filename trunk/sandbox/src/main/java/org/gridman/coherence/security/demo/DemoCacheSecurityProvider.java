@@ -20,6 +20,6 @@ public class DemoCacheSecurityProvider implements CacheSecurityProvider {
      * check the access.
      */
     @Override public boolean checkAccess(Subject subject, String cacheName, boolean readOnly) {
-        return DemoServer.checkPermission(CoherenceSecurityUtils.getFirstPrincipalName(subject),cacheName,true,readOnly);
+        return DemoSecurityProvider.checkPermission(CoherenceSecurityUtils.getFirstPrincipalName(subject),cacheName,true,readOnly);
     }
 }
