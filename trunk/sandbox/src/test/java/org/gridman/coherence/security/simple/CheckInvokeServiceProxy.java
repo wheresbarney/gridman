@@ -19,7 +19,7 @@ public class CheckInvokeServiceProxy implements InvocationSecurityProvider  {
 
     // This checks whether they are allowed.
     @Override public boolean checkInvocation(Subject subject, Invocable invocable) {
-        if(CoherenceUtils.checkFirstPrincipalName(SecurityTest.DISALLOWED_INVOKE)) {
+        if(CoherenceSecurityUtils.checkFirstPrincipalName(SecurityTest.DISALLOWED_INVOKE)) {
             throw new SecurityException("Not allowed");
         }
         return true;

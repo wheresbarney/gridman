@@ -13,7 +13,7 @@ import java.util.Arrays;
 /**
  * Useful static functions that sit here for now.
  */
-public class CoherenceUtils {
+public class CoherenceSecurityUtils {
 
     /**
      * Gets the Subject from the current thread, or null if there isn't one.     

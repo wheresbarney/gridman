@@ -2,7 +2,7 @@ package org.gridman.coherence.security.demo;
 
 import org.apache.log4j.Logger;
 import org.gridman.coherence.security.simple.CacheSecurityProvider;
-import org.gridman.coherence.security.simple.CoherenceUtils;
+import org.gridman.coherence.security.simple.CoherenceSecurityUtils;
 
 import javax.security.auth.Subject;
 
@@ -20,6 +20,6 @@ public class DemoCacheSecurityProvider implements CacheSecurityProvider {
      * check the access.
      */
     @Override public boolean checkAccess(Subject subject, String cacheName, boolean readOnly) {
-        return DemoServer.checkPermission(CoherenceUtils.getFirstPrincipalName(subject),cacheName,true,readOnly);
+        return DemoServer.checkPermission(CoherenceSecurityUtils.getFirstPrincipalName(subject),cacheName,true,readOnly);
     }
 }

@@ -57,7 +57,7 @@ public class SecurityTest extends TestCase {
 
         // Check that the disallowed cache putter user cannot put
         try {
-            Subject.doAs(CoherenceUtils.getSimpleSubject(DISALLOWED_CACHE_WRITE), putAction);
+            Subject.doAs(CoherenceSecurityUtils.getSimpleSubject(DISALLOWED_CACHE_WRITE), putAction);
             fail("Did not get expected SecurityException");
         } catch(Exception e) {
             logger.info("Got expected SE : " + e);
@@ -65,7 +65,7 @@ public class SecurityTest extends TestCase {
 
         // Check that the disallowed_invoke cannot invoke
         try {
-            Subject.doAs(CoherenceUtils.getSimpleSubject(DISALLOWED_INVOKE), invokeAction);
+            Subject.doAs(CoherenceSecurityUtils.getSimpleSubject(DISALLOWED_INVOKE), invokeAction);
             fail("Did not get expected SecurityException");
         } catch(Exception e) {
             logger.info("Got expected SE : " + e);
@@ -73,7 +73,7 @@ public class SecurityTest extends TestCase {
 
         // Check that the disallowed user cannot get in.
         try {
-            Subject.doAs(CoherenceUtils.getSimpleSubject(DISALLOWED), getAction);
+            Subject.doAs(CoherenceSecurityUtils.getSimpleSubject(DISALLOWED), getAction);
             fail("Did not get expected SecurityException");
         } catch(Exception e) {
             logger.info("Got expected SE : " + e);
@@ -85,16 +85,16 @@ public class SecurityTest extends TestCase {
 
     private void checkAllowed() {
         // Check that the allowed user can put.
-        Subject.doAs(CoherenceUtils.getSimpleSubject(ALLOWED), putAction);
+        Subject.doAs(CoherenceSecurityUtils.getSimpleSubject(ALLOWED), putAction);
 
         // Check that the allowed user can get.
-        Subject.doAs(CoherenceUtils.getSimpleSubject(ALLOWED), getAction);
+        Subject.doAs(CoherenceSecurityUtils.getSimpleSubject(ALLOWED), getAction);
 
         // And do an invoke
-        Subject.doAs(CoherenceUtils.getSimpleSubject(ALLOWED), invokeAction);
+        Subject.doAs(CoherenceSecurityUtils.getSimpleSubject(ALLOWED), invokeAction);
 
         // Check that the disallowed cache putter user can do a get
-        Subject.doAs(CoherenceUtils.getSimpleSubject(DISALLOWED_CACHE_WRITE), getAction);
+        Subject.doAs(CoherenceSecurityUtils.getSimpleSubject(DISALLOWED_CACHE_WRITE), getAction);
     }
 }
 

@@ -21,9 +21,9 @@ public class CheckCacheSecurityProvider implements CacheSecurityProvider {
         // Only allow the allowed user.
         logger.debug("checkAccess" + subject );
         if(readOnly) {
-            return !CoherenceUtils.checkFirstPrincipalName(SecurityTest.DISALLOWED_CACHE);
+            return !CoherenceSecurityUtils.checkFirstPrincipalName(SecurityTest.DISALLOWED_CACHE);
         } else {
-            return CoherenceUtils.checkFirstPrincipalName(SecurityTest.ALLOWED);
+            return CoherenceSecurityUtils.checkFirstPrincipalName(SecurityTest.ALLOWED);
         }
     }
 }
