@@ -21,7 +21,7 @@ public class DemoInvokeSecurityProvider implements InvocationSecurityProvider {
     }
 
     @Override public boolean checkInvocation(Subject subject, Invocable invocable) {
-        return DemoServer.checkPermission(CoherenceSecurityUtils.getFirstPrincipalName(subject),invocable.getClass().getName(),false,true);
+        return DemoSecurityProvider.checkPermission(CoherenceSecurityUtils.getFirstPrincipalName(subject),invocable.getClass().getName(),false,true);
     }
 
 }

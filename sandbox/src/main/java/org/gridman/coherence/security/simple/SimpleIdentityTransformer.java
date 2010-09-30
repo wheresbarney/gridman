@@ -6,6 +6,9 @@ import javax.security.auth.Subject;
 
 import org.apache.log4j.Logger;
 
+/*
+ * Simple Identity Transformer, just passes the first principal name through
+ */
 public class SimpleIdentityTransformer implements IdentityTransformer {
     private static final Logger logger = Logger.getLogger(SimpleIdentityTransformer.class);
 

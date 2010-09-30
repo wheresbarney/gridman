@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 
+ * A simple Security Proxy for the Invocation Service. 
  */
 public class SimpleInvokeServiceProxy extends WrapperInvocationService {
     private static final Logger logger = Logger.getLogger(SimpleInvokeServiceProxy.class);
@@ -27,7 +27,9 @@ public class SimpleInvokeServiceProxy extends WrapperInvocationService {
         this(invocationService, (InvocationSecurityProvider)Class.forName(invocationSecurityProviderClass).newInstance());
     }
 
-
+    /**
+     * This is not supported in the current version of Coherence over Extends, but might be in the future...
+     */
     @Override public void execute(Invocable invocable, Set set, InvocationObserver invocationObserver) {
         logger.debug("execute invocable : " + invocable + " set : " + set + " invocationObserver : " + invocationObserver);
         checkInternal(invocable);
