@@ -82,10 +82,10 @@ public class DemoSecurityGUI implements ActionListener {
         panel.add(button);
 
         frame = new JFrame(isAdminGui ? "Admin GUI" : "Security GUI");
+        frame.setIconImage(new ImageIcon("src/main/resources/gridman-small.jpg").getImage());
         frame.getContentPane().add(panel);
         frame.pack();
         frame.setVisible(true);
-
     }
 
     @Override public void actionPerformed(ActionEvent e) {
