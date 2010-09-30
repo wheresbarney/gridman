@@ -13,6 +13,7 @@ import org.gridman.classloader.ClassloaderLifecycle;
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
 public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
+
     private static final Logger logger = Logger.getLogger(CoherenceClassloaderLifecycle.class);
 
     private ClassLoader classLoader;
@@ -20,7 +21,7 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
 
     public CoherenceClassloaderLifecycle() {} // default constructor required
 
-    @Override public void start() {
+    public void start() {
         logger.info("Starting Server");
         classLoader = Thread.currentThread().getContextClassLoader();
         DefaultCacheServer.startDaemon();
@@ -31,7 +32,7 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
         logger.info("Started Server");
     }
 
-    @Override public boolean isStarted() {
+    public boolean isStarted() {
         boolean running;
         ClassLoader saved = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
@@ -40,7 +41,7 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
         return running;
     }
 
-    @Override public void shutdown() {
+    public void shutdown() {
         logger.info("Shutting down Server");
         ClassLoader saved = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
@@ -48,8 +49,7 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
         while (cluster.isRunning()) {
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException e) {
-                // ignored
+            } catch (InterruptedException ignored) {
             }
             logger.debug("Waiting for cluster to stop " + cluster);
         }

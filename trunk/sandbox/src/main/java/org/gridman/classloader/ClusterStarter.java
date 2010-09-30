@@ -4,7 +4,6 @@ import com.tangosol.util.Base;
 import com.tangosol.util.LongArray;
 import com.tangosol.util.SimpleLongArray;
 import org.apache.log4j.Logger;
-import org.gridman.classloader.coherence.CoherenceClassloaderLifecycle;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,7 +26,7 @@ public class ClusterStarter extends Base {
 
     private Map<String, ClusterInfo> clusters;
     private Map<String, LongArray> services;
-    
+
     public static void main(String[] args) {
         new ClusterStarter().ensureCluster(args[0]);
     }
@@ -122,7 +121,7 @@ public class ClusterStarter extends Base {
         LongArray serviceList = getServiceList(identifier, groupId);
         if (!serviceList.exists(instanceId)) {
             ClusterInfo clusterInfo = getClusterInfo(identifier, properties);
-            Class<? extends CoherenceClassloaderLifecycle> serverClass = clusterInfo.getServerClass(groupId);
+            Class<? extends ClassloaderLifecycle> serverClass = clusterInfo.getServerClass(groupId);
             Properties localProperties = clusterInfo.getLocalProperties(groupId);
 
             ClassloaderRunner runner;
