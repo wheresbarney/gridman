@@ -73,6 +73,11 @@ public class ClusterNodeProperties {
 		return this;
 	}
 
+	public ClusterNodeProperties withClusterAddress(String address) {
+		properties.setProperty("tangosol.coherence.clusteraddress", address);
+		return this;
+	}
+
 	public ClusterNodeProperties withClusterPort(int portNumber) {
 		properties.setProperty("tangosol.coherence.clusterport", Integer.toString(portNumber));
 		return this;
