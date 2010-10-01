@@ -1,5 +1,3 @@
-#summary Gridman Coherence Homepage
-
 =Welcome to Gridman=
 
 == What's here? ==
@@ -26,4 +24,4 @@ Founder members are :
   * Keith Loose - keith@looseflow.com
 
 == How do I join?  ==
-We are very happy for everyone to get involved.  Just drop us an email with your ideas!
+We are very happy for anyone to get involved.  Just drop us an email with your ideas!
