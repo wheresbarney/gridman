@@ -3,7 +3,7 @@
 
 =Welcome to Gridman=
 
-== Whats here? ==
+== What's here? ==
   * Coherence Security Code 
      * (Kerberos / Active Directory integration 
      * Cluster lock ( a simple lock to the cluster with a System Property )
@@ -15,8 +15,16 @@
   * Classloader Cluster - startup a cluster in a single process using ChildFirstClassloaders for isolation
   * A simple driver for Coherence ( for running performance tests )
 
+== What's coming soon ==
+  * BinaryDatabaseCacheStore - a CacheStore which writes the binary directly to the database
+  * Index code ( useful classes for checking indexes ) 
+  * SerializerChecker - to check you are not deserializing certain objects on the cluster
+
 == Founder members ==
 Founder members are :
   * Andrew Wilson - andrew.wilson@orangephoenix.com
   * Jonathan Knight - jk@thegridman.com
   * Keith Loose - keith@looseflow.com
+
+== How do I join?  ==
+We are very happy for everyone to get involved.  Just drop us an email with your ideas!
