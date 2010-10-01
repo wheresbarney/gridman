@@ -9,9 +9,9 @@
      * Coherence Security Utils
      * Tests for Security functionality
   * Kerberos GSS JAAS code to support the above (could be useful to others)
-  * Classloader Cluster - startup a cluster in a single process using ChildFirstClassloaders for isolation
+  * Classloader Cluster - startup a cluster in a single process using ChildFirstClassloaders for isolation [http://code.google.com/p/gridman/source/browse/#svn/trunk/sandbox/src/main/java/org/gridman/classloader here]
   * A simple driver for Coherence ( for running performance tests )
-  * Andrew's presentation to the London Oracle Coherence SIG : [http://code.google.com/p/gridman/source/browse/trunk/sandbox/src/test/resources/SIGSecurity.ppt here]
+  * Andrew's presentation to the London Oracle Coherence SIG : [http://gridman.googlecode.com/svn/trunk/sandbox/src/test/resources/SIGSecurity.ppt here]
 
 == What's coming soon ==
   * BinaryDatabaseCacheStore - a CacheStore which writes the binary directly to the database
