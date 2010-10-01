@@ -1,5 +1,4 @@
 #summary Gridman Coherence Homepage
-#sidebar TableOfContents
 
 =Welcome to Gridman=
 
