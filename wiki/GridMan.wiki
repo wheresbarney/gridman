@@ -1,0 +1,21 @@
+#summary Gridman Coherence Homepage
+
+=Welcome to Gridman=
+
+== Whats here? ==
+  * Coherence Security Code 
+     * (Kerberos / Active Directory integration 
+     * Cluster lock ( a simple lock to the cluster with a System Property )
+     * Read / Write access to Caches and Invocation Services
+     * A demo of the functionality
+     * Coherence Security Utils
+     * Tests for Security functionality
+  * Kerberos GSS JAAS code to support the above (could be useful to others)
+  * Classloader Cluster - startup a cluster in a single process using ChildFirstClassloaders for isolation
+  * A simple driver for Coherence ( for running performance tests )
+
+== Founder members ==
+Founder members are :
+  * Andrew Wilson - andrew.wilson@orangephoenix.com
+  * Jonathan Knight - jk@thegridman.com
+  * Keith Loose - keith@looseflow.com
