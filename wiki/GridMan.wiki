@@ -4,7 +4,7 @@
 
 == What's here? ==
   * Coherence Security Code 
-     * (Kerberos / Active Directory integration 
+     * ( Kerberos / Active Directory integration ) 
      * Cluster lock ( a simple lock to the cluster with a System Property )
      * Read / Write access to Caches and Invocation Services
      * A demo of the functionality
