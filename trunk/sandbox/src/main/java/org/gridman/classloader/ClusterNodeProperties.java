@@ -44,7 +44,7 @@ public class ClusterNodeProperties {
 
 	private void useDefaultMulticastProperties() {
 		withClusterPort(8016);
-		withTimeToLive(0);
+		withMulticastPacketTimeToLive(0);
 	}
 
 	public ClusterNodeProperties withPofEnabled(boolean enabled) {
@@ -54,11 +54,6 @@ public class ClusterNodeProperties {
 
 	public ClusterNodeProperties withCoherenceOverride(String xmlConfigFile) {
 		properties.setProperty("tangosol.coherence.override", xmlConfigFile);
-		return this;
-	}
-
-	public ClusterNodeProperties withClusterIdentifier(String identifier) {
-		properties.setProperty("tangosol.coherence.cluster", identifier);
 		return this;
 	}
 
@@ -73,6 +68,26 @@ public class ClusterNodeProperties {
 		return this;
 	}
 
+	public ClusterNodeProperties withUnicastAddress(String unicastIpAddress) {
+		properties.setProperty("tangosol.coherence.localhost", unicastIpAddress);
+		return this;
+	}
+
+	public ClusterNodeProperties withUnicastPort(int portNumber) {
+		properties.setProperty("tangosol.coherence.localport", Integer.toString(portNumber));
+		return this;
+	}
+
+	public ClusterNodeProperties withUnicastPortAutoAdjust(boolean autoAdjust) {
+		properties.setProperty("tangosol.coherence.localport.adjust", Boolean.toString(autoAdjust));
+		return this;
+	}
+
+	public ClusterNodeProperties withClusterIdentifier(String identifier) {
+		properties.setProperty("tangosol.coherence.cluster", identifier);
+		return this;
+	}
+
 	public ClusterNodeProperties withClusterAddress(String address) {
 		properties.setProperty("tangosol.coherence.clusteraddress", address);
 		return this;
@@ -83,7 +98,7 @@ public class ClusterNodeProperties {
 		return this;
 	}
 
-	public ClusterNodeProperties withTimeToLive(int timeToLive) {
+	public ClusterNodeProperties withMulticastPacketTimeToLive(int timeToLive) {
 		properties.setProperty("tangosol.coherence.ttl", Integer.toString(timeToLive));
 		return this;
 	}
