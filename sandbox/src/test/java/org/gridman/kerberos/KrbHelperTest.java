@@ -4,18 +4,24 @@ import com.sun.security.auth.module.Krb5LoginModule;
 import org.apache.directory.server.core.integ.Level;
 import org.apache.directory.server.core.integ.annotations.ApplyLdifFiles;
 import org.apache.directory.server.core.integ.annotations.CleanupLevel;
+import org.gridman.kerberos.junit.DirectoryPartition;
 import org.gridman.kerberos.junit.JAAS;
 import org.gridman.kerberos.junit.KdcType;
 import org.gridman.kerberos.junit.KiRunner;
 import org.gridman.kerberos.junit.Krb5;
 import org.gridman.kerberos.junit.apacheds.ApacheDsServerContext;
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.security.auth.Subject;
-import javax.security.auth.login.LoginContext;
 import java.security.Principal;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.util.HashSet;
 
 import static org.junit.Assert.*;
@@ -24,9 +30,11 @@ import static org.junit.Assert.*;
  * @author Jonathan Knight
  */
 @RunWith(KiRunner.class)
+
 @KdcType(type = ApacheDsServerContext.class)
 @CleanupLevel(Level.CLASS)
-@ApplyLdifFiles({
+@DirectoryPartition(suffixes = "dc=example,dc=com")
+@ApplyLdifFiles(value = {
         "/coherence/security/kerberos/coherence-security.ldif"
 })
 @Krb5( credentials = {
@@ -45,32 +53,22 @@ import static org.junit.Assert.*;
      , loginModuleClass = Krb5LoginModule.class
      , settings = {
         "required",
-        "useKeyTab=true",
-        "principal=\"knightj\"",
-        "keyTab=\"jk-test.keytab\"",
         "debug=true",
+        "doNotPrompt=false",
         "storeKey=true",
-        "realm=\"EXAMPLE.COM\"",
-        "doNotPrompt=true",
-        "useTicketCache=true",
-        "renewTGT=true",
-        "serviceprincipalname=\"cacheserver@EXAMPLE.COM\""
+        "realm=\"EXAMPLE.COM\""
      }
 )
 public class KrbHelperTest {
 
-    /**
-     * Test we can log on to the Apache DS server.
-     *
-     * @throws Exception if there is a problem
-     */
-    @Test
-    public void testLogon() throws Exception {
-        LoginContext lc = new LoginContext("Coherence");
-        lc.login();
-        Subject subject = lc.getSubject();
+    private String servicePrincipalName = "cacheserver@EXAMPLE.COM";
+    private Subject subjectKnightJ;
+    private Subject subjectCacheServer;
 
-        assertNotNull(subject);
+    @Before
+    public void initialiseSubjects() throws Exception {
+        subjectKnightJ = KrbHelper.logon("Coherence", "knightj@EXAMPLE.COM", "secret");
+        subjectCacheServer = KrbHelper.logon("Coherence", "cacheserver@EXAMPLE.COM", "secret");
     }
 
     @Test
@@ -132,5 +130,92 @@ public class KrbHelperTest {
         });
 
         assertSame(result, subject);
+    }
+
+    @Test
+    public void shouldDoAsSpecifiedSubject() {
+        Subject subject = new Subject(true, new HashSet<Principal>(), new HashSet(), new HashSet());
+
+        Subject result = KrbHelper.doAs(subject, new PrivilegedExceptionAction<Subject>() {
+            @Override
+            public Subject run() {
+                return KrbHelper.getCurrentSubject();
+            }
+        });
+
+        assertSame(result, subject);
+    }
+
+    @Test
+    public void shouldDoAsEnclosingSubject() {
+        Subject subject = new Subject(true, new HashSet<Principal>(), new HashSet(), new HashSet());
+
+        Subject result = Subject.doAs(subject, new PrivilegedAction<Subject>() {
+            @Override
+            public Subject run() {
+                return KrbHelper.doAs(new PrivilegedExceptionAction<Subject>() {
+                    @Override
+                    public Subject run() {
+                        return KrbHelper.getCurrentSubject();
+                    }
+                });
+            }
+        });
+
+        assertSame(result, subject);
+    }
+
+    @Test
+    public void shouldObtainServiceTicket() throws Exception {
+        final byte[] ticket = KrbHelper.getServiceTicket(subjectKnightJ, servicePrincipalName);
+
+        String userName = Subject.doAs(subjectCacheServer, new PrivilegedExceptionAction<String>() {
+            @Override
+            public String run() throws Exception {
+                GSSManager manager = GSSManager.getInstance();
+                GSSContext context = manager.createContext((GSSCredential) null);
+                context.acceptSecContext(ticket, 0, ticket.length);
+                return context.getSrcName().toString();
+            }
+        });
+
+        assertEquals("knightj@EXAMPLE.COM", userName);
+    }
+
+    @Test
+    public void shouldValidateServiceTicket() throws Exception {
+        byte[] serviceTicket = KrbHelper.getServiceTicket(subjectKnightJ, servicePrincipalName);
+        KrbTicket krbTicket = KrbHelper.validate(serviceTicket, false, subjectCacheServer);
+
+        assertEquals("knightj", krbTicket.getName());
+    }
+
+    @Test
+    public void shouldDetectReplayWhenValidatingDuplicateTicket() throws Exception {
+        byte[] serviceTicket = KrbHelper.getServiceTicket(subjectKnightJ, servicePrincipalName);
+        KrbHelper.validate(serviceTicket, false, subjectCacheServer);
+
+        Throwable exception = null;
+
+        try {
+            KrbHelper.validate(serviceTicket, false, subjectCacheServer);
+        } catch (SecurityException e) {
+            exception = e;
+        }
+        
+        if (exception != null && exception.getCause() instanceof GSSException) {
+            GSSException gssException = (GSSException) exception.getCause();
+            assertEquals("Request is a replay (34)", gssException.getMinorString());
+        } else {
+            fail("Expected SecurityException wrapping GSSException Replay Error");
+        }
+
+    }
+
+    @Test
+    public void shouldIgnoreReplayWhenValidatingDuplicateTicket() throws Exception {
+        byte[] serviceTicket = KrbHelper.getServiceTicket(subjectKnightJ, servicePrincipalName);
+        KrbHelper.validate(serviceTicket, false, subjectCacheServer);
+        KrbHelper.validate(serviceTicket, true, subjectCacheServer);
     }
 }

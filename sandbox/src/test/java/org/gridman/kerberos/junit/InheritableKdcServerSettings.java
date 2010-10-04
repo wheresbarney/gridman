@@ -2,7 +2,11 @@ package org.gridman.kerberos.junit;
 
 import org.apache.directory.server.core.integ.Level;
 import org.apache.directory.server.core.integ.SetupMode;
-import org.apache.directory.server.core.integ.annotations.*;
+import org.apache.directory.server.core.integ.annotations.ApplyLdifFiles;
+import org.apache.directory.server.core.integ.annotations.ApplyLdifs;
+import org.apache.directory.server.core.integ.annotations.CleanupLevel;
+import org.apache.directory.server.core.integ.annotations.Factory;
+import org.apache.directory.server.core.integ.annotations.Mode;
 import org.gridman.kerberos.junit.apacheds.ApacheDsServerContext;
 import org.junit.runner.Description;
 
@@ -20,6 +24,9 @@ public class InheritableKdcServerSettings {
      * the default setup mode to use if inheritance leads to null value
      */
     public static final SetupMode DEFAULT_MODE = SetupMode.ROLLBACK;
+
+    /** The default suffix to use for the LDAP partition if not specified in the LoadLdifFiles and LoadLdifs annotations */
+    private String[] DEFAULT_PARTITON_SUFFIX = {"dc=gridman,dc=com"};
 
     /**
      * the default factory to use if inheritance leads to a null value
@@ -266,6 +273,17 @@ public class InheritableKdcServerSettings {
         return args;
     }
 
+    public String[] getDirectoryPartitionSuffix() {
+        String[] suffix = DEFAULT_PARTITON_SUFFIX;
+
+        if (parent != null) {
+            suffix = parent.getDirectoryPartitionSuffix();
+        }
+
+        DirectoryPartition annotation = description.getAnnotation(DirectoryPartition.class);
+        return annotation != null ? annotation.suffixes() : suffix;
+    }
+
     /**
      * Get a list of entries from a LDIF declared as an annotation
      *
@@ -289,7 +307,6 @@ public class InheritableKdcServerSettings {
 
         return ldifs;
     }
-
 
     /**
      * Get a list of files containing entries described using the LDIF format.
