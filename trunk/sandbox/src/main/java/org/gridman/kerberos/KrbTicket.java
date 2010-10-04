@@ -1,7 +1,6 @@
 package org.gridman.kerberos;
 
 import sun.security.krb5.EncryptionKey;
-import sun.security.krb5.KrbException;
 import sun.security.krb5.internal.EncTicketPart;
 import sun.security.krb5.internal.Ticket;
 import sun.security.krb5.internal.crypto.KeyUsage;
@@ -10,19 +9,23 @@ import sun.security.util.DerValue;
 
 import javax.security.auth.Subject;
 import javax.security.auth.kerberos.KerberosKey;
-import java.io.IOException;
 import java.security.Principal;
 import java.util.Set;
 
 /**
+ * This class represents a decrypted Kerberos ticket.
+ * </p>
+ * Instances of the class are created by calling the static newInstance() method passing
+ * in the encrypted ticket data and the Subject to use to decrypt the ticket.
+ * </p>
+ *
  * @author Jonathan Knight
  */
 public class KrbTicket implements Principal {
 
     private byte[] serviceTicket;
-    private boolean decoded = false;
     private EncryptionKey sessionKey;
-    private String cname;
+    private String clientPrincipalName;
 
     /**
      * Create a Kerberos Ticket. This takes the service ticket that is
@@ -32,6 +35,8 @@ public class KrbTicket implements Principal {
      * @param serviceTicket the AP-REQ service ticket that is to be decode
      * @param subject       the JAAS subject containing the secret key for the server
      *                      principal
+     * @return a new instance of a KrbTicket wrapping the given service ticket.
+     * @throws SecurityException if there is an error decrypting the ticket.
      */
     public static KrbTicket newInstance(byte[] serviceTicket, Subject subject) {
         KrbTicket ticket = new KrbTicket(serviceTicket);
@@ -50,6 +55,11 @@ public class KrbTicket implements Principal {
         this.serviceTicket = serviceTicket;
     }
 
+    /**
+     * Returns the name of this principal.
+     *
+     * @return the name of this principal.
+     */
     @Override
     public String getName() {
         return getClientPrincipalName();
@@ -60,8 +70,8 @@ public class KrbTicket implements Principal {
      *
      * @return the client principal name
      */
-    public String getClientPrincipalName() throws SecurityException {
-        return cname;
+    public String getClientPrincipalName() {
+        return clientPrincipalName;
     }
 
     /**
@@ -69,11 +79,19 @@ public class KrbTicket implements Principal {
      *
      * @return the session key
      */
-    public EncryptionKey getSessionKey() throws Exception {
+    EncryptionKey getSessionKey() {
         return sessionKey;
     }
 
-    private void parseServiceTicket(Subject subject) throws SecurityException {
+    /**
+     * Parse this instances service ticket using the specified {@link javax.security.auth.Subject}
+     * to decrypt the ticket data.
+     * </p>
+     *
+     * @param subject - the Subject to use to decrypt the ticket
+     * @throws SecurityException - if there is an error
+     */
+    private void parseServiceTicket(Subject subject) {
         try {
             DerInputStream ticketStream = new DerInputStream(serviceTicket);
             DerValue[] values = ticketStream.getSet(serviceTicket.length, true);
@@ -96,7 +114,6 @@ public class KrbTicket implements Principal {
     }
 
     // Parse the GSS AP-REQ token.
-
     private void parseApReq(Subject subject, DerInputStream reqStream, int len) throws Exception {
         //byte apOptions = 0;
         DerValue ticket = null;
@@ -151,43 +168,62 @@ public class KrbTicket implements Principal {
     //        endtime[7]           KerberosTime,
     //        renew-till[8]        KerberosTime OPTIONAL,
     //        caddr[9]             HostAddresses OPTIONAL,
-    //        authorization-data[10]   AuthorizationData OPTIONAL
+    //        authorization-data[10]   AuthorizationData OPTIONAL - using Active Directory
+    //                                 this will be where the Groups are stored
     //  }
 
-    private void decryptTicket(Ticket ticket, Subject svrSub) throws SecurityException {
+    private void decryptTicket(Ticket ticket, Subject svrSub) {
         try {
             // Get the private key that matches the encryption type of the ticket.
             EncryptionKey key = getPrivateKey(svrSub, ticket.encPart.getEType());
+
             // Decrypt the service ticket and get the cleartext bytes.
             byte[] ticketBytes = ticket.encPart.decrypt(key, KeyUsage.KU_TICKET);
             if (ticketBytes.length <= 0) {
                 throw new SecurityException("Decrypted Key is empty.");
             }
+
             // EncTicketPart provides access to the decrypted attributes of the service
             // ticket.
             byte[] temp = ticket.encPart.reset(ticketBytes, true);
             EncTicketPart encPart = new EncTicketPart(temp);
             this.sessionKey = encPart.key;
-            this.cname = encPart.cname.toString();
-        } catch (KrbException e) {
-            throw new SecurityException("Error decrypting token", e);
-        } catch (IOException e) {
-            throw new SecurityException("Error decrypting token", e);
+            this.clientPrincipalName = encPart.cname.toString();
+        } catch (Exception e) {
+            throw KrbHelper.ensureSecurityException(e, "Error decrypting token");
         }
     }
 
-    // Get the private server key.
-
-    private EncryptionKey getPrivateKey(Subject sub, int keyType) {
-        KerberosKey key = getKrbKey(sub, keyType);
+    /**
+     * Obtain the private server key of the specified type from
+     * the given {@link javax.security.auth.Subject}.
+     * </p>
+     * The key type can be specified using constants in the
+     * {@link sun.security.krb5.internal.crypto.KeyUsage} class.
+     *
+     * @param subject - the {@link javax.security.auth.Subject} to obtain the private key from
+     * @param keyType - the type of the private key to obtain
+     * @return the required private key
+     */
+    EncryptionKey getPrivateKey(Subject subject, int keyType) {
+        KerberosKey key = getKrbKey(subject, keyType);
         return new EncryptionKey(key.getEncoded(), key.getKeyType(), keyType);
     }
 
-    // Get the Kerberos Key from the subject that matches the given key type.
-
-    private KerberosKey getKrbKey(Subject sub, int keyType) {
-        Set<Object> creds = sub.getPrivateCredentials(Object.class);
-        for (Object cred : creds) {
+    /**
+     * Obtain the Kerberos key of the specified type from
+     * the given {@link javax.security.auth.Subject}.
+     * </p>
+     * The key type can be specified using constants in the
+     * {@link sun.security.krb5.internal.crypto.KeyUsage} class.
+     *
+     * @param subject - the {@link javax.security.auth.Subject} to obtain the Kerberos key from
+     * @param keyType - the type of the private key to obtain
+     * @return the required private key
+     */
+    private KerberosKey getKrbKey(Subject subject, int keyType) {
+        Set<Object> credentials = subject.getPrivateCredentials(Object.class);
+        for (Object cred : credentials) {
             if (cred instanceof KerberosKey) {
                 KerberosKey key = (KerberosKey) cred;
                 if (key.getKeyType() == keyType) {

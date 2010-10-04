@@ -89,7 +89,8 @@ public abstract class AbstractApacheDsState extends AbstractKerberosState {
         List<String> ldifFiles = new ArrayList<String>();
 
         ServerPartitionFactory partitionFactory = settings.getPartitionFactory();
-        List<Partition> partitions = partitionFactory.getPartitions();
+        String[] suffixes = settings.getDirectoryPartitionSuffix();
+        List<Partition> partitions = partitionFactory.getPartitions(suffixes);
         getContext().setPartitions(partitions);
         for (Partition partition : partitions) {
             partition.init(service);
