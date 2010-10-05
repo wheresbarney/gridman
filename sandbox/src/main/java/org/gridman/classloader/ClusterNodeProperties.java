@@ -103,6 +103,11 @@ public class ClusterNodeProperties {
 		return this;
 	}
 
+	public ClusterNodeProperties withSiteName(String siteName) {
+		properties.setProperty("tangosol.coherence.site", siteName);
+		return this;
+	}
+
 	public ClusterNodeProperties withRemoteManagement(boolean enabled) {
 		properties.setProperty("com.sun.management.jmxremote", Boolean.toString(enabled));
 		properties.setProperty("tangosol.coherence.management.remote", Boolean.toString(enabled));
