@@ -4,3 +4,5 @@ The following articles are useful, but require you to create a logon :
   * Split Brain [https://support.oracle.com/CSP/main/article?cmd=show&type=NOT&id=1069132.1 here]
   * Recovery Protocol [https://support.oracle.com/CSP/main/article?cmd=show&type=NOT&id=1069429.1 here]
   * Key Association [https://support.oracle.com/CSP/main/article?cmd=show&type=NOT&doctype=HOWTO&id=1052174.1 here]
+  * JMX Console - very basic [https://support.oracle.com/CSP/main/article?cmd=show&type=NOT&doctype=HOWTO&id=826972.1 here]
+  * Supporting log rotation with log4j [https://support.oracle.com/CSP/main/article?cmd=show&type=NOT&doctype=HOWTO&id=1119873.1 here]
