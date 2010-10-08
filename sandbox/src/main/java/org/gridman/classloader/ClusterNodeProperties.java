@@ -170,6 +170,11 @@ public class ClusterNodeProperties {
 		return this;
 	}
 
+	public ClusterNodeProperties withProperty(String key, String value) {
+		properties.setProperty(key, value);
+		return this;
+	}
+
 	public Properties asProperties() {
 		return properties;
 	}
