@@ -1,4 +1,5 @@
   * GridMan
     * Coherence
       * CoherenceSecurity
-      * CoherenceSupportArticles 
+      * CoherenceSupportArticles
+      * CoherenceWANReplication 
