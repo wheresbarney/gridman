@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  *
- *  @author Jonathan
+ *  @author Jonathan Knight
  */
 public class ClusterStarterTest {
 
@@ -32,7 +32,7 @@ public class ClusterStarterTest {
 
         // Start an isolated Cluster node with the above properties
         // We can then use this to check member counts etc in our tests
-        cluster = PropertyIsolation.runIsolated(localProperties, new PropertyIsolation.Action<Cluster>() {
+        cluster = PropertyIsolation.runIsolated(localProperties, new IsolatedAction<Cluster>() {
             public Cluster run() {
                 Cluster cluster = CacheFactory.ensureCluster();
                 while (!cluster.isRunning()) {
@@ -109,6 +109,8 @@ public class ClusterStarterTest {
         String clusterFile = "/coherence/classloader/cluster.properties";
         Properties properties = SystemPropertyLoader.getSystemProperties(clusterFile);
 
+        assertEquals(0, getClusterSize());
+        
         clusterStarter.ensureAllServersInClusterGroup(clusterFile, properties, 0);
         int membersStarted = getClusterSize();
 
@@ -164,7 +166,7 @@ public class ClusterStarterTest {
         int finalSize = getClusterSize();
 
 		assertEquals("Expected to start 3 members", 3, membersStarted);
-        assertEquals("Expected to start 3 members after shutdown of node", 2, afterNodeShutdownSize);
+        assertEquals("Expected 2 members after shutdown of node", 2, afterNodeShutdownSize);
         assertEquals("Expected to shutdown all members", 0, finalSize);
     }
 }

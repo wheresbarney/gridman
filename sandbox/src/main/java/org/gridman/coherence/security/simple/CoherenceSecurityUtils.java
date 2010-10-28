@@ -4,11 +4,13 @@ import com.tangosol.io.pof.PofPrincipal;
 
 import javax.security.auth.Subject;
 import javax.security.auth.SubjectDomainCombiner;
-import java.security.AccessController;
 import java.security.AccessControlContext;
+import java.security.AccessController;
 import java.security.DomainCombiner;
-import java.util.HashSet;
+import java.security.Principal;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Useful static functions that sit here for now.
@@ -41,6 +43,12 @@ public class CoherenceSecurityUtils {
     public static String getFirstPrincipalName(Subject subject) {
         if(subject == null) { return null; }
         return subject.getPrincipals().iterator().next().getName();
+    }
+
+    public static <T extends Principal> T getFirstPrincipal(Subject subject, Class<T> type) {
+        if(subject == null) { return null; }
+        Set<T> principals = subject.getPrincipals(type);
+        return (!principals.isEmpty()) ? principals.iterator().next() : null;
     }
 
     public static String getCurrentFirstPrincipalName() {

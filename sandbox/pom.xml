@@ -8,7 +8,7 @@
   <description>sandbox</description>
 
   <properties>
-    <coherence.version>3.6.0.0b17229</coherence.version>
+    <coherence.version>3.6.0.1</coherence.version>
     <!--<coherence.version>3.5.3b465</coherence.version>-->
     <apacheds.version>1.5.5</apacheds.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -60,7 +60,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <skip>false</skip>
-          <argLine>-Xms256m -Xmx256m -XX:MaxPermSize=128m</argLine>
+          <argLine>-Xms256m -Xmx1024m -XX:MaxPermSize=512m</argLine>
           <disableXmlReport>false</disableXmlReport>
           <forkMode>always</forkMode>
         </configuration>
@@ -133,6 +133,18 @@
       </exclusions>
     </dependency>
 
+    <!-- Testing and Mocking -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.8.2</version>
+    </dependency>
+    <dependency>
+      <groupId>hamcrest</groupId>
+      <artifactId>hamcrest-all</artifactId>
+      <version>1.2</version>
+    </dependency>
+    
     <!-- Embedded ApacheDS Testing dependencies -->
     <dependency>
       <groupId>org.apache.directory.server</groupId>

@@ -1,7 +1,6 @@
 package org.gridman.coherence.security.simple;
 
-import com.tangosol.net.*;
-
+import com.tangosol.net.Invocable;
 import org.apache.log4j.Logger;
 
 import javax.security.auth.Subject;

@@ -1,10 +1,9 @@
 package org.gridman.coherence.security.simple;
 
 import com.tangosol.net.security.IdentityTransformer;
+import org.apache.log4j.Logger;
 
 import javax.security.auth.Subject;
-
-import org.apache.log4j.Logger;
 
 /*
  * Simple Identity Transformer, just passes the first principal name through

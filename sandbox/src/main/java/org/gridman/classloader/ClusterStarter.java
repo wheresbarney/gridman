@@ -27,6 +27,8 @@ public class ClusterStarter extends Base {
     private Map<String, ClusterInfo> clusters;
     private Map<String, LongArray> services;
 
+    private Properties extraProperties;
+
     public static void main(String[] args) {
         new ClusterStarter().ensureCluster(args[0]);
     }
@@ -34,6 +36,12 @@ public class ClusterStarter extends Base {
     private ClusterStarter() {
         clusters = new HashMap<String, ClusterInfo>();
         services = new HashMap<String, LongArray>();
+        extraProperties = new Properties();
+    }
+
+    public ClusterStarter setProperty(String key, String value) {
+        extraProperties.setProperty(key, value);
+        return this;
     }
 
     /**
@@ -123,7 +131,8 @@ public class ClusterStarter extends Base {
             ClusterInfo clusterInfo = getClusterInfo(identifier, properties);
             Class<? extends ClassloaderLifecycle> serverClass = clusterInfo.getServerClass(groupId);
             Properties localProperties = clusterInfo.getLocalProperties(groupId);
-
+            localProperties.putAll(extraProperties);
+            
             ClassloaderRunner runner;
             try {
                 runner = new ClassloaderRunner(serverClass.getCanonicalName(), localProperties);
@@ -287,6 +296,9 @@ public class ClusterStarter extends Base {
             try {
                 logger.debug("Shutting down " + service);
                 service.shutdown();
+                while(service.isStarted()) {
+                    Thread.sleep(100);
+                }
                 return true;
             } catch (Exception e) {
                 throw Base.ensureRuntimeException(e, "Error shutting down service " + service);

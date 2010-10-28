@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE pof-config SYSTEM "pof-config.dtd">
+<pof-config>
+  <user-type-list>
+
+    <include>coherence-pof-config.xml</include>
+
+    <user-type>
+      <type-id>1001</type-id>
+      <class-name>org.gridman.security.kerberos.activedirectory.PacSid</class-name>
+      <serializer>
+        <class-name>org.gridman.coherence.security.kerberos.PacSidPofSerializer</class-name>
+      </serializer>
+    </user-type>
+
+  </user-type-list>
+</pof-config>

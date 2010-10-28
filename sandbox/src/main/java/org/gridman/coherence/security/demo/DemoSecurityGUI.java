@@ -64,7 +64,7 @@ public class DemoSecurityGUI implements ActionListener {
             roleField = new JTextField(20);
             panel.add(roleField);
 
-            // Action (Add, Remove, Check)
+            // IsolatedAction (Add, Remove, Check)
             panel.add(new JLabel("Action"));
             actionBox = new JComboBox(ACTIONS);
             panel.add(actionBox);
