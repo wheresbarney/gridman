@@ -1,12 +1,11 @@
 package org.gridman.coherence.security.simple;
 
-import com.tangosol.util.Filter;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
+import com.tangosol.util.Filter;
+import org.apache.log4j.Logger;
 
 import java.net.InetAddress;
-
-import org.apache.log4j.Logger;
 
 /**
  * This authorizes cluster membership using an Authorized Host Cache.

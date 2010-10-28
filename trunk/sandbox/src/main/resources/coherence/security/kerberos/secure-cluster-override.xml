@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!-- Security overrides file -->
+<!DOCTYPE coherence SYSTEM "coherence.dtd">
+<coherence>
+  <cluster-config>
+    <multicast-listener>
+      <join-timeout-milliseconds system-property="coherence.incubator.joinTimeout">1000</join-timeout-milliseconds>
+    </multicast-listener>
+  </cluster-config>
+
+  <security-config>
+    <enabled system-property="tangosol.coherence.security">true</enabled>
+    <login-module-name>Coherence</login-module-name>
+    <access-controller>
+      <class-name>org.gridman.coherence.security.cluster.AllowAllAccessController</class-name>
+      <init-params>
+        <init-param id="1">
+          <param-type>java.lang.String</param-type>
+          <param-value system-property="coherence.security.keystore">/coherence/keystore.jks</param-value>
+        </init-param>
+        <init-param id="2">
+          <param-type>java.lang.String</param-type>
+          <param-value system-property="coherence.security.keystore.username">cacheserver</param-value>
+        </init-param>
+        <init-param id="3">
+          <param-type>java.lang.String</param-type>
+          <param-value system-property="coherence.security.keystore.password">password</param-value>
+        </init-param>
+      </init-params>
+    </access-controller>
+    <callback-handler>
+      <class-name/>
+    </callback-handler>
+    <identity-asserter>
+      <class-name system-property="org.gridman.coherence.security.identityAsserter">
+        org.gridman.coherence.security.kerberos.KrbIdentityAsserter
+      </class-name>
+    </identity-asserter>
+    <identity-transformer>
+      <class-name system-property="org.gridman.coherence.security.identityTransformer">
+        org.gridman.coherence.security.kerberos.KrbIdentityTransformer
+      </class-name>
+      <init-params>
+        <init-param>
+          <param-type>java.lang.String</param-type>
+          <param-value>coherenceserver/KNIGHT.COM</param-value>
+        </init-param>
+      </init-params>
+    </identity-transformer>
+    <subject-scope>true</subject-scope>
+  </security-config>
+
+</coherence>

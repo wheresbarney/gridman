@@ -1,10 +1,10 @@
 package org.gridman.coherence.security.simple;
 
-import junit.framework.TestCase;
-import org.gridman.classloader.*;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.InvocationService;
+import junit.framework.TestCase;
 import org.apache.log4j.Logger;
+import org.gridman.classloader.ClusterStarter;
 import org.gridman.coherence.util.NullInvokable;
 
 import javax.security.auth.Subject;

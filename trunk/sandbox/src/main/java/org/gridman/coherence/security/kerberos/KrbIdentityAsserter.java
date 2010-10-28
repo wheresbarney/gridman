@@ -1,8 +1,9 @@
 package org.gridman.coherence.security.kerberos;
 
 import com.tangosol.net.security.IdentityAsserter;
-import org.gridman.kerberos.KrbHelper;
-import org.gridman.kerberos.KrbTicket;
+import org.gridman.security.JaasHelper;
+import org.gridman.security.kerberos.KrbHelper;
+import org.gridman.security.kerberos.KrbTicket;
 
 import javax.security.auth.Subject;
 import java.security.Principal;
@@ -12,7 +13,7 @@ import java.util.Set;
 /**
  * An implementation of {@link com.tangosol.net.security.IdentityAsserter} that will
  * assert that the Object passed to the assertIdentity method is a valid Kerberos
- * ticket in the form of a byte array.
+ * ticket in the form of a byte toByteArray.
  * </p>
  * This IdentityAsserter is configurable to indicate whether it should ignore
  * Kerberos replay errors, that is instances where identical tickets are sent
@@ -25,11 +26,15 @@ public class KrbIdentityAsserter implements IdentityAsserter {
     /** Flag to indicate whether this asserter ignores Kerberos replay errors */
     private boolean allowReplays = false;
 
+    /** The Subject that will be used to authenticate the token being asserted */
+    private Subject authenticatingSubject;
+
     /**
      * Default constructor that will create a KrbIdentityAsserter
      * that will not allow replay errors
      */
     public KrbIdentityAsserter() {
+        this.authenticatingSubject = JaasHelper.ensureCurrentSubject();
     }
 
     /**
@@ -65,7 +70,7 @@ public class KrbIdentityAsserter implements IdentityAsserter {
         
         Set<Principal> principals = new HashSet<Principal>();
 
-        KrbTicket principal = KrbHelper.validate((byte[])token, allowReplays);
+        KrbTicket principal = KrbHelper.validate(authenticatingSubject, (byte[])token, allowReplays);
         principals.add(principal);
         
         subject = new Subject(true, principals, new HashSet(), new HashSet());

@@ -27,7 +27,7 @@ public class ClusterNodeProperties {
 
 	private void useDefaultClusterProperties() {
 		withPofEnabled(true);
-		withCoherenceOverride("coherence/simple/simpleOverride.xml");
+		//withCoherenceOverride("coherence/simple/simpleOverride.xml");
 		withClusterIdentifier("anew-1");
 		withLogLevel(9);
 		withCoherenceExtendPort(8098);
@@ -174,6 +174,11 @@ public class ClusterNodeProperties {
 		properties.setProperty(key, value);
 		return this;
 	}
+
+    public ClusterNodeProperties withProperties(Properties properties) {
+        properties.putAll(properties);
+        return this;
+    }
 
 	public Properties asProperties() {
 		return properties;

@@ -1,8 +1,8 @@
 package org.gridman.coherence.security.simple;
 
 import com.tangosol.net.CacheService;
-import com.tangosol.net.WrapperCacheService;
 import com.tangosol.net.NamedCache;
+import com.tangosol.net.WrapperCacheService;
 import org.apache.log4j.Logger;
 
 /**
@@ -26,6 +26,6 @@ public class SimpleCacheServiceProxy extends WrapperCacheService {
 
     @Override public NamedCache ensureCache(String cache, ClassLoader classLoader) {
         logger.debug("ensureCache : " + cache + " : " + CoherenceSecurityUtils.getCurrentSubject());
-        return new PermissionedNamedCache(super.ensureCache(cache, classLoader), securityProvider);
+        return new SimplePermissionedNamedCache(super.ensureCache(cache, classLoader), securityProvider);
     }
 }

@@ -4,6 +4,7 @@ import com.tangosol.net.Invocable;
 import com.tangosol.net.InvocationObserver;
 import com.tangosol.net.InvocationService;
 import com.tangosol.net.WrapperInvocationService;
+import com.tangosol.run.xml.XmlElement;
 import org.apache.log4j.Logger;
 
 import java.util.Map;
@@ -24,6 +25,10 @@ public class SimpleInvokeServiceProxy extends WrapperInvocationService {
     }
 
     public SimpleInvokeServiceProxy(InvocationService invocationService, String invocationSecurityProviderClass) throws Exception {
+        this(invocationService, (InvocationSecurityProvider)Class.forName(invocationSecurityProviderClass).newInstance());
+    }
+
+    public SimpleInvokeServiceProxy(InvocationService invocationService, String invocationSecurityProviderClass, XmlElement xml) throws Exception {
         this(invocationService, (InvocationSecurityProvider)Class.forName(invocationSecurityProviderClass).newInstance());
     }
 

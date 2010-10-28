@@ -53,6 +53,19 @@
                             <param-type>java.lang.String</param-type>
                             <param-value system-property="org.gridman.coherence.security.invocationSecurityProvider">NOT_SET</param-value>
                         </init-param>
+                        <init-param>
+                          <param-type>com.tangosol.run.xml.XmlElement</param-type>
+                          <param-value>
+                            <invocation-security-provider>
+                              <class-name system-property="org.gridman.coherence.security.invocationSecurityProvider">NOT_SET</class-name>
+                              <permissions-checker>
+                                <instance>
+                                  <class-name>org.gridman.coherence.security.kerberos.activedirectory.ADGroupPermissionCheckerTest</class-name>
+                                </instance>
+                              </permissions-checker>
+                            </invocation-security-provider>
+                          </param-value>
+                        </init-param>
                       </init-params>
                     <enabled>true</enabled>
                 </invocation-service-proxy>

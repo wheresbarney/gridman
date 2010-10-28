@@ -2,9 +2,11 @@ package org.gridman.classloader.coherence;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
-import com.tangosol.net.DefaultCacheServer;
+import com.tangosol.util.Base;
 import org.apache.log4j.Logger;
 import org.gridman.classloader.ClassloaderLifecycle;
+
+import java.lang.reflect.Method;
 
 /**
  * Start up a Coherence Server for use in a Classloader.
@@ -19,12 +21,44 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
     private ClassLoader classLoader;
     private Cluster cluster;
 
+    private String classname = "com.tangosol.net.DefaultCacheServer";
+    private String startMethod = "startDaemon";
+    private String stopMethod = "shutdown";
+
     public CoherenceClassloaderLifecycle() {} // default constructor required
+
+    public CoherenceClassloaderLifecycle(String classname, String startMethod, String stopMethod) {
+        this.classname = classname;
+        this.startMethod = startMethod;
+        this.stopMethod = stopMethod;
+    }
+
+    private Method getStartMethod() {
+        try {
+            Class clazz = Class.forName(classname);
+            return clazz.getMethod(startMethod);
+        } catch (Exception e) {
+            throw Base.ensureRuntimeException(e);
+        }
+    }
+
+    private Method getStopMethod() {
+        try {
+            Class clazz = Class.forName(classname);
+            return clazz.getMethod(stopMethod);
+        } catch (Exception e) {
+            throw Base.ensureRuntimeException(e);
+        }
+    }
 
     public void start() {
         logger.info("Starting Server");
         classLoader = Thread.currentThread().getContextClassLoader();
-        DefaultCacheServer.startDaemon();
+        try {
+            getStartMethod().invoke(null);
+        } catch (Exception e) {
+            throw Base.ensureRuntimeException(e);
+        }
         cluster = CacheFactory.getCluster();
         while (cluster == null) {
             cluster = CacheFactory.getCluster();
@@ -45,7 +79,11 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
         logger.info("Shutting down Server");
         ClassLoader saved = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
-        DefaultCacheServer.shutdown();
+        try {
+            getStopMethod().invoke(null);
+        } catch (Exception e) {
+            throw Base.ensureRuntimeException(e);
+        }
         while (cluster.isRunning()) {
             try {
                 Thread.sleep(100);

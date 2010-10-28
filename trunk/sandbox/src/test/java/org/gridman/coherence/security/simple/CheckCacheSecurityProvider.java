@@ -1,8 +1,8 @@
 package org.gridman.coherence.security.simple;
 
-import javax.security.auth.Subject;
-
 import org.apache.log4j.Logger;
+
+import javax.security.auth.Subject;
 
 /**
  * For checking access to Coherence Caches.
