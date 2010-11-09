@@ -1,9 +1,12 @@
-package org.gridman.classloader;
+package org.gridman.testtools.coherence.classloader;
 
 import com.tangosol.util.Base;
 import com.tangosol.util.LongArray;
 import com.tangosol.util.SimpleLongArray;
 import org.apache.log4j.Logger;
+import org.gridman.testtools.classloader.ClassloaderLifecycle;
+import org.gridman.testtools.classloader.ClassloaderRunner;
+import org.gridman.testtools.classloader.SystemPropertyLoader;
 
 import java.util.HashMap;
 import java.util.Iterator;

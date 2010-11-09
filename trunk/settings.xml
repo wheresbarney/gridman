@@ -1,0 +1,30 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+http://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <localRepository>c:/apps/m2_repo</localRepository>
+
+    <proxies>
+
+        <proxy>
+            <id>myproxy</id>
+            <active>true</active>
+            <protocol>http</protocol>
+            <host>XXX_PROXY_XXX</host>
+            <port>8080</port>
+            <username>XXX_USERNAME_XXX</username>
+            <password>XXX_PASSWORD_XXX</password>
+            <nonProxyHosts>*.google.com|ibiblio.org</nonProxyHosts>
+        </proxy>
+    </proxies>
+
+    <mirrors>
+        <mirror>
+            <id>archiva.default</id>
+            <url>http://archiva.netance.com/repository/internal/</url>
+            <mirrorOf>*</mirrorOf>
+        </mirror>
+    </mirrors>
+
+
+</settings>
