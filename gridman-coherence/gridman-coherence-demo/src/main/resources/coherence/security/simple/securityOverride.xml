@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!-- Security overrides file -->
+<!DOCTYPE coherence SYSTEM "coherence.dtd">
+<coherence>
+    <cluster-config>
+        <!-- Dynamic Cluster membership -->
+        <!--<authorized-hosts>-->
+            <!--<host-filter>-->
+                <!--<class-name>org.gridman.coherence.security.simple.AuthorizedHostFilter</class-name>-->
+            <!--</host-filter>-->
+        <!--</authorized-hosts>-->
+
+        <multicast-listener>
+            <join-timeout-milliseconds system-property="coherence.incubator.joinTimeout">1000</join-timeout-milliseconds>
+        </multicast-listener>
+    </cluster-config>
+
+    <security-config>
+        <login-module-name>Coherence</login-module-name>
+        <identity-asserter>
+            <class-name system-property="org.gridman.coherence.security.identityAsserter">NOT_SET</class-name>
+        </identity-asserter>
+        <identity-transformer>
+            <class-name system-property="org.gridman.coherence.security.identityTransformer">NOT_SET</class-name>
+        </identity-transformer>
+        <subject-scope>true</subject-scope>
+    </security-config>
+
+</coherence>

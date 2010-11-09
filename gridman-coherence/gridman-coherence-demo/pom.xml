@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <packaging>jar</packaging>
+
+  <groupId>org.gridman</groupId>
+  <artifactId>gridman-coherence-demo</artifactId>
+  <name>GridMan Coherence Demo</name>
+  <description>GridMan Coherence Demo Project</description>
+
+  <parent>
+    <groupId>org.gridman</groupId>
+    <artifactId>gridman-coherence</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.gridman</groupId>
+      <artifactId>gridman-coherence-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.gridman</groupId>
+      <artifactId>gridman-testtools</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.gridman</groupId>
+      <artifactId>gridman-coherence-testtools</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+  </dependencies>
+
+</project>
