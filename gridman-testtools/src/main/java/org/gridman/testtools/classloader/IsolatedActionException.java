@@ -5,9 +5,9 @@ package org.gridman.testtools.classloader;
  */
 public class IsolatedActionException extends Exception {
 
-    private Exception exception;
+    private Throwable exception;
 
-    public IsolatedActionException(Exception exception) {
+    public IsolatedActionException(Throwable exception) {
         super((Throwable)null);
         this.exception = exception;
     }

@@ -150,6 +150,12 @@
         <version>${coherence.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>com.sleepycat</groupId>
+        <artifactId>je</artifactId>
+        <version>3.3.98</version>
+      </dependency>
+
       <!-- Logging -->
       <dependency>
         <groupId>log4j</groupId>

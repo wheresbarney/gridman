@@ -26,5 +26,5 @@ public interface IsolatedExceptionAction<T> {
      *	       that implements <code>IsolatedExceptionAction</code> should
      *         document the exceptions that its run method can throw.
      */
-    T run() throws Exception;
+    T run() throws Throwable;
 }

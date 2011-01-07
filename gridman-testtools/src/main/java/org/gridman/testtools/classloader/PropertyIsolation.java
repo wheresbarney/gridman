@@ -25,7 +25,7 @@ public class PropertyIsolation {
     public static <T> T runIsolated(final Properties localProperties, final IsolatedExceptionAction<T> isolatedAction) throws IsolatedActionException {
         final Object[] result = new Object[1];
         final boolean[] done = new boolean[1];
-        final Exception[] exception = new Exception[1];
+        final Throwable[] exception = new Throwable[1];
 
         final Thread thread = new Thread() {
             @Override
@@ -38,7 +38,7 @@ public class PropertyIsolation {
 
                 try {
                     result[0] = isolatedAction.run();
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     exception[0] = e;
                 }
                 done[0] = true;

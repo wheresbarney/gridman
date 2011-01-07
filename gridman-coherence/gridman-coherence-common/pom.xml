@@ -26,6 +26,10 @@
       <groupId>com.oracle</groupId>
       <artifactId>coherence</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.sleepycat</groupId>
+      <artifactId>je</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.gridman</groupId>

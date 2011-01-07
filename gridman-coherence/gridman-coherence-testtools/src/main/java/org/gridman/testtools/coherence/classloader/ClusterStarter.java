@@ -32,8 +32,24 @@ public class ClusterStarter extends Base {
 
     private Properties extraProperties;
 
-    public static void main(String[] args) {
-        new ClusterStarter().ensureCluster(args[0]);
+    public static void main(String[] args) throws Exception {
+        if (args.length == 1) {
+            new ClusterStarter().ensureCluster(args[0]);
+        } else if (args.length == 2) {
+            Properties props = SystemPropertyLoader.getSystemProperties(args[0]);
+            int groupId = Integer.parseInt(args[1]);
+            new ClusterStarter().startAllServersInGroupInternal(args[0], props, groupId, false);
+        } else if (args.length == 3) {
+            Properties props = SystemPropertyLoader.getSystemProperties(args[0]);
+            int groupId = Integer.parseInt(args[1]);
+            int instance = Integer.parseInt(args[2]);
+            new ClusterStarter().startServiceInstanceInternal(args[0], props, groupId, instance, false);
+        }
+
+        final Object lock = new Object();
+        synchronized (lock) {
+            lock.wait();
+        }
     }
 
     private ClusterStarter() {
@@ -186,8 +202,23 @@ public class ClusterStarter extends Base {
      * @param instance - the server instance to shut down
      */
     public void shutdown(String clusterFilename, int groupId, int instance) {
+        shutdown(clusterFilename, groupId, instance, new ServiceShutdownVisitor());
+    }
+
+    /**
+     * Shutdown the specified server instance in the specified group within the specified cluster properties file
+     * and returns immediately without waiting to confirm shutdown.
+     * @param clusterFilename - the cluster properties file to use to identify the server to shutdown
+     * @param groupId - the server group containing the server to shut down
+     * @param instance - the server instance to shut down
+     */
+    public void shutdownNoWait(String clusterFilename, int groupId, int instance) {
+        shutdown(clusterFilename, groupId, instance, new ServiceShutdownAndWaitVisitor());
+    }
+
+    private void shutdown(String clusterFilename, int groupId, int instance, ServiceVisitor visitor) {
         logger.info("Shutting down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
-        visitService(clusterFilename, groupId, instance, new ServiceShutdownVisitor());
+        visitService(clusterFilename, groupId, instance, visitor);
         logger.info("Shut down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
     }
 
@@ -304,6 +335,25 @@ public class ClusterStarter extends Base {
             try {
                 logger.debug("Shutting down " + service);
                 service.shutdown();
+                return true;
+            } catch (Exception e) {
+                throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
+            }
+        }
+    }
+
+    /**
+     * ServiceVisitor that shuts down services and waits for the service to stop
+     */
+    private static class ServiceShutdownAndWaitVisitor extends ServiceShutdownVisitor {
+        /**
+         * Shutdown the specified ClassloaderRunner
+         * @param service the ClassloaderRunner to visit
+         */
+        @Override
+        public boolean visit(ClassloaderRunner service) {
+            try {
+                super.visit(service);
                 while(service.isStarted()) {
                     Thread.sleep(100);
                 }
