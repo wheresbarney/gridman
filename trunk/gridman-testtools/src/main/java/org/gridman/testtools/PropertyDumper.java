@@ -60,4 +60,14 @@ public class PropertyDumper implements ClassloaderLifecycle {
     public void shutdown() {
 
     }
+
+    @Override
+    public void suspendNetwork() {
+
+    }
+
+    @Override
+    public void unsuspendNetwork() {
+        
+    }
 }

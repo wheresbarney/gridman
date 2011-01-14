@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config-3.6.dtd">
+
+<!-- secureConfig - config for secure solution -->
+<cache-config>
+
+    <!-- Allow non pof stuff to work for now. -->
+    <defaults>
+        <socket-provider system-property="tangosol.coherence.extend.socketprovider"/>
+        <serializer>
+            <instance>
+                <class-name system-property="org.gridman.coherence.serializer">com.tangosol.io.pof.SafeConfigurablePofContext</class-name>
+            </instance>
+        </serializer>
+    </defaults>
+
+    <caching-scheme-mapping>
+
+        <cache-mapping>
+            <cache-name>dist-*</cache-name>
+            <scheme-name>distributed-scheme</scheme-name>
+        </cache-mapping>
+
+    </caching-scheme-mapping>
+
+    <caching-schemes>
+
+        <distributed-scheme>
+            <scheme-name>xxdistributed-scheme</scheme-name>
+            <service-name>TestDistributedService</service-name>
+            <backing-map-scheme>
+              <!--<local-scheme>-->
+                <!--<unit-calculator>BINARY</unit-calculator>-->
+              <!--</local-scheme>-->
+              <external-scheme>
+                <lh-file-manager>
+                  <directory>/temp/odc-data</directory>
+                </lh-file-manager>
+              </external-scheme>
+            </backing-map-scheme>
+        </distributed-scheme>
+
+        <distributed-scheme>
+            <scheme-name>distributed-scheme</scheme-name>
+            <service-name>TestDistributedService</service-name>
+            <backing-map-scheme>
+                <local-scheme>
+                    <unit-calculator>BINARY</unit-calculator>
+                </local-scheme>
+            </backing-map-scheme>
+        </distributed-scheme>
+
+
+        <distributed-scheme>
+            <scheme-name>WrapperBinaryCacheStore-distributed-scheme</scheme-name>
+            <service-name>TestDistributedService</service-name>
+            <backing-map-scheme>
+                <read-write-backing-map-scheme>
+                    <scheme-name>read-write-scheme</scheme-name>
+                    <internal-cache-scheme>
+                        <local-scheme/>
+                    </internal-cache-scheme>
+                    <cachestore-scheme>
+                        <class-scheme>
+                            <class-name>org.gridman.coherence.cachestore.WrapperBinaryCacheStore</class-name>
+                            <init-params>
+                                <init-param>
+                                    <param-type>com.tangosol.net.BackingMapManagerContext</param-type>
+                                    <param-value>{manager-context}</param-value>
+                                </init-param>
+                                <init-param>
+                                    <param-type>java.lang.ClassLoader</param-type>
+                                    <param-value>{class-loader}</param-value>
+                                </init-param>
+                                <init-param>
+                                    <param-type>java.lang.String</param-type>
+                                    <param-value>{cache-name}</param-value>
+                                </init-param>
+                                <init-param>
+                                    <param-type>com.tangosol.run.xml.XmlElement</param-type>
+                                    <param-value>
+                                        <class-scheme>
+                                            <!--<class-name>org.gridman.coherence.cachestore.CacheStoreStub</class-name>-->
+                                            <class-name>com.tangosol.coherence.jpa.JpaCacheStore</class-name>
+                                            <init-params>
+                                                <init-param>
+                                                    <param-type>java.lang.String</param-type>
+                                                    <param-value>{cache-name}</param-value>
+                                                </init-param>
+                                                <init-param>
+                                                    <param-type>java.lang.String</param-type>
+                                                    <param-value>org.gridman.coherence.cachestore.EntityStub</param-value>
+                                                </init-param>
+                                                <init-param>
+                                                    <param-type>java.lang.String</param-type>
+                                                    <param-value>JPA</param-value>
+                                                </init-param>
+                                            </init-params>
+                                        </class-scheme>
+                                    </param-value>
+                                </init-param>
+                            </init-params>
+                        </class-scheme>
+                    </cachestore-scheme>
+                </read-write-backing-map-scheme>
+            </backing-map-scheme>
+            <autostart>true</autostart>
+        </distributed-scheme>
+
+        <invocation-scheme>
+            <service-name>ServerInvokeService</service-name>
+            <thread-count>5</thread-count>
+            <autostart>true</autostart>
+        </invocation-scheme>
+
+    </caching-schemes>
+</cache-config>

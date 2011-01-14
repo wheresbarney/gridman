@@ -75,10 +75,46 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
         return running;
     }
 
+    public void suspendNetwork() {
+        ClassLoader saved = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(classLoader);
+        callSuspend(true);
+        Thread.currentThread().setContextClassLoader(saved);
+    }
+
+    public void unsuspendNetwork() {
+        ClassLoader saved = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(classLoader);
+        callSuspend(false);
+        Thread.currentThread().setContextClassLoader(saved);
+    }
+
+    private void callSuspend(boolean suspend) {
+        try {
+            Class clz = Class.forName("org.gridman.testtools.coherence.net.PacketController");
+            Method suspendMethod = clz.getDeclaredMethod("suspend", boolean.class);
+            suspendMethod.invoke(null, suspend);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void shutdown() {
         logger.info("Shutting down Server");
         ClassLoader saved = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
+
+        try {
+            Class cls = classLoader.loadClass("com.tangosol.net.CacheFactory");
+            Method shutdown = cls.getDeclaredMethod("shutdown");
+            shutdown.invoke(null);
+            cls = classLoader.loadClass("com.tangosol.net.DefaultCacheServer");
+            shutdown = cls.getDeclaredMethod("shutdown");
+            shutdown.invoke(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         try {
             getStopMethod().invoke(null);
         } catch (Exception e) {
@@ -91,6 +127,7 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
             }
             logger.debug("Waiting for cluster to stop " + cluster);
         }
+
         cluster = null;
         Thread.currentThread().setContextClassLoader(saved);
         logger.info("Shut down Server");

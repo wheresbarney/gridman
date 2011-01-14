@@ -14,4 +14,8 @@ public interface ClassloaderLifecycle {
 
     // Shut it down
     public void shutdown();
+
+    void suspendNetwork();
+
+    void unsuspendNetwork();
 }

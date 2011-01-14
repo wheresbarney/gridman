@@ -27,8 +27,16 @@
       <artifactId>coherence</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.oracle</groupId>
+      <artifactId>coherence-jpa</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.sleepycat</groupId>
       <artifactId>je</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>persistence-api</artifactId>
     </dependency>
 
     <dependency>
