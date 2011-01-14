@@ -45,6 +45,18 @@ public class ClassloaderRunner {
         logger.info("Called shutdown");        
     }
 
+    public void suspendNetwork() throws Exception {
+        logger.info("Calling suspendNetwork");
+        aClass.getMethod("suspendNetwork").invoke(instance);
+        logger.info("Called suspendNetwork");
+    }
+
+    public void unsuspendNetwork() throws Exception {
+        logger.info("Calling unsuspendNetwork");
+        aClass.getMethod("unsuspendNetwork").invoke(instance);
+        logger.info("Called unsuspendNetwork");
+    }
+
     private class MyRunner implements Runnable {
 
         private MyRunner() {

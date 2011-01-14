@@ -10,7 +10,7 @@
   <url>http://code.google.com/p/gridman/</url>
 
   <properties>
-    <coherence.version>3.6.0.1</coherence.version>
+    <coherence.version>3.6.1</coherence.version>
     <!--<coherence.version>3.5.3b465</coherence.version>-->
     <apacheds.version>1.5.5</apacheds.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -149,12 +149,32 @@
         <artifactId>coherence</artifactId>
         <version>${coherence.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.oracle</groupId>
+        <artifactId>coherence-jpa</artifactId>
+        <version>${coherence.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>com.sleepycat</groupId>
         <artifactId>je</artifactId>
         <version>3.3.98</version>
       </dependency>
+      <dependency>
+        <groupId>javax.persistence</groupId>
+        <artifactId>persistence-api</artifactId>
+        <version>1.0</version>
+      </dependency>
+        <dependency>
+          <groupId>javax.persistence</groupId>
+          <artifactId>persistence-api</artifactId>
+          <version>1.0</version>
+        </dependency>
+        <dependency>
+          <groupId>asm</groupId>
+          <artifactId>asm-all</artifactId>
+          <version>3.3</version>
+        </dependency>
 
       <!-- Logging -->
       <dependency>

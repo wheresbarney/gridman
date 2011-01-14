@@ -144,6 +144,7 @@ public class ClusterStarter extends Base {
         startServiceInstanceInternal(identifier, properties, groupId, instanceId, true);
     }
 
+    @SuppressWarnings({"unchecked"})
     private void startServiceInstanceInternal(String identifier, Properties properties, int groupId, int instanceId, boolean waitForStart) {
         LongArray serviceList = getServiceList(identifier, groupId);
         if (!serviceList.exists(instanceId)) {
@@ -198,8 +199,8 @@ public class ClusterStarter extends Base {
     /**
      * Shutdown the specified server instance in the specified group within the specified cluster properties file.
      * @param clusterFilename - the cluster properties file to use to identify the server to shutdown
-     * @param groupId - the server group containing the server to shut down
-     * @param instance - the server instance to shut down
+     * @param groupId - the server group containing the server to shutdown
+     * @param instance - the server instance to shutdown
      */
     public void shutdown(String clusterFilename, int groupId, int instance) {
         shutdown(clusterFilename, groupId, instance, new ServiceShutdownVisitor());
@@ -208,6 +209,7 @@ public class ClusterStarter extends Base {
     /**
      * Shutdown the specified server instance in the specified group within the specified cluster properties file
      * and returns immediately without waiting to confirm shutdown.
+     * This will cleanly shut down nodes so data loss should not occurr.
      * @param clusterFilename - the cluster properties file to use to identify the server to shutdown
      * @param groupId - the server group containing the server to shut down
      * @param instance - the server instance to shut down
@@ -220,6 +222,55 @@ public class ClusterStarter extends Base {
         logger.info("Shutting down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
         visitService(clusterFilename, groupId, instance, visitor);
         logger.info("Shut down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+    }
+
+    /**
+     * Kill the all server instances in the specified group within the specified cluster properties file.
+     * This method will stop a nodes network sockets before stopping the node so simulating node death.
+     * @param clusterFilename - the cluster properties file to use to identify the server to kill
+     * @param groupId - the server group containing the server to kill
+     */
+    public void kill(String clusterFilename, int groupId) {
+        logger.info("Killing down all services : cluster=" + clusterFilename + " groupId=" + groupId);
+        visitAllServicesInGroup(clusterFilename, groupId, new ServiceKillVisitor());
+        logger.info("Killed all services : cluster=" + clusterFilename + " groupId=" + groupId);
+    }
+
+    /**
+     * Kill the specified server instance in the specified group within the specified cluster properties file.
+     * This method will stop a nodes network sockets before stopping the node so simulating node death.
+     * @param clusterFilename - the cluster properties file to use to identify the server to kill
+     * @param groupId - the server group containing the server to kill
+     * @param instance - the server instance to kill
+     */
+    public void kill(String clusterFilename, int groupId, int instance) {
+        logger.info("Killing service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        visitService(clusterFilename, groupId, instance, new ServiceKillVisitor());
+        logger.info("Killed service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+    }
+
+    /**
+     * Suspend the network om the specified server instance in the specified group within the specified cluster properties file.
+     * @param clusterFilename - the cluster properties file to use to identify the server
+     * @param groupId - the server group containing the server
+     * @param instance - the server instance
+     */
+    public void suspendNetwork(String clusterFilename, int groupId, int instance) {
+        logger.info("Suspending Network service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        visitService(clusterFilename, groupId, instance, new SuspendNetworkVisitor());
+        logger.info("Suspended service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+    }
+
+    /**
+     * Unsuspend the network om the specified server instance in the specified group within the specified cluster properties file.
+     * @param clusterFilename - the cluster properties file to use to identify the server
+     * @param groupId - the server group containing the server
+     * @param instance - the server instance
+     */
+    public void unsuspendNetwork(String clusterFilename, int groupId, int instance) {
+        logger.info("unuspending Network service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        visitService(clusterFilename, groupId, instance, new UnsuspendNetworkVisitor());
+        logger.info("unuspended service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
     }
 
     ClusterInfo getClusterInfo(String identifier, Properties properties) {
@@ -358,6 +409,65 @@ public class ClusterStarter extends Base {
                     Thread.sleep(100);
                 }
                 return true;
+            } catch (Exception e) {
+                throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
+            }
+        }
+    }
+
+    /**
+     * ServiceVisitor that Kills services by stopping their
+     * network sockets before stopping the service
+     */
+    private static class ServiceKillVisitor implements ServiceVisitor {
+        /**
+         * Shutdown the specified ClassloaderRunner
+         * @param service the ClassloaderRunner to visit
+         */
+        public boolean visit(ClassloaderRunner service) {
+            try {
+                logger.debug("Shutting down " + service);
+                service.suspendNetwork();
+                service.shutdown();
+                return true;
+            } catch (Exception e) {
+                throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
+            }
+        }
+    }
+
+    /**
+     * ServiceVisitor that suspends sending and receiving of packets
+     * by network sockets for a service
+     */
+    private static class SuspendNetworkVisitor implements ServiceVisitor {
+        /**
+         * @param service the ClassloaderRunner to visit
+         */
+        public boolean visit(ClassloaderRunner service) {
+            try {
+                logger.debug("Suspending Network " + service);
+                service.suspendNetwork();
+                return false;
+            } catch (Exception e) {
+                throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
+            }
+        }
+    }
+
+    /**
+     * ServiceVisitor that re-enables sending and receiving of packets
+     * by network sockets for a service
+     */
+    private static class UnsuspendNetworkVisitor implements ServiceVisitor {
+        /**
+         * @param service the ClassloaderRunner to visit
+         */
+        public boolean visit(ClassloaderRunner service) {
+            try {
+                logger.debug("Unsuspending Network " + service);
+                service.unsuspendNetwork();
+                return false;
             } catch (Exception e) {
                 throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
             }

@@ -10,9 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-
 
 /**
  * @author Jonathan Knight
@@ -26,6 +23,7 @@ public class PofClusterTest {
     @Before
     public void startSecureCluster() throws Exception {
         clusterFile = "/coherence/pof/pof-test-cluster.properties";
+        java.net.DatagramSocket c;
         clusterStarter.ensureCluster(clusterFile);
     }
 
@@ -47,10 +45,32 @@ public class PofClusterTest {
         NamedCache cache = CacheFactory.getCache("dist-test");
         cache.put(key, value);
         Object retrievedValue = cache.get(key);
-        CacheFactory.shutdown();
-        
-        assertThat(retrievedValue, is(value));
-    }
 
+        System.err.println("Putting...");
+        for (int i=0; i<1000; i++) {
+            cache.put("key-" + i, "value-" + i);
+        }
+
+        System.err.println("Suspending...");
+        clusterStarter.suspendNetwork(clusterFile, 0, 1);
+        clusterStarter.shutdown(clusterFile, 0, 1);
+        
+        System.err.println("Sleeping...");
+        Thread.sleep(5000);
+
+        clusterStarter.unsuspendNetwork(clusterFile, 0, 1);
+
+        System.err.println("Putting...");
+        for (int i=0; i<1000; i++) {
+            cache.put("key-" + i, "value-" + i);
+        }
+
+        System.err.println("sleeping...");
+        Thread.sleep(5000);
+        
+        CacheFactory.shutdown();
+
+//        assertThat(retrievedValue, is(value));
+    }
 
 }
