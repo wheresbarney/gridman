@@ -1,7 +1,9 @@
-package org.gridman.coherence.pof;
+package org.gridman.coherence.net;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
+import org.gridman.coherence.pof.DomainKey;
+import org.gridman.coherence.pof.DomainValue;
 import org.gridman.testtools.coherence.classloader.ClusterStarter;
 import org.gridman.testtools.junit.IsolationRunner;
 import org.gridman.testtools.kerberos.RunIsolated;
@@ -10,15 +12,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-
 /**
  * @author Jonathan Knight
  */
 @RunWith(IsolationRunner.class)
-public class PofClusterTest {
+public class ClusterNodeFailureSimulationTest {
 
     private final ClusterStarter clusterStarter = ClusterStarter.getInstance();
     private String clusterFile;
@@ -48,9 +46,30 @@ public class PofClusterTest {
         cache.put(key, value);
         Object retrievedValue = cache.get(key);
 
-        CacheFactory.shutdown();
-        
-        assertThat(retrievedValue, is(value));
-    }
+        System.err.println("Putting...");
+        for (int i=0; i<1000; i++) {
+            cache.put("key-" + i, "value-" + i);
+        }
 
+        System.err.println("Suspending...");
+        clusterStarter.suspendNetwork(clusterFile, 0, 1);
+        clusterStarter.shutdown(clusterFile, 0, 1);
+
+        System.err.println("Sleeping...");
+        Thread.sleep(5000);
+
+        clusterStarter.unsuspendNetwork(clusterFile, 0, 1);
+
+        System.err.println("Putting...");
+        for (int i=0; i<1000; i++) {
+            cache.put("key-" + i, "value-" + i);
+        }
+
+        System.err.println("sleeping...");
+        Thread.sleep(5000);
+
+        CacheFactory.shutdown();
+
+//        assertThat(retrievedValue, is(value));
+    }
 }

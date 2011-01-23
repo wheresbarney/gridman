@@ -25,7 +25,7 @@
     <module>gridman-testtools</module>
     <module>gridman-common</module>
     <module>gridman-coherence</module>
-    <module>sandbox</module>
+    <!--<module>sandbox</module>-->
   </modules>
 
   <scm>

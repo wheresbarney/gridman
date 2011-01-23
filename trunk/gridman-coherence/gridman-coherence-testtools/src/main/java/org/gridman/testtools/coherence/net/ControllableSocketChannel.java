@@ -1,5 +1,6 @@
 package org.gridman.testtools.coherence.net;
 
+import com.tangosol.net.WrapperSelector;
 import com.tangosol.net.WrapperSocketChannel;
 
 import java.io.IOException;
@@ -43,5 +44,10 @@ public class ControllableSocketChannel extends WrapperSocketChannel {
             throw new IOException("Network suspended");
         }
         return super.read(dsts, offset, length);
+    }
+
+    @Override
+    public WrapperSelector.WrapperSelectionKey registerInternal(WrapperSelector selector, int ops, Object att) throws IOException {
+        return super.registerInternal(selector, ops, att);
     }
 }

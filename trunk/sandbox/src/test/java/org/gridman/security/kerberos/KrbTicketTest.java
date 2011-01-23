@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 @CleanupLevel(Level.CLASS)
 @DirectoryPartition(suffixes = "dc=example,dc=com")
 @ApplyLdifFiles( value = {
-        "/coherence/security/kerberos/coherence-security.ldif"
+        "/gridman.ldif"
 })
 @Krb5( credentials = {
         "knightj@EXAMPLE.COM,secret",

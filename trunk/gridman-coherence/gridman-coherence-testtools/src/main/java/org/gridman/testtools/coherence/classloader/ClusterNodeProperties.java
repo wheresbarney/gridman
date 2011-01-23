@@ -30,7 +30,7 @@ public class ClusterNodeProperties {
 	private void useDefaultClusterProperties() {
 		withPofEnabled(true);
 		//withCoherenceOverride("coherence/simple/simpleOverride.xml");
-		withClusterIdentifier("anew-1");
+		withClusterIdentifier("gridman-test");
 		withLogLevel(9);
 		withCoherenceExtendPort(8098);
 

@@ -25,7 +25,7 @@ public class ChildFirstClassLoader extends PropertyIsolatingClassLoader {
         String[] vals = System.getProperty("java.class.path").split(System.getProperty("path.separator"));
         List<URL> urls = new ArrayList<URL>();
         for (String val : vals) {
-            logger.debug("Adding classpath : " + val);
+            //logger.debug("Adding classpath : " + val);
             String ending = val.endsWith(".jar") ? "" : "/";
             urls.add(new URL("file:///" + val + ending));
         }
