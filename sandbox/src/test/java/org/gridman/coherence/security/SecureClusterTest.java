@@ -6,6 +6,7 @@ import com.tangosol.net.CacheFactory;
 import com.tangosol.net.InvocationObserver;
 import com.tangosol.net.InvocationService;
 import com.tangosol.net.Member;
+import com.tangosol.net.messaging.ConnectionException;
 import org.apache.directory.server.core.integ.Level;
 import org.apache.directory.server.core.integ.annotations.ApplyLdifFiles;
 import org.apache.directory.server.core.integ.annotations.CleanupLevel;
@@ -146,7 +147,7 @@ public class SecureClusterTest {
             InvocationService service = (InvocationService) CacheFactory.getService("ClientInvokeService");
             service.query(new NullInvokable(), null);
             fail("Expected to catch SecurityException");
-        } catch (SecurityException e) {
+        } catch (ConnectionException e) {
             assertThat(e.getMessage(), is("Missing Credentials - Subject not present"));
         } finally {
             CacheFactory.shutdown();
