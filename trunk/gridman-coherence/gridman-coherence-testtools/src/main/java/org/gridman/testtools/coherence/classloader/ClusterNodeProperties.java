@@ -60,7 +60,6 @@ public class ClusterNodeProperties {
 	}
 
 	public ClusterNodeProperties withLogLevel(int logLevel) {
-//		properties.setProperty("tangosol.coherence.log", "log4j");
 		properties.setProperty("tangosol.coherence.log.level", Integer.toString(logLevel));
 		return this;
 	}
@@ -178,7 +177,7 @@ public class ClusterNodeProperties {
 	}
 
     public ClusterNodeProperties withProperties(Properties properties) {
-        properties.putAll(properties);
+        this.properties.putAll(properties);
         return this;
     }
 

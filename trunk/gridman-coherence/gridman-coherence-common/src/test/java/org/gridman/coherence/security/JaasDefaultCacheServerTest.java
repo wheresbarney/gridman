@@ -116,20 +116,24 @@ public class JaasDefaultCacheServerTest {
         cluster.addNodeWithServers(2, JaasClusterClassloaderLifecycle.class)
                 //.useDefaultServerProperties()
                 .withProperties(defaultProperties)
+                .withProperties(SystemPropertyLoader.loadProperties("/coherence/security/kerberos/common-server.properties"))
+                .withProperties(SystemPropertyLoader.loadProperties("/coherence/security/kerberos/storage-node.properties"))
                 .withProperty(JaasHelper.PROP_JAAS_MODULE, "Coherence")
                 .withProperty(GridManCallbackHandler.PROP_USERNAME, "knightj")
                 .withProperty(GridManCallbackHandler.PROP_PASSWORD, "secret")
-                .withCoherenceOverride("coherence/security/kerberos/secure-extend-override.xml")
-                .withCacheConfig("coherence/security/kerberos/secured-storage-node-config.xml");
+                .withCoherenceOverride("/coherence/security/kerberos/secure-extend-override.xml")
+                .withCacheConfig("/coherence/security/kerberos/secured-storage-node-config.xml");
 
         cluster.addNodeWithServers(1, JaasClusterClassloaderLifecycle.class)
                 //.useDefaultServerProperties()
                 .withProperties(defaultProperties)
+                .withProperties(SystemPropertyLoader.loadProperties("/coherence/security/kerberos/common-server.properties"))
+                .withProperties(SystemPropertyLoader.loadProperties("/coherence/security/kerberos/extend-proxy.properties"))
                 .withProperty(JaasHelper.PROP_JAAS_MODULE, "Coherence")
                 .withProperty(GridManCallbackHandler.PROP_USERNAME, "knightj")
                 .withProperty(GridManCallbackHandler.PROP_PASSWORD, "secret")
-                .withCoherenceOverride("coherence/security/kerberos/secure-extend-override.xml")
-                .withCacheConfig("coherence/security/kerberos/secured-extend-proxy-config.xml")
+                .withCoherenceOverride("/coherence/security/kerberos/secure-extend-override.xml")
+                .withCacheConfig("/coherence/security/kerberos/secured-extend-proxy-config.xml")
                 .withDistributedLocalStorage(false)
                 .withProxyEnabled(true);
 

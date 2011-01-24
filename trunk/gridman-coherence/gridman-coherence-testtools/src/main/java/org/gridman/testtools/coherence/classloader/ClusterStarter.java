@@ -1,9 +1,9 @@
 package org.gridman.testtools.coherence.classloader;
 
+import com.tangosol.net.CacheFactory;
 import com.tangosol.util.Base;
 import com.tangosol.util.LongArray;
 import com.tangosol.util.SimpleLongArray;
-import org.apache.log4j.Logger;
 import org.gridman.testtools.classloader.ClassloaderLifecycle;
 import org.gridman.testtools.classloader.ClassloaderRunner;
 import org.gridman.testtools.classloader.SystemPropertyLoader;
@@ -23,8 +23,6 @@ import java.util.Properties;
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
 public class ClusterStarter extends Base {
-    private static final Logger logger = Logger.getLogger(ClusterStarter.class);
-
     private static ClusterStarter sInstance;
 
     private Map<String, ClusterInfo> clusters;
@@ -85,6 +83,7 @@ public class ClusterStarter extends Base {
             throw new IllegalArgumentException("clusterFile argument cannot be null or empty String and must specifiy a valid properties file");
         }
         ensureCluster(clusterFile, SystemPropertyLoader.getSystemProperties(clusterFile));
+        CacheFactory.shutdown();
     }
 
     /**
@@ -175,14 +174,14 @@ public class ClusterStarter extends Base {
      * @param clusterFilename - the cluster properties file to use to identify the servers to shutdown
      */
     public void shutdown(String clusterFilename) {
-        logger.info("Shutting down all services : " + clusterFilename);
+        CacheFactory.log("Shutting down all services : " + clusterFilename, CacheFactory.LOG_INFO);
         visitAllServices(clusterFilename, new ServiceShutdownVisitor());
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             // ignored
         }
-        logger.info("Shut down all services : " + clusterFilename);
+        CacheFactory.log("Shut down all services : " + clusterFilename, CacheFactory.LOG_INFO);
     }
 
     /**
@@ -191,9 +190,9 @@ public class ClusterStarter extends Base {
      * @param groupId - the server group to shut down
      */
     public void shutdown(String clusterFilename, int groupId) {
-        logger.info("Shutting down all services : cluster=" + clusterFilename + " groupId=" + groupId);
+        CacheFactory.log("Shutting down all services : cluster=" + clusterFilename + " groupId=" + groupId, CacheFactory.LOG_INFO);
         visitAllServicesInGroup(clusterFilename, groupId, new ServiceShutdownVisitor());
-        logger.info("Shut down all services : cluster=" + clusterFilename + " groupId=" + groupId);
+        CacheFactory.log("Shut down all services : cluster=" + clusterFilename + " groupId=" + groupId, CacheFactory.LOG_INFO);
     }
 
     /**
@@ -219,9 +218,9 @@ public class ClusterStarter extends Base {
     }
 
     private void shutdown(String clusterFilename, int groupId, int instance, ServiceVisitor visitor) {
-        logger.info("Shutting down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        CacheFactory.log("Shutting down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
         visitService(clusterFilename, groupId, instance, visitor);
-        logger.info("Shut down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        CacheFactory.log("Shut down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
     }
 
     /**
@@ -231,9 +230,9 @@ public class ClusterStarter extends Base {
      * @param groupId - the server group containing the server to kill
      */
     public void kill(String clusterFilename, int groupId) {
-        logger.info("Killing down all services : cluster=" + clusterFilename + " groupId=" + groupId);
+        CacheFactory.log("Killing down all services : cluster=" + clusterFilename + " groupId=" + groupId, CacheFactory.LOG_INFO);
         visitAllServicesInGroup(clusterFilename, groupId, new ServiceKillVisitor());
-        logger.info("Killed all services : cluster=" + clusterFilename + " groupId=" + groupId);
+        CacheFactory.log("Killed all services : cluster=" + clusterFilename + " groupId=" + groupId, CacheFactory.LOG_INFO);
     }
 
     /**
@@ -244,9 +243,9 @@ public class ClusterStarter extends Base {
      * @param instance - the server instance to kill
      */
     public void kill(String clusterFilename, int groupId, int instance) {
-        logger.info("Killing service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        CacheFactory.log("Killing service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
         visitService(clusterFilename, groupId, instance, new ServiceKillVisitor());
-        logger.info("Killed service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        CacheFactory.log("Killed service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
     }
 
     /**
@@ -256,9 +255,9 @@ public class ClusterStarter extends Base {
      * @param instance - the server instance
      */
     public void suspendNetwork(String clusterFilename, int groupId, int instance) {
-        logger.info("Suspending Network service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        CacheFactory.log("Suspending Network service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
         visitService(clusterFilename, groupId, instance, new SuspendNetworkVisitor());
-        logger.info("Suspended service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        CacheFactory.log("Suspended service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
     }
 
     /**
@@ -268,9 +267,9 @@ public class ClusterStarter extends Base {
      * @param instance - the server instance
      */
     public void unsuspendNetwork(String clusterFilename, int groupId, int instance) {
-        logger.info("unuspending Network service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        CacheFactory.log("unuspending Network service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
         visitService(clusterFilename, groupId, instance, new UnsuspendNetworkVisitor());
-        logger.info("unuspended service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+        CacheFactory.log("unuspended service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
     }
 
     ClusterInfo getClusterInfo(String identifier, Properties properties) {
@@ -364,7 +363,7 @@ public class ClusterStarter extends Base {
         public boolean visit(ClassloaderRunner service) {
             try {
                 while(!service.isStarted()) {
-                    logger.debug("Waiting for " + service);
+                    CacheFactory.log("Waiting for " + service, CacheFactory.LOG_DEBUG);
                     Thread.sleep(1000);
                 }
                 return false;
@@ -384,7 +383,7 @@ public class ClusterStarter extends Base {
          */
         public boolean visit(ClassloaderRunner service) {
             try {
-                logger.debug("Shutting down " + service);
+                CacheFactory.log("Shutting down " + service, CacheFactory.LOG_DEBUG);
                 service.shutdown();
                 return true;
             } catch (Exception e) {
@@ -426,7 +425,7 @@ public class ClusterStarter extends Base {
          */
         public boolean visit(ClassloaderRunner service) {
             try {
-                logger.debug("Shutting down " + service);
+                CacheFactory.log("Shutting down " + service, CacheFactory.LOG_DEBUG);
                 service.suspendNetwork();
                 service.shutdown();
                 return true;
@@ -446,7 +445,7 @@ public class ClusterStarter extends Base {
          */
         public boolean visit(ClassloaderRunner service) {
             try {
-                logger.debug("Suspending Network " + service);
+                CacheFactory.log("Suspending Network " + service, CacheFactory.LOG_DEBUG);
                 service.suspendNetwork();
                 return false;
             } catch (Exception e) {
@@ -465,7 +464,7 @@ public class ClusterStarter extends Base {
          */
         public boolean visit(ClassloaderRunner service) {
             try {
-                logger.debug("Unsuspending Network " + service);
+                CacheFactory.log("Unsuspending Network " + service);
                 service.unsuspendNetwork();
                 return false;
             } catch (Exception e) {
