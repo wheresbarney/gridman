@@ -115,6 +115,7 @@ public class SecureClusterTest {
         }
     }
 
+    @SuppressWarnings({"unchecked"})
     @Test
     @RunIsolated(properties = {
             "/coherence/security/kerberos/common-client.properties",
@@ -124,7 +125,7 @@ public class SecureClusterTest {
     public void shouldAllowCacheAccessWithValidSubject() throws Exception {
         try {
             NamedCache cache = CacheFactory.getCache("one-Cache");
-
+            cache.put("key", "value");
         } catch (Throwable t) {
             fail("Expected no exception but caught " + t);
         } finally {

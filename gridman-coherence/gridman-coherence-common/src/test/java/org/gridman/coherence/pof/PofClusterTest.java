@@ -27,6 +27,7 @@ public class PofClusterTest {
     public void startSecureCluster() throws Exception {
         clusterFile = "/coherence/pof/pof-test-cluster.properties";
         clusterStarter.ensureCluster(clusterFile);
+        CacheFactory.shutdown();
     }
 
     @After

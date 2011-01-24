@@ -2,11 +2,15 @@ package org.gridman.testtools.coherence.classloader;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
+import com.tangosol.net.Member;
+import com.tangosol.run.xml.XmlElement;
 import com.tangosol.util.Base;
-import org.apache.log4j.Logger;
+import com.tangosol.util.Service;
 import org.gridman.testtools.classloader.ClassloaderLifecycle;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * Start up a Coherence Server for use in a Classloader.
@@ -15,9 +19,6 @@ import java.lang.reflect.Method;
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
 public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
-
-    private static final Logger logger = Logger.getLogger(CoherenceClassloaderLifecycle.class);
-
     private ClassLoader classLoader;
     private Cluster cluster;
 
@@ -25,7 +26,8 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
     private String startMethod = "startDaemon";
     private String stopMethod = "shutdown";
 
-    public CoherenceClassloaderLifecycle() {} // default constructor required
+    public CoherenceClassloaderLifecycle() {
+    } // default constructor required
 
     public CoherenceClassloaderLifecycle(String classname, String startMethod, String stopMethod) {
         this.classname = classname;
@@ -52,7 +54,7 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
     }
 
     public void start() {
-        logger.info("Starting Server");
+        CacheFactory.log("Starting Server", CacheFactory.LOG_INFO);
         classLoader = Thread.currentThread().getContextClassLoader();
         try {
             getStartMethod().invoke(null);
@@ -63,15 +65,39 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
         while (cluster == null) {
             cluster = CacheFactory.getCluster();
         }
-        logger.info("Started Server");
+        CacheFactory.log("Started Server", CacheFactory.LOG_INFO);
     }
 
     public boolean isStarted() {
         boolean running;
         ClassLoader saved = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
-        running = cluster != null && cluster.isRunning();
+        running = cluster != null && cluster.isRunning() && areAutoStartServicesRunning(classLoader);
         Thread.currentThread().setContextClassLoader(saved);
+        return running;
+    }
+
+    @SuppressWarnings({"unchecked"})
+    public boolean areAutoStartServicesRunning(ClassLoader classLoader) {
+        DefaultConfigurableCacheFactory factory = (DefaultConfigurableCacheFactory) CacheFactory.getCacheFactoryBuilder().getConfigurableCacheFactory(classLoader);
+        XmlElement xmlConfig = factory.getConfig();
+
+        Member member = cluster.getLocalMember();
+        boolean running = true;
+        for (XmlElement xmlScheme : (List<XmlElement>)xmlConfig.getSafeElement("caching-schemes").getElementList()) {
+            if (xmlScheme.getSafeElement("autostart").getBoolean()) {
+                String serviceName = xmlScheme.getSafeElement("service-name").getString();
+                if (serviceName != null && serviceName.length() > 0) {
+                    Service service = cluster.getService(serviceName);
+                    running = service != null && service.isRunning();
+                    if (!running) {
+                        CacheFactory.log("Auto-Start Service still starting - service=" + serviceName + " member=" + member, CacheFactory.LOG_INFO);
+                        break;
+                    }
+                }
+            }
+        }
+
         return running;
     }
 
@@ -100,7 +126,7 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
     }
 
     public void shutdown() {
-        logger.info("Shutting down Server");
+        CacheFactory.log("Shutting down Server", CacheFactory.LOG_INFO);
         ClassLoader saved = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
 
@@ -125,11 +151,11 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
                 Thread.sleep(100);
             } catch (InterruptedException ignored) {
             }
-            logger.debug("Waiting for cluster to stop " + cluster);
+            CacheFactory.log("Waiting for cluster to stop " + cluster, CacheFactory.LOG_DEBUG);
         }
 
         cluster = null;
         Thread.currentThread().setContextClassLoader(saved);
-        logger.info("Shut down Server");
+//        CacheFactory.log("Shut down Server", CacheFactory.LOG_INFO);
     }
 }

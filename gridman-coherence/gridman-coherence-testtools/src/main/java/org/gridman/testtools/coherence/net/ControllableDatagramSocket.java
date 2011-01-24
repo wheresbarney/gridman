@@ -1,9 +1,5 @@
 package org.gridman.testtools.coherence.net;
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.Cluster;
-import com.tangosol.net.Member;
-
 import java.io.IOException;
 import java.net.*;
 

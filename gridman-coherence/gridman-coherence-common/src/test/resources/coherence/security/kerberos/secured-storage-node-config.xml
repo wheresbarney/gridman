@@ -31,6 +31,7 @@
       <backing-map-scheme>
         <local-scheme/>
       </backing-map-scheme>
+      <autostart>true</autostart>
     </distributed-scheme>
 
     <invocation-scheme>
