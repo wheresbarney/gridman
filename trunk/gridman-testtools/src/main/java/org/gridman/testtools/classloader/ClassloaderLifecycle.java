@@ -18,4 +18,6 @@ public interface ClassloaderLifecycle {
     void suspendNetwork();
 
     void unsuspendNetwork();
+
+    Object invoke(String className, String methodName, Class[] paramTypes, Object[] params);
 }

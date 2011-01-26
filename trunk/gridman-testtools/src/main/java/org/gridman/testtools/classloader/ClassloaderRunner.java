@@ -2,6 +2,7 @@ package org.gridman.testtools.classloader;
 
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.Method;
 import java.util.Properties;
 
 /**
@@ -55,6 +56,12 @@ public class ClassloaderRunner {
         logger.info("Calling unsuspendNetwork");
         aClass.getMethod("unsuspendNetwork").invoke(instance);
         logger.info("Called unsuspendNetwork");
+    }
+
+    @SuppressWarnings({"unchecked"})
+    public Object invoke(String className, String methodName, Class[] paramTypes, Object[] params) throws Exception {
+        Method method = aClass.getMethod("invoke", String.class, String.class, Class[].class, Object[].class);
+        return method.invoke(instance, className, methodName, paramTypes, params);
     }
 
     private class MyRunner implements Runnable {

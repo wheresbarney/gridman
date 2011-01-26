@@ -1,5 +1,6 @@
 package org.gridman.coherence.backup;
 
+import org.gridman.testtools.coherence.ClusterQueries;
 import org.gridman.testtools.coherence.classloader.ClusterStarter;
 import org.gridman.testtools.junit.IsolationRunner;
 import org.gridman.testtools.kerberos.RunIsolated;
@@ -7,6 +8,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Set;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 
 /**
  * @author Jonathan Knight
@@ -16,51 +23,42 @@ public class PartitionRecoveryTest {
 
     private final ClusterStarter clusterStarter = ClusterStarter.getInstance();
     private String clusterFile;
+    private final int storageNodesGroupId = 0;
+    private final int extendNodesGroupId = 1;
+    private final int memberZeroId = 0;
 
     @Before
     public void startSecureCluster() throws Exception {
-//        clusterFile = "/coherence/backup/test-cluster.properties";
-//        clusterStarter
-//                .setProperty("backup.bdb.directory", "target/bdb")
-//                .ensureCluster(clusterFile);
+        clusterFile = "/coherence/common/common-cluster.properties";
+        clusterStarter
+                .overrideClusterProperty(clusterFile, storageNodesGroupId, "tangosol.coherence.cacheconfig", "coherence/backup/storage-node-config.xml")
+                .overrideClusterProperty(clusterFile, storageNodesGroupId, "backup.bdb.directory", "target/bdb")
+                .overrideClusterProperty(clusterFile, extendNodesGroupId, "tangosol.coherence.cacheconfig", "coherence/backup/extend-proxy-config.xml")
+                .ensureCluster(clusterFile);
     }
 
     @After
     public void stopSecureCluster() {
-//        clusterStarter.shutdown(clusterFile);
+        clusterStarter.shutdown(clusterFile);
     }
 
     @Test
-    @RunIsolated(properties = {
-            "/coherence/backup/common-client.properties",
-            "/coherence/backup/client.properties"
-    })
+    @RunIsolated(properties = {"/coherence/common/common-client.properties"})
     @SuppressWarnings({"unchecked"})
     public void shouldWork() throws Exception {
-//        Object key = "Key-jk";
-//        Object value = "JK";
-//
-//        NamedCache cache = CacheFactory.getCache("dist-test");
-//        cache.put(key, value);
-//        for (int i=0; i<1000; i++) {
-//            cache.put("key-" + i, "value-" + i);
-//        }
-//
-//        Object retrievedValue = cache.get(key);
-////        CacheFactory.shutdown();
-//
-//        assertThat(retrievedValue, is(value));
-//
-////        clusterStarter.shutdownNoWait(clusterFile, 0, 1);
-////        clusterStarter.shutdownNoWait(clusterFile, 0, 2);
-////
-////        Thread.sleep(10000);
-////
-////        for (int i=0; i<1000; i++) {
-////            System.err.println("Get: " + i + " = " + cache.get("key-" + i));
-////        }
+        final int memberToKillId = 1;
 
-        //Thread.sleep(60000);
+        Integer before = clusterStarter.invoke(clusterFile, storageNodesGroupId, memberZeroId, ClusterQueries.NAME, ClusterQueries.CLUSTER_SIZE);
+        String memberToKill = clusterStarter.invoke(clusterFile, storageNodesGroupId, memberToKillId, ClusterQueries.NAME, ClusterQueries.LOCAL_MEMBER);
+
+        clusterStarter.suspendNetwork(clusterFile, storageNodesGroupId, memberToKillId);
+        clusterStarter.shutdown(clusterFile, storageNodesGroupId, memberToKillId);
+
+        Integer after = clusterStarter.invoke(clusterFile, storageNodesGroupId, memberZeroId, ClusterQueries.NAME, ClusterQueries.CLUSTER_SIZE);
+        Set memberSetAfter = clusterStarter.invoke(clusterFile, storageNodesGroupId, memberZeroId, ClusterQueries.NAME, ClusterQueries.MEMBER_SET);
+
+        assertThat(before - after, is(1));
+        assertThat(memberSetAfter.contains(memberToKill), is(false));
     }
 
 }
