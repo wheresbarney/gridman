@@ -70,4 +70,9 @@ public class PropertyDumper implements ClassloaderLifecycle {
     public void unsuspendNetwork() {
         
     }
+
+    @Override
+    public Object invoke(String className, String methodName, Class[] paramTypes, Object[] params) {
+        return null;
+    }
 }

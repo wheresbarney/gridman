@@ -13,7 +13,7 @@ public class BDBStore extends BerkeleyDBBinaryStore {
 
     public BDBStore(String sDbName, DatabaseFactory dbFactory) throws DatabaseException {
         super(sDbName, dbFactory);
-        System.err.println("********* Creating BDBStore for " + sDbName);
+//        System.err.println("********* Creating BDBStore for " + sDbName);
     }
 
     public Database getDB() {
@@ -22,21 +22,21 @@ public class BDBStore extends BerkeleyDBBinaryStore {
 
     @Override
     public void erase(Binary binKey) {
-        try {
-            System.err.println("*********** " + getDB().getDatabaseName() + " erase " + binKey);
-        } catch (DatabaseException e) {
-            // ignore
-        }
+//        try {
+//            System.err.println("*********** " + getDB().getDatabaseName() + " erase " + binKey);
+//        } catch (DatabaseException e) {
+//            // ignore
+//        }
         super.erase(binKey);
     }
 
     @Override
     public void eraseAll() {
-        try {
-            System.err.println("*********** " + getDB().getDatabaseName() + " eraseAll ");
-        } catch (DatabaseException e) {
-            // ignore
-        }
+//        try {
+//            System.err.println("*********** " + getDB().getDatabaseName() + " eraseAll ");
+//        } catch (DatabaseException e) {
+//            // ignore
+//        }
         super.eraseAll();
     }
 }

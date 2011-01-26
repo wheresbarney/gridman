@@ -27,6 +27,7 @@ public class ClusterStarter extends Base {
 
     private Map<String, ClusterInfo> clusters;
     private Map<String, LongArray> services;
+    private Map<String, Map<Integer,Properties>> servicePropertyOverrides;
 
     private Properties extraProperties;
 
@@ -53,12 +54,29 @@ public class ClusterStarter extends Base {
     private ClusterStarter() {
         clusters = new HashMap<String, ClusterInfo>();
         services = new HashMap<String, LongArray>();
+        servicePropertyOverrides = new HashMap<String, Map<Integer,Properties>>();
         extraProperties = new Properties();
     }
 
     public ClusterStarter setProperty(String key, String value) {
         extraProperties.setProperty(key, value);
         return this;
+    }
+
+    public ClusterStarter overrideClusterProperty(String identifier, int group, String key, String value) {
+        getPropertyOverrides(identifier, group).setProperty(key, value);
+        return this;
+    }
+
+    private Properties getPropertyOverrides(String identifier, int group) {
+        if (!servicePropertyOverrides.containsKey(identifier)) {
+            servicePropertyOverrides.put(identifier, new HashMap<Integer,Properties>());
+        }
+        Map<Integer,Properties> groupOverrides = servicePropertyOverrides.get(identifier);
+        if (!groupOverrides.containsKey(group)) {
+            groupOverrides.put(group, new Properties());
+        }
+        return groupOverrides.get(group);
     }
 
     /**
@@ -151,6 +169,7 @@ public class ClusterStarter extends Base {
             Class<? extends ClassloaderLifecycle> serverClass = clusterInfo.getServerClass(groupId);
             Properties localProperties = clusterInfo.getLocalProperties(groupId);
             localProperties.putAll(extraProperties);
+            localProperties.putAll(getPropertyOverrides(identifier, groupId));
             
             ClassloaderRunner runner;
             try {
@@ -270,6 +289,23 @@ public class ClusterStarter extends Base {
         CacheFactory.log("unuspending Network service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
         visitService(clusterFilename, groupId, instance, new UnsuspendNetworkVisitor());
         CacheFactory.log("unuspended service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
+    }
+
+    public <T> T invoke(String clusterFilename, int groupId, int instance, String className, String methodName) {
+//        return invoke(clusterFilename, groupId, instance, className, methodName, new Class[0], new Object[0]);
+        InvokeVisitor<T> visitor = new InvokeVisitor<T>(className, methodName, new Class[0], new Object[0]);
+        invoke(clusterFilename, groupId, instance, visitor);
+        return visitor.getResult();
+    }
+
+    public <T> T invoke(String clusterFilename, int groupId, int instance, String className, String methodName, Class[] paramTypes, Object[] params) {
+        InvokeVisitor<T> visitor = new InvokeVisitor<T>(className, methodName, paramTypes, params);
+        invoke(clusterFilename, groupId, instance, visitor);
+        return visitor.getResult();
+    }
+
+    private void invoke(String clusterFilename, int groupId, int instance, InvokeVisitor visitor) {
+        visitService(clusterFilename, groupId, instance, visitor);
     }
 
     ClusterInfo getClusterInfo(String identifier, Properties properties) {
@@ -431,6 +467,35 @@ public class ClusterStarter extends Base {
                 return true;
             } catch (Exception e) {
                 throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
+            }
+        }
+    }
+
+    private static class InvokeVisitor<T> implements ServiceVisitor {
+        private String className;
+        private String methodName;
+        private Class[] paramTypes;
+        private Object[] params;
+        private T result;
+
+        private InvokeVisitor(String className, String methodName, Class[] paramTypes, Object[] params) {
+            this.className = className;
+            this.methodName = methodName;
+            this.paramTypes = paramTypes;
+            this.params = params;
+        }
+
+        public T getResult() {
+            return result;
+        }
+
+        @SuppressWarnings({"unchecked"})
+        public boolean visit(ClassloaderRunner service) {
+            try {
+                result = (T) service.invoke(className, methodName, paramTypes, params);
+                return false;
+            } catch (Exception e) {
+                throw Base.ensureRuntimeException(e, "Error invoking method on service " + service);
             }
         }
     }

@@ -10,6 +10,7 @@ import com.tangosol.util.Service;
 import org.gridman.testtools.classloader.ClassloaderLifecycle;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 /**
@@ -99,6 +100,27 @@ public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
         }
 
         return running;
+    }
+
+    public Object invoke(String className, String methodName, Class[] paramTypes, Object[] params) {
+        ClassLoader saved = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(classLoader);
+        try {
+
+            Class cls = Class.forName(className);
+            Method method = cls.getDeclaredMethod(methodName, paramTypes);
+            Object result;
+            if (Modifier.isStatic(method.getModifiers())) {
+                result = method.invoke(null, params);
+            } else {
+                result = method.invoke(cls.newInstance(), params);
+            }
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(saved);
+        }
     }
 
     public void suspendNetwork() {

@@ -19,6 +19,13 @@ public class SystemPropertyLoader {
         addProperties(System.getProperties(), resourceNames);
     }
 
+    public static Properties loadCommaDelimitedPropertiesResourceList(String resourceList) {
+        Properties properties = new Properties();
+        String[] resourceNames = resourceList.split(",");
+        addProperties(properties, resourceNames);
+        return properties;
+    }
+
     public static Properties loadProperties(String... resourceNames) {
         Properties properties = new Properties();
         addProperties(properties, resourceNames);
@@ -58,9 +65,21 @@ public class SystemPropertyLoader {
             Properties properties = new Properties();
             properties.load(stream);
             stream.close();
+
+            String includes = properties.getProperty("gridman.include");
+            if (includes != null && includes.length() > 0) {
+                Properties included = loadCommaDelimitedPropertiesResourceList(includes);
+                for (String name : included.stringPropertyNames()) {
+                    if (!properties.containsKey(name)) {
+                        properties.setProperty(name, included.getProperty(name));
+                    }
+                }
+            }
+
             return properties;
         } catch (IOException e) {
             throw new RuntimeException("Error loading properties " + resourceName, e);
         }
     }
+
 }

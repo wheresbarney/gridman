@@ -4,19 +4,10 @@
 <!-- secureConfig - config for secure solution -->
 <cache-config>
 
-    <!-- Allow non pof stuff to work for now. -->
     <defaults>
         <serializer>
             <instance>
-                <class-name system-property="org.gridman.coherence.serializer">
-                    com.tangosol.io.pof.ConfigurablePofContext
-                </class-name>
-                <init-params>
-                    <init-param>
-                        <param-type>java.lang.String</param-type>
-                        <param-value>coherence/backup/test-pof-config.xml</param-value>
-                    </init-param>
-                </init-params>
+                <class-name system-property="org.gridman.coherence.serializer">com.tangosol.io.pof.ConfigurablePofContext</class-name>
             </instance>
         </serializer>
     </defaults>
@@ -26,7 +17,7 @@
 
         <cache-mapping>
             <cache-name>*</cache-name>
-            <scheme-name>readwrite</scheme-name>
+            <scheme-name>dist-scheme</scheme-name>
         </cache-mapping>
 
     </caching-scheme-mapping>
@@ -46,32 +37,6 @@
                 <class-name>org.gridman.coherence.backup.LoggingPartitionListener</class-name>
             </partition-listener>
             <partition-count>29</partition-count>
-            <autostart>true</autostart>
-        </distributed-scheme>
-
-        <distributed-scheme>
-            <scheme-name>readwrite</scheme-name>
-            <backing-map-scheme>
-                <read-write-backing-map-scheme>
-                    <internal-cache-scheme>
-                        <local-scheme/>
-                    </internal-cache-scheme>
-                    <cachestore-scheme>
-                        <class-scheme>
-                            <class-name>org.gridman.coherence.backup.CacheStoreStub</class-name>
-                        </class-scheme>
-                        <operation-bundling>
-                            <bundle-config>
-                                <operation-name>store</operation-name>
-                                <delay-millis>60000</delay-millis>
-                                <preferred-size>1000</preferred-size>
-                                <thread-threshold>1</thread-threshold>
-                            </bundle-config>
-                        </operation-bundling>
-                    </cachestore-scheme>
-                </read-write-backing-map-scheme>
-            </backing-map-scheme>
-            <thread-count>10</thread-count>
             <autostart>true</autostart>
         </distributed-scheme>
 
@@ -95,12 +60,6 @@
                 <store-name>{cache-name}</store-name>
             </bdb-store-manager>
         </external-scheme>
-
-        <invocation-scheme>
-            <scheme-name>ClientInvokeService</scheme-name>
-            <service-name>ClientInvokeService</service-name>
-            <autostart>true</autostart>
-        </invocation-scheme>
 
     </caching-schemes>
 </cache-config>
