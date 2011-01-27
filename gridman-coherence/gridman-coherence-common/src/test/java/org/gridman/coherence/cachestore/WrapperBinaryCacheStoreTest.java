@@ -1,30 +1,26 @@
 package org.gridman.coherence.cachestore;
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.NamedCache;
-import org.gridman.testtools.classloader.SystemPropertyLoader;
+import org.gridman.testtools.coherence.classloader.ClusterInfo;
 import org.gridman.testtools.coherence.classloader.ClusterStarter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
 public class WrapperBinaryCacheStoreTest {
 
-    private final ClusterStarter clusterStarter = ClusterStarter.getInstance();
-    private String clusterFile;
+    private ClusterStarter clusterStarter = ClusterStarter.getInstance();
+    private ClusterInfo clusterInfo;
 
     @Before
     public void startSecureCluster() throws Exception {
-        clusterFile = "/coherence/common/common-cluster.properties";
-        clusterStarter.ensureCluster(clusterFile);
+        String clusterFile = "/coherence/common/common-cluster.properties";
+        clusterInfo = new ClusterInfo(clusterFile);
+        clusterStarter.ensureCluster(clusterInfo);
     }
 
     @After
     public void stopSecureCluster() {
-        clusterStarter.shutdown(clusterFile);
+        clusterStarter.shutdown(clusterInfo);
     }
 
     @Test

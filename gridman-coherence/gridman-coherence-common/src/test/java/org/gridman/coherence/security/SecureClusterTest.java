@@ -10,6 +10,7 @@ import org.apache.directory.server.core.integ.annotations.CleanupLevel;
 import org.gridman.coherence.util.NullInvokable;
 import org.gridman.security.GridManCallbackHandler;
 import org.gridman.security.JaasHelper;
+import org.gridman.testtools.coherence.classloader.ClusterInfo;
 import org.gridman.testtools.coherence.classloader.ClusterStarter;
 import org.gridman.testtools.kerberos.*;
 import org.gridman.testtools.kerberos.apacheds.ApacheDsServerContext;
@@ -58,6 +59,7 @@ public class SecureClusterTest {
 
     private final ClusterStarter clusterStarter = ClusterStarter.getInstance();
     private String clusterFile;
+    private ClusterInfo clusterInfo;
 
     public static Subject subjectNULL;
     public static Subject subjectKnightj;
@@ -66,11 +68,12 @@ public class SecureClusterTest {
     @Before
     public void startSecureCluster() throws Exception {
         clusterFile = "/coherence/security/kerberos/secure-cluster.properties";
+        clusterInfo = new ClusterInfo(clusterFile);
         clusterStarter
                 .setProperty(JaasHelper.PROP_JAAS_MODULE, "Coherence")
                 .setProperty(GridManCallbackHandler.PROP_USERNAME, "cacheserver")
                 .setProperty(GridManCallbackHandler.PROP_PASSWORD, "secret")
-                .ensureCluster(clusterFile);
+                .ensureCluster(clusterInfo);
 
         subjectNULL = null;
         subjectKnightj = JaasHelper.logon("Coherence", "knightj", "secret");
@@ -79,7 +82,7 @@ public class SecureClusterTest {
 
     @After
     public void stopSecureCluster() {
-        clusterStarter.shutdown(clusterFile);
+        clusterStarter.shutdown(clusterInfo);
     }
 
     @Test
