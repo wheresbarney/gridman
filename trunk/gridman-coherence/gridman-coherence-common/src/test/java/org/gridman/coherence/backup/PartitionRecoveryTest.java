@@ -1,6 +1,9 @@
 package org.gridman.coherence.backup;
 
-import org.gridman.testtools.coherence.ClusterQueries;
+import org.gridman.testtools.coherence.CoherenceTestConstants;
+import org.gridman.testtools.coherence.classloader.ClusterInfo;
+import org.gridman.testtools.coherence.classloader.ClusterNode;
+import org.gridman.testtools.coherence.classloader.ClusterNodeGroup;
 import org.gridman.testtools.coherence.classloader.ClusterStarter;
 import org.gridman.testtools.junit.IsolationRunner;
 import org.gridman.testtools.kerberos.RunIsolated;
@@ -11,9 +14,11 @@ import org.junit.runner.RunWith;
 
 import java.util.Set;
 
+import static org.gridman.testtools.Matchers.isFalse;
+import static org.gridman.testtools.coherence.CoherenceTestConstants.*;
+import static org.gridman.testtools.coherence.queries.ClusterQueries.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-
 
 /**
  * @author Jonathan Knight
@@ -22,43 +27,46 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class PartitionRecoveryTest {
 
     private final ClusterStarter clusterStarter = ClusterStarter.getInstance();
-    private String clusterFile;
-    private final int storageNodesGroupId = 0;
-    private final int extendNodesGroupId = 1;
-    private final int memberZeroId = 0;
+    private ClusterInfo clusterInfo;
+    private ClusterNodeGroup storageGroup;
+    private ClusterNodeGroup extendProxyGroup;
+    private ClusterNode nodeZero;
 
     @Before
-    public void startSecureCluster() throws Exception {
-        clusterFile = "/coherence/common/common-cluster.properties";
+    public void setup() throws Exception {
+        clusterInfo = new ClusterInfo(COMMON_CLUSTER_FILE);
+        storageGroup = clusterInfo.getGroup(COMMON_STORAGE_GROUP);
+        extendProxyGroup = clusterInfo.getGroup(COMMON_EXTENDPROXY_GROUP);
+        nodeZero = clusterInfo.getNode(storageGroup, 0);
+
         clusterStarter
-                .overrideClusterProperty(clusterFile, storageNodesGroupId, "tangosol.coherence.cacheconfig", "coherence/backup/storage-node-config.xml")
-                .overrideClusterProperty(clusterFile, storageNodesGroupId, "backup.bdb.directory", "target/bdb")
-                .overrideClusterProperty(clusterFile, extendNodesGroupId, "tangosol.coherence.cacheconfig", "coherence/backup/extend-proxy-config.xml")
-                .ensureCluster(clusterFile);
+                .overrideClusterProperty(storageGroup, "tangosol.coherence.cacheconfig", "coherence/backup/storage-node-config.xml")
+                .overrideClusterProperty(storageGroup, "backup.bdb.directory", "target/bdb")
+                .overrideClusterProperty(extendProxyGroup, "tangosol.coherence.cacheconfig", "coherence/backup/extend-proxy-config.xml")
+                .ensureCluster(clusterInfo);
     }
 
     @After
     public void stopSecureCluster() {
-        clusterStarter.shutdown(clusterFile);
+        clusterStarter.shutdown(clusterInfo);
     }
 
     @Test
-    @RunIsolated(properties = {"/coherence/common/common-client.properties"})
+    @RunIsolated(properties = {CoherenceTestConstants.COMMON_CLIENT_PROPERTIES})
     @SuppressWarnings({"unchecked"})
     public void shouldWork() throws Exception {
-        final int memberToKillId = 1;
+        ClusterNode nodeToKill = clusterInfo.getNode(storageGroup, 1);
+                                                      
+        Integer before = clusterStarter.invoke(nodeZero, clusterSize());
+        String memberToKill = clusterStarter.invoke(nodeToKill, localMember());
 
-        Integer before = clusterStarter.invoke(clusterFile, storageNodesGroupId, memberZeroId, ClusterQueries.NAME, ClusterQueries.CLUSTER_SIZE);
-        String memberToKill = clusterStarter.invoke(clusterFile, storageNodesGroupId, memberToKillId, ClusterQueries.NAME, ClusterQueries.LOCAL_MEMBER);
+        clusterStarter.killNode(nodeToKill);
 
-        clusterStarter.suspendNetwork(clusterFile, storageNodesGroupId, memberToKillId);
-        clusterStarter.shutdown(clusterFile, storageNodesGroupId, memberToKillId);
-
-        Integer after = clusterStarter.invoke(clusterFile, storageNodesGroupId, memberZeroId, ClusterQueries.NAME, ClusterQueries.CLUSTER_SIZE);
-        Set memberSetAfter = clusterStarter.invoke(clusterFile, storageNodesGroupId, memberZeroId, ClusterQueries.NAME, ClusterQueries.MEMBER_SET);
+        Integer after = clusterStarter.invoke(nodeZero, clusterSize());
+        Set memberSetAfter = clusterStarter.invoke(nodeZero, memberSet());
 
         assertThat(before - after, is(1));
-        assertThat(memberSetAfter.contains(memberToKill), is(false));
+        assertThat(memberSetAfter.contains(memberToKill), isFalse());
     }
 
 }

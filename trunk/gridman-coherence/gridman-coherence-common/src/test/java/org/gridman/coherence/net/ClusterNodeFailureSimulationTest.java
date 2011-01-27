@@ -1,10 +1,8 @@
 package org.gridman.coherence.net;
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.Cluster;
-import com.tangosol.net.NamedCache;
-import org.gridman.coherence.pof.DomainKey;
-import org.gridman.coherence.pof.DomainValue;
+import org.gridman.testtools.coherence.classloader.ClusterInfo;
+import org.gridman.testtools.coherence.classloader.ClusterNode;
+import org.gridman.testtools.coherence.classloader.ClusterNodeGroup;
 import org.gridman.testtools.coherence.classloader.ClusterStarter;
 import org.gridman.testtools.junit.IsolationRunner;
 import org.gridman.testtools.kerberos.RunIsolated;
@@ -13,6 +11,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Set;
+
+import static org.gridman.testtools.Matchers.isFalse;
+import static org.gridman.testtools.coherence.CoherenceTestConstants.*;
+import static org.gridman.testtools.coherence.queries.ClusterQueries.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -23,57 +26,40 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class ClusterNodeFailureSimulationTest {
 
     private final ClusterStarter clusterStarter = ClusterStarter.getInstance();
-    private String clusterFile;
+    private ClusterInfo clusterInfo;
+    private ClusterNodeGroup storageGroup;
+    private ClusterNode nodeZero;
 
     @Before
-    public void startSecureCluster() throws Exception {
-        clusterFile = "/coherence/pof/pof-test-cluster.properties";
-        clusterStarter.ensureCluster(clusterFile);
+    public void setup() throws Exception {
+        clusterInfo = new ClusterInfo(COMMON_CLUSTER_FILE);
+        storageGroup = clusterInfo.getGroup(COMMON_STORAGE_GROUP);
+        nodeZero = clusterInfo.getNode(storageGroup, 0);
+
+        clusterStarter.ensureCluster(clusterInfo);
     }
 
     @After
     public void stopSecureCluster() {
-        clusterStarter.shutdown(clusterFile);
+        clusterStarter.shutdown(clusterInfo);
     }
 
     @Test
-    @RunIsolated(properties = {
-            "/coherence/pof/common-client.properties",
-            "/coherence/pof/client.properties"
-    })
+    @RunIsolated(properties = {COMMON_CLIENT_PROPERTIES})
     @SuppressWarnings({"unchecked"})
-    public void shouldCauseNodeDeparture() throws Exception {
-        Object key = new DomainKey("Key-1");
-        Object value = new DomainValue("JK");
+    public void shouldWork() throws Exception {
+        ClusterNode nodeToKill = clusterInfo.getNode(storageGroup, 1);
 
-        NamedCache cache = CacheFactory.getCache("dist-test");
-        cache.put(key, value);
+        Integer before = clusterStarter.invoke(nodeZero, clusterSize());
+        String memberToKill = clusterStarter.invoke(nodeToKill, localMember());
 
-        System.err.println("Putting...");
-        for (int i=0; i<1000; i++) {
-            cache.put("key-" + i, "value-" + i);
-        }
+        clusterStarter.killNode(nodeToKill);
 
-        Object before = clusterStarter.invoke(clusterFile, 0, 0, ClusterSize.class.getName(), "run");
-        clusterStarter.suspendNetwork(clusterFile, 0, 1);
-        Object after = clusterStarter.invoke(clusterFile, 0, 0, ClusterSize.class.getName(), "run");
-        clusterStarter.shutdown(clusterFile, 0, 1);
+        Integer after = clusterStarter.invoke(nodeZero, clusterSize());
+        Set memberSetAfter = clusterStarter.invoke(nodeZero, memberSet());
 
-        CacheFactory.shutdown();
-
-        assertThat(String.valueOf(before), is("3"));
-        assertThat(String.valueOf(after), is("2"));
-    }
-
-    public static class ClusterSize {
-        public int run() {
-            int size = 0;
-            Cluster cluster = CacheFactory.getCluster();
-            if (cluster != null) {
-                size = cluster.getMemberSet().size();
-            }
-            return size;
-        }
+        assertThat(before - after, is(1));
+        assertThat(memberSetAfter.contains(memberToKill), isFalse());
     }
 
 }

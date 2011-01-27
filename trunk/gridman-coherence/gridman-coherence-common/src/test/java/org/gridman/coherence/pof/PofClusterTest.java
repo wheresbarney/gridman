@@ -2,6 +2,7 @@ package org.gridman.coherence.pof;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
+import org.gridman.testtools.coherence.classloader.ClusterInfo;
 import org.gridman.testtools.coherence.classloader.ClusterStarter;
 import org.gridman.testtools.junit.IsolationRunner;
 import org.gridman.testtools.kerberos.RunIsolated;
@@ -22,17 +23,18 @@ public class PofClusterTest {
 
     private final ClusterStarter clusterStarter = ClusterStarter.getInstance();
     private String clusterFile;
-
+    private ClusterInfo clusterInfo;
     @Before
     public void startSecureCluster() throws Exception {
         clusterFile = "/coherence/pof/pof-test-cluster.properties";
-        clusterStarter.ensureCluster(clusterFile);
+        clusterInfo = new ClusterInfo(clusterFile);
+        clusterStarter.ensureCluster(clusterInfo);
         CacheFactory.shutdown();
     }
 
     @After
     public void stopSecureCluster() {
-        clusterStarter.shutdown(clusterFile);
+        clusterStarter.shutdown(clusterInfo);
     }
 
     @Test

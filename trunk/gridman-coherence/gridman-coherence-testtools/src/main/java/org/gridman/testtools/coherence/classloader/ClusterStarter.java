@@ -7,6 +7,7 @@ import com.tangosol.util.SimpleLongArray;
 import org.gridman.testtools.classloader.ClassloaderLifecycle;
 import org.gridman.testtools.classloader.ClassloaderRunner;
 import org.gridman.testtools.classloader.SystemPropertyLoader;
+import org.gridman.testtools.coherence.queries.ClusterQuery;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,22 +28,28 @@ public class ClusterStarter extends Base {
 
     private Map<String, ClusterInfo> clusters;
     private Map<String, LongArray> services;
-    private Map<String, Map<Integer,Properties>> servicePropertyOverrides;
+    private Map<String, Map<Integer, Properties>> servicePropertyOverrides;
 
     private Properties extraProperties;
 
     public static void main(String[] args) throws Exception {
-        if (args.length == 1) {
-            new ClusterStarter().ensureCluster(args[0]);
-        } else if (args.length == 2) {
-            Properties props = SystemPropertyLoader.getSystemProperties(args[0]);
-            int groupId = Integer.parseInt(args[1]);
-            new ClusterStarter().startAllServersInGroupInternal(args[0], props, groupId, false);
-        } else if (args.length == 3) {
-            Properties props = SystemPropertyLoader.getSystemProperties(args[0]);
-            int groupId = Integer.parseInt(args[1]);
-            int instance = Integer.parseInt(args[2]);
-            new ClusterStarter().startServiceInstanceInternal(args[0], props, groupId, instance, false);
+        if (args.length > 0) {
+            Properties properties = SystemPropertyLoader.getSystemProperties(args[0]);
+            ClusterInfo clusterInfo = new ClusterInfo(args[0], properties);
+            ClusterStarter clusterStarter = new ClusterStarter();
+            if (args.length == 1) {
+                clusterStarter.ensureCluster(clusterInfo);
+            } else if (args.length == 2) {
+                int groupId = Integer.parseInt(args[1]);
+                ClusterNodeGroup group = new ClusterNodeGroup(clusterInfo, groupId);
+                clusterStarter.startAllServersInGroupInternal(group, false);
+            } else if (args.length == 3) {
+                int groupId = Integer.parseInt(args[1]);
+                int instance = Integer.parseInt(args[2]);
+                ClusterNodeGroup group = new ClusterNodeGroup(clusterInfo, groupId);
+                ClusterNode node = new ClusterNode(group, instance);
+                clusterStarter.startServiceInstanceInternal(node, false);
+            }
         }
 
         final Object lock = new Object();
@@ -54,7 +61,7 @@ public class ClusterStarter extends Base {
     private ClusterStarter() {
         clusters = new HashMap<String, ClusterInfo>();
         services = new HashMap<String, LongArray>();
-        servicePropertyOverrides = new HashMap<String, Map<Integer,Properties>>();
+        servicePropertyOverrides = new HashMap<String, Map<Integer, Properties>>();
         extraProperties = new Properties();
     }
 
@@ -63,28 +70,30 @@ public class ClusterStarter extends Base {
         return this;
     }
 
-    public ClusterStarter overrideClusterProperty(String identifier, int group, String key, String value) {
-        getPropertyOverrides(identifier, group).setProperty(key, value);
+    public ClusterStarter overrideClusterProperty(ClusterNodeGroup group, String key, String value) {
+        getPropertyOverrides(group).setProperty(key, value);
         return this;
     }
 
-    private Properties getPropertyOverrides(String identifier, int group) {
+    private Properties getPropertyOverrides(ClusterNodeGroup group) {
+        String identifier = group.getClusterInfo().getIdentifier();
         if (!servicePropertyOverrides.containsKey(identifier)) {
-            servicePropertyOverrides.put(identifier, new HashMap<Integer,Properties>());
+            servicePropertyOverrides.put(identifier, new HashMap<Integer, Properties>());
         }
-        Map<Integer,Properties> groupOverrides = servicePropertyOverrides.get(identifier);
-        if (!groupOverrides.containsKey(group)) {
-            groupOverrides.put(group, new Properties());
+        Map<Integer, Properties> groupOverrides = servicePropertyOverrides.get(identifier);
+        if (!groupOverrides.containsKey(group.getGroupId())) {
+            groupOverrides.put(group.getGroupId(), new Properties());
         }
-        return groupOverrides.get(group);
+        return groupOverrides.get(group.getGroupId());
     }
 
     /**
      * Returns the singleton instance of ClusterStarter
+     *
      * @return the singleton instance of ClusterStarter
      */
     public static synchronized ClusterStarter getInstance() {
-        if(sInstance == null) {
+        if (sInstance == null) {
             sInstance = new ClusterStarter();
         }
         return sInstance;
@@ -94,57 +103,39 @@ public class ClusterStarter extends Base {
      * Ensure all the servers in all the server groups of the specified
      * cluster file are started.
      *
-     * @param clusterFile - the properties file for the cluster to ensure
+     * @param clusterInfo - the properties file for the cluster to ensure
      */
-    public void ensureCluster(String clusterFile) {
-        if (clusterFile == null || clusterFile.length() == 0) {
-            throw new IllegalArgumentException("clusterFile argument cannot be null or empty String and must specifiy a valid properties file");
-        }
-        ensureCluster(clusterFile, SystemPropertyLoader.getSystemProperties(clusterFile));
-        CacheFactory.shutdown();
-    }
-
-    /**
-     * Ensure all the servers in all the server groups of the specified
-     * cluster properties are started.
-     *
-     * @param identifier - an identifier for the cluster
-     * @param properties - the properties for the cluster to ensure
-     */
-    public void ensureCluster(String identifier, Properties properties) {
-        ClusterInfo clusterInfo = getClusterInfo(identifier, properties);
-
-        for (int groupId = 0; groupId < clusterInfo.getGroupCount(); groupId++) {
-            startAllServersInGroupInternal(identifier, properties, groupId, false);
+    public void ensureCluster(ClusterInfo clusterInfo) {
+        for (Object group : clusterInfo.getGroups()) {
+            startAllServersInGroupInternal((ClusterNodeGroup)group, false);
         }
 
         // Wait for the Services to come up...
-        visitAllServices(identifier, new ServiceStartupWaitVisitor());
+        visitAllServices(clusterInfo, new ServiceStartupWaitVisitor());
     }
 
     /**
      * Ensure all the servers in the specified group within the specified
      * cluster properties file are started.
      *
-     * @param identifier - an identifier for the cluster
-     * @param properties - the properties for the cluster
-     * @param groupId - the group of servers to start
+     * @param group    - the group of servers to start
      */
-    public void ensureAllServersInClusterGroup(String identifier, Properties properties, int groupId) {
-        startAllServersInGroupInternal(identifier, properties, groupId, true);
+    public void ensureAllServersInClusterGroup(ClusterNodeGroup group) {
+        startAllServersInGroupInternal(group, true);
     }
 
-    private void startAllServersInGroupInternal(String identifier, Properties properties, int groupId, boolean waitForStart) {
-        ClusterInfo clusterInfo = getClusterInfo(identifier, properties);
+    private void startAllServersInGroupInternal(ClusterNodeGroup group, boolean waitForStart) {
+        ClusterInfo clusterInfo = group.getClusterInfo();
+        int groupId = group.getGroupId();
         if (groupId < clusterInfo.getGroupCount()) {
-            for (int instance=0; instance<clusterInfo.getServerCount(groupId); instance++) {
-                startServiceInstanceInternal(identifier, properties, groupId, instance, false);
+            for (Object node : clusterInfo.getNodesForGroup(groupId)) {
+                startServiceInstanceInternal((ClusterNode)node, false);
             }
         }
 
         if (waitForStart) {
             // Wait for the Services to come up...
-            visitAllServices(identifier, new ServiceStartupWaitVisitor());
+            visitAllServices(clusterInfo, new ServiceStartupWaitVisitor());
         }
     }
 
@@ -152,30 +143,30 @@ public class ClusterStarter extends Base {
      * Ensure all the specified server instance within the specified group within the specified
      * cluster properties file is started.
      *
-     * @param identifier - an identifier for the cluster
-     * @param properties - the properties for the cluster
-     * @param groupId - the group of the servers to start belongs to
-     * @param instanceId - the instance of the server to start
+     * @param clusterNode - the instance of the server to start
      */
-    public void ensureServerInstance(String identifier, Properties properties, int groupId, int instanceId) {
-        startServiceInstanceInternal(identifier, properties, groupId, instanceId, true);
+    public void ensureServerInstance(ClusterNode clusterNode) {
+        startServiceInstanceInternal(clusterNode, true);
     }
 
     @SuppressWarnings({"unchecked"})
-    private void startServiceInstanceInternal(String identifier, Properties properties, int groupId, int instanceId, boolean waitForStart) {
-        LongArray serviceList = getServiceList(identifier, groupId);
-        if (!serviceList.exists(instanceId)) {
-            ClusterInfo clusterInfo = getClusterInfo(identifier, properties);
+    private void startServiceInstanceInternal(ClusterNode node, boolean waitForStart) {
+        LongArray serviceList = getServiceList(node.getGroup());
+        ClusterInfo clusterInfo = node.getClusterInfo();
+        int groupId = node.getGroupId();
+        int instanceId = node.getNodeId();
+
+        if (!serviceList.exists(node.getNodeId())) {
             Class<? extends ClassloaderLifecycle> serverClass = clusterInfo.getServerClass(groupId);
             Properties localProperties = clusterInfo.getLocalProperties(groupId);
             localProperties.putAll(extraProperties);
-            localProperties.putAll(getPropertyOverrides(identifier, groupId));
-            
+            localProperties.putAll(getPropertyOverrides(node.getGroup()));
+
             ClassloaderRunner runner;
             try {
                 runner = new ClassloaderRunner(serverClass.getCanonicalName(), localProperties);
             } catch (Throwable throwable) {
-                throw ensureRuntimeException(throwable, "Error starting server clusterFile=" + identifier +
+                throw ensureRuntimeException(throwable, "Error starting server clusterFile=" + clusterInfo.getIdentifier() +
                         " groupId=" + groupId + " instance=" + instanceId);
             }
 
@@ -184,155 +175,150 @@ public class ClusterStarter extends Base {
 
         if (waitForStart) {
             // Wait for the Services to come up...
-            visitAllServices(identifier, new ServiceStartupWaitVisitor());
+            visitAllServices(clusterInfo, new ServiceStartupWaitVisitor());
         }
     }
 
     /**
      * Shutdown all the servers in the specified cluster properties file.
-     * @param clusterFilename - the cluster properties file to use to identify the servers to shutdown
+     *
+     * @param clusterInfo - the cluster properties file to use to identify the servers to shutdown
      */
-    public void shutdown(String clusterFilename) {
-        CacheFactory.log("Shutting down all services : " + clusterFilename, CacheFactory.LOG_INFO);
-        visitAllServices(clusterFilename, new ServiceShutdownVisitor());
+    public void shutdown(ClusterInfo clusterInfo) {
+        CacheFactory.log("Shutting down all services : " + clusterInfo, CacheFactory.LOG_INFO);
+        visitAllServices(clusterInfo, new ServiceShutdownVisitor());
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             // ignored
         }
-        CacheFactory.log("Shut down all services : " + clusterFilename, CacheFactory.LOG_INFO);
+        CacheFactory.log("Shut down all services : " + clusterInfo, CacheFactory.LOG_INFO);
     }
 
     /**
      * Shutdown all the servers in the specified group within the specified cluster properties file.
-     * @param clusterFilename - the cluster properties file to use to identify the servers to shutdown
-     * @param groupId - the server group to shut down
+     *
+     * @param group     - the server group to shut down
      */
-    public void shutdown(String clusterFilename, int groupId) {
-        CacheFactory.log("Shutting down all services : cluster=" + clusterFilename + " groupId=" + groupId, CacheFactory.LOG_INFO);
-        visitAllServicesInGroup(clusterFilename, groupId, new ServiceShutdownVisitor());
-        CacheFactory.log("Shut down all services : cluster=" + clusterFilename + " groupId=" + groupId, CacheFactory.LOG_INFO);
+    public void shutdown(ClusterNodeGroup group) {
+        CacheFactory.log("Shutting down all services : " + group, CacheFactory.LOG_INFO);
+        visitAllServicesInGroup(group, new ServiceShutdownVisitor());
+        CacheFactory.log("Shut down all services : " + group, CacheFactory.LOG_INFO);
     }
 
     /**
      * Shutdown the specified server instance in the specified group within the specified cluster properties file.
-     * @param clusterFilename - the cluster properties file to use to identify the server to shutdown
-     * @param groupId - the server group containing the server to shutdown
-     * @param instance - the server instance to shutdown
+     *
+     * @param node        - the server instance to shutdown
      */
-    public void shutdown(String clusterFilename, int groupId, int instance) {
-        shutdown(clusterFilename, groupId, instance, new ServiceShutdownVisitor());
+    public void shutdown(ClusterNode node) {
+        shutdown(node, new ServiceShutdownVisitor());
     }
 
     /**
      * Shutdown the specified server instance in the specified group within the specified cluster properties file
      * and returns immediately without waiting to confirm shutdown.
      * This will cleanly shut down nodes so data loss should not occurr.
-     * @param clusterFilename - the cluster properties file to use to identify the server to shutdown
-     * @param groupId - the server group containing the server to shut down
-     * @param instance - the server instance to shut down
+     *
+     * @param node        - the server instance to shut down
      */
-    public void shutdownNoWait(String clusterFilename, int groupId, int instance) {
-        shutdown(clusterFilename, groupId, instance, new ServiceShutdownAndWaitVisitor());
+    public void shutdownNoWait(ClusterNode node) {
+        shutdown(node, new ServiceShutdownAndWaitVisitor());
     }
 
-    private void shutdown(String clusterFilename, int groupId, int instance, ServiceVisitor visitor) {
-        CacheFactory.log("Shutting down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
-        visitService(clusterFilename, groupId, instance, visitor);
-        CacheFactory.log("Shut down service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance);
+    private void shutdown(ClusterNode node, ServiceVisitor visitor) {
+        CacheFactory.log("Shutting down service : " + node, CacheFactory.LOG_INFO);
+        visitService(node, visitor);
+        CacheFactory.log("Shut down service : " + node, CacheFactory.LOG_INFO);
     }
 
     /**
      * Kill the all server instances in the specified group within the specified cluster properties file.
      * This method will stop a nodes network sockets before stopping the node so simulating node death.
-     * @param clusterFilename - the cluster properties file to use to identify the server to kill
-     * @param groupId - the server group containing the server to kill
+     *
+     * @param group - the server group containing the server to killNode
      */
-    public void kill(String clusterFilename, int groupId) {
-        CacheFactory.log("Killing down all services : cluster=" + clusterFilename + " groupId=" + groupId, CacheFactory.LOG_INFO);
-        visitAllServicesInGroup(clusterFilename, groupId, new ServiceKillVisitor());
-        CacheFactory.log("Killed all services : cluster=" + clusterFilename + " groupId=" + groupId, CacheFactory.LOG_INFO);
+    public void killNode(ClusterNodeGroup group) {
+        CacheFactory.log("Killing down all services : " + group, CacheFactory.LOG_INFO);
+        visitAllServicesInGroup(group, new ServiceKillVisitor());
+        CacheFactory.log("Killed all services : " + group, CacheFactory.LOG_INFO);
     }
 
     /**
      * Kill the specified server instance in the specified group within the specified cluster properties file.
      * This method will stop a nodes network sockets before stopping the node so simulating node death.
-     * @param clusterFilename - the cluster properties file to use to identify the server to kill
-     * @param groupId - the server group containing the server to kill
-     * @param instance - the server instance to kill
+     *
+     * @param instance        - the server instance to kill
      */
-    public void kill(String clusterFilename, int groupId, int instance) {
-        CacheFactory.log("Killing service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
-        visitService(clusterFilename, groupId, instance, new ServiceKillVisitor());
-        CacheFactory.log("Killed service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
+    public void killNode(ClusterNode instance) {
+        CacheFactory.log("Killing service : " + instance, CacheFactory.LOG_INFO);
+        visitService(instance, new ServiceKillVisitor());
+        CacheFactory.log("Killed service : " + instance, CacheFactory.LOG_INFO);
     }
 
     /**
      * Suspend the network om the specified server instance in the specified group within the specified cluster properties file.
-     * @param clusterFilename - the cluster properties file to use to identify the server
-     * @param groupId - the server group containing the server
-     * @param instance - the server instance
+     *
+     * @param instance        - the server instance
      */
-    public void suspendNetwork(String clusterFilename, int groupId, int instance) {
-        CacheFactory.log("Suspending Network service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
-        visitService(clusterFilename, groupId, instance, new SuspendNetworkVisitor());
-        CacheFactory.log("Suspended service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
+    public void suspendNetwork(ClusterNode instance) {
+        CacheFactory.log("Suspending Network service : " + instance, CacheFactory.LOG_INFO);
+        visitService(instance, new SuspendNetworkVisitor());
+        CacheFactory.log("Suspended service : " + instance, CacheFactory.LOG_INFO);
     }
 
     /**
      * Unsuspend the network om the specified server instance in the specified group within the specified cluster properties file.
-     * @param clusterFilename - the cluster properties file to use to identify the server
-     * @param groupId - the server group containing the server
-     * @param instance - the server instance
+     *
+     * @param instance    - the server instance
      */
-    public void unsuspendNetwork(String clusterFilename, int groupId, int instance) {
-        CacheFactory.log("unuspending Network service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
-        visitService(clusterFilename, groupId, instance, new UnsuspendNetworkVisitor());
-        CacheFactory.log("unuspended service : cluster=" + clusterFilename + " groupId=" + groupId + " instance=" + instance, CacheFactory.LOG_INFO);
+    public void unsuspendNetwork(ClusterNode instance) {
+        CacheFactory.log("unuspending Network service : " + instance, CacheFactory.LOG_INFO);
+        visitService(instance, new UnsuspendNetworkVisitor());
+        CacheFactory.log("unuspended service : " + instance, CacheFactory.LOG_INFO);
     }
 
-    public <T> T invoke(String clusterFilename, int groupId, int instance, String className, String methodName) {
-//        return invoke(clusterFilename, groupId, instance, className, methodName, new Class[0], new Object[0]);
+    public <T> T invoke(ClusterNode node, ClusterQuery<T> query) {
+        InvokeVisitor<T> visitor = new InvokeVisitor<T>(query);
+        invoke(node, visitor);
+        return visitor.getResult();
+    }
+
+    public <T> T invoke(ClusterNode node, String className, String methodName) {
         InvokeVisitor<T> visitor = new InvokeVisitor<T>(className, methodName, new Class[0], new Object[0]);
-        invoke(clusterFilename, groupId, instance, visitor);
+        invoke(node, visitor);
         return visitor.getResult();
     }
 
-    public <T> T invoke(String clusterFilename, int groupId, int instance, String className, String methodName, Class[] paramTypes, Object[] params) {
+    public <T> T invoke(ClusterNode node, String className, String methodName, Class[] paramTypes, Object[] params) {
         InvokeVisitor<T> visitor = new InvokeVisitor<T>(className, methodName, paramTypes, params);
-        invoke(clusterFilename, groupId, instance, visitor);
+        invoke(node, visitor);
         return visitor.getResult();
     }
 
-    private void invoke(String clusterFilename, int groupId, int instance, InvokeVisitor visitor) {
-        visitService(clusterFilename, groupId, instance, visitor);
+    private void invoke(ClusterNode node, InvokeVisitor visitor) {
+        visitService(node, visitor);
     }
 
-    ClusterInfo getClusterInfo(String identifier, Properties properties) {
-        if (!clusters.containsKey(identifier)) {
-            clusters.put(identifier, new ClusterInfo(properties));
+    LongArray getClusterServiceList(ClusterInfo clusterInfo) {
+        String identifier = clusterInfo.getIdentifier();
+        if (!services.containsKey(identifier)) {
+            services.put(identifier, new SimpleLongArray());
         }
-        return clusters.get(identifier);
+        return services.get(identifier);
     }
 
-    LongArray getClusterServiceList(String filename) {
-        if (!services.containsKey(filename)) {
-            services.put(filename, new SimpleLongArray());
+    LongArray getServiceList(ClusterNodeGroup group) {
+        LongArray clusterServiceList = getClusterServiceList(group.getClusterInfo());
+        if (!clusterServiceList.exists(group.getGroupId())) {
+            clusterServiceList.set(group.getGroupId(), new SimpleLongArray());
         }
-        return services.get(filename);
-    }
-
-    LongArray getServiceList(String filename, int groupId) {
-        LongArray clusterServiceList = getClusterServiceList(filename);
-        if (!clusterServiceList.exists(groupId)) {
-            clusterServiceList.set(groupId, new SimpleLongArray());
-        }
-        return (LongArray) clusterServiceList.get(groupId);
+        return (LongArray) clusterServiceList.get(group.getGroupId());
     }
 
     @SuppressWarnings({"unchecked"})
-    void visitAllServices(String filename, ServiceVisitor visitor) {
-        LongArray clusterServicesList = getClusterServiceList(filename);
+    void visitAllServices(ClusterInfo clusterInfo, ServiceVisitor visitor) {
+        LongArray clusterServicesList = getClusterServiceList(clusterInfo);
         Iterator<LongArray> it = clusterServicesList.iterator();
         while (it.hasNext()) {
             LongArray serviceList = it.next();
@@ -347,9 +333,9 @@ public class ClusterStarter extends Base {
     }
 
     @SuppressWarnings({"unchecked"})
-    void visitAllServicesInGroup(String filename, int groupId, ServiceVisitor visitor) {
-        LongArray clusterServicesList = getClusterServiceList(filename);
-        LongArray serviceList = (LongArray) clusterServicesList.get(groupId);
+    void visitAllServicesInGroup(ClusterNodeGroup group, ServiceVisitor visitor) {
+        LongArray clusterServicesList = getClusterServiceList(group.getClusterInfo());
+        LongArray serviceList = (LongArray) clusterServicesList.get(group.getGroupId());
         if (serviceList != null) {
             Iterator<ClassloaderRunner> serviceIterator = serviceList.iterator();
             while (serviceIterator.hasNext()) {
@@ -362,14 +348,14 @@ public class ClusterStarter extends Base {
     }
 
     @SuppressWarnings({"unchecked"})
-    void visitService(String filename, int groupId, int instance, ServiceVisitor visitor) {
-        LongArray clusterServicesList = getClusterServiceList(filename);
-        LongArray serviceList = (LongArray) clusterServicesList.get(groupId);
+    void visitService(ClusterNode node, ServiceVisitor visitor) {
+        LongArray clusterServicesList = getClusterServiceList(node.getClusterInfo());
+        LongArray serviceList = (LongArray) clusterServicesList.get(node.getGroupId());
         if (serviceList != null) {
-            ClassloaderRunner service = (ClassloaderRunner) serviceList.get(instance);
+            ClassloaderRunner service = (ClassloaderRunner) serviceList.get(node.getNodeId());
             if (service != null) {
                 if (visitor.visit(service)) {
-                    serviceList.remove(instance);
+                    serviceList.remove(node.getNodeId());
                 }
             }
         }
@@ -382,6 +368,7 @@ public class ClusterStarter extends Base {
     private static interface ServiceVisitor {
         /**
          * Perform an operation (visit) the specified ClassloaderRunner
+         *
          * @param service the ClassloaderRunner to visit
          * @return true if the service should be considered dead
          */
@@ -394,11 +381,12 @@ public class ClusterStarter extends Base {
     private static class ServiceStartupWaitVisitor implements ServiceVisitor {
         /**
          * Wait until the specified ClassloaderRunner's isStarted method returns true
+         *
          * @param service the ClassloaderRunner to visit
          */
         public boolean visit(ClassloaderRunner service) {
             try {
-                while(!service.isStarted()) {
+                while (!service.isStarted()) {
                     CacheFactory.log("Waiting for " + service, CacheFactory.LOG_DEBUG);
                     Thread.sleep(1000);
                 }
@@ -415,6 +403,7 @@ public class ClusterStarter extends Base {
     private static class ServiceShutdownVisitor implements ServiceVisitor {
         /**
          * Shutdown the specified ClassloaderRunner
+         *
          * @param service the ClassloaderRunner to visit
          */
         public boolean visit(ClassloaderRunner service) {
@@ -434,13 +423,14 @@ public class ClusterStarter extends Base {
     private static class ServiceShutdownAndWaitVisitor extends ServiceShutdownVisitor {
         /**
          * Shutdown the specified ClassloaderRunner
+         *
          * @param service the ClassloaderRunner to visit
          */
         @Override
         public boolean visit(ClassloaderRunner service) {
             try {
                 super.visit(service);
-                while(service.isStarted()) {
+                while (service.isStarted()) {
                     Thread.sleep(100);
                 }
                 return true;
@@ -457,6 +447,7 @@ public class ClusterStarter extends Base {
     private static class ServiceKillVisitor implements ServiceVisitor {
         /**
          * Shutdown the specified ClassloaderRunner
+         *
          * @param service the ClassloaderRunner to visit
          */
         public boolean visit(ClassloaderRunner service) {
@@ -477,6 +468,13 @@ public class ClusterStarter extends Base {
         private Class[] paramTypes;
         private Object[] params;
         private T result;
+
+        private InvokeVisitor(ClusterQuery query) {
+            this.className = query.getClassName();
+            this.methodName = query.getMethodName();
+            this.paramTypes = query.getParamTypes();
+            this.params = query.getParameters();
+        }
 
         private InvokeVisitor(String className, String methodName, Class[] paramTypes, Object[] params) {
             this.className = className;

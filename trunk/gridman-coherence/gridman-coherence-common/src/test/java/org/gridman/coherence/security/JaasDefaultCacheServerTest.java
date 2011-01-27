@@ -11,6 +11,7 @@ import org.gridman.security.JaasHelper;
 import org.gridman.testtools.classloader.IsolatedAction;
 import org.gridman.testtools.classloader.PropertyIsolation;
 import org.gridman.testtools.classloader.SystemPropertyLoader;
+import org.gridman.testtools.coherence.classloader.ClusterInfo;
 import org.gridman.testtools.coherence.classloader.ClusterProperties;
 import org.gridman.testtools.coherence.classloader.ClusterStarter;
 import org.gridman.testtools.coherence.classloader.JaasClusterClassloaderLifecycle;
@@ -138,10 +139,11 @@ public class JaasDefaultCacheServerTest {
                 .withProxyEnabled(true);
 
         String identifier = "test.cluster";
-        clusterStarter.ensureCluster(identifier, cluster.asProperties());
+        ClusterInfo clusterInfo = new ClusterInfo(identifier, cluster.asProperties());
+        clusterStarter.ensureCluster(clusterInfo);
         int membersStarted = getClusterSize();
 
-        clusterStarter.shutdown(identifier);
+        clusterStarter.shutdown(clusterInfo);
         int finalSize = getClusterSize();
 
         assertEquals("Expected to start 3 members", 3, membersStarted);
@@ -152,17 +154,16 @@ public class JaasDefaultCacheServerTest {
     public void shouldStartAndStopClusterGroup() {
         String clusterFile = "/coherence/security/kerberos/secure-cluster.properties";
 
-        Properties localProperties = SystemPropertyLoader.getSystemProperties(clusterFile);
-
+        ClusterInfo clusterInfo = new ClusterInfo(clusterFile);
         clusterStarter
                 .setProperty(JaasHelper.PROP_JAAS_MODULE, "Coherence")
                 .setProperty(GridManCallbackHandler.PROP_USERNAME, "knightj")
                 .setProperty(GridManCallbackHandler.PROP_PASSWORD, "secret")
-                .ensureAllServersInClusterGroup(clusterFile, localProperties, 0);
+                .ensureAllServersInClusterGroup(clusterInfo.getGroup(0));
 
         int membersStarted = getClusterSize();
 
-        clusterStarter.shutdown(clusterFile, 0);
+        clusterStarter.shutdown(clusterInfo.getGroup(0));
         int finalSize = getClusterSize();
 
         assertEquals("Expected to start 2 members", 2, membersStarted);
