@@ -34,6 +34,8 @@ public class ClusterNodeFailureSimulationTest {
     public void setup() throws Exception {
         clusterInfo = new ClusterInfo(COMMON_CLUSTER_FILE);
         storageGroup = clusterInfo.getGroup(COMMON_STORAGE_GROUP);
+        clusterInfo.addNodeToGroup(storageGroup);
+
         nodeZero = clusterInfo.getNode(storageGroup, 0);
 
         clusterStarter.ensureCluster(clusterInfo);
@@ -47,7 +49,7 @@ public class ClusterNodeFailureSimulationTest {
     @Test
     @RunIsolated(properties = {COMMON_CLIENT_PROPERTIES})
     @SuppressWarnings({"unchecked"})
-    public void shouldWork() throws Exception {
+    public void shouldCauseMemberDeparture() throws Exception {
         ClusterNode nodeToKill = clusterInfo.getNode(storageGroup, 1);
 
         Integer before = clusterStarter.invoke(nodeZero, clusterSize());
@@ -62,4 +64,40 @@ public class ClusterNodeFailureSimulationTest {
         assertThat(memberSetAfter.contains(memberToKill), isFalse());
     }
 
+    @Test
+    @RunIsolated(properties = {COMMON_CLIENT_PROPERTIES})
+    @SuppressWarnings({"unchecked"})
+    public void shouldCauseTwoMemberDepartures() throws Exception {
+        ClusterNode nodeToKill_1 = clusterInfo.getNode(storageGroup, 1);
+        ClusterNode nodeToKill_2 = clusterInfo.getNode(storageGroup, 2);
+
+        Integer before = clusterStarter.invoke(nodeZero, clusterSize());
+        String memberToKill_1 = clusterStarter.invoke(nodeToKill_1, localMember());
+        String memberToKill_2 = clusterStarter.invoke(nodeToKill_2, localMember());
+
+        clusterStarter.killNode(nodeToKill_1, nodeToKill_2);
+
+        Integer after = clusterStarter.invoke(nodeZero, clusterSize());
+        Set memberSetAfter = clusterStarter.invoke(nodeZero, memberSet());
+
+        assertThat(before - after, is(2));
+        assertThat(memberSetAfter.contains(memberToKill_1), isFalse());
+        assertThat(memberSetAfter.contains(memberToKill_2), isFalse());
+    }
+
+    //@Test
+    @RunIsolated(properties = {COMMON_CLIENT_PROPERTIES})
+    @SuppressWarnings({"unchecked"})
+    public void shouldCauseMemberDepartureAndAllowRejoin() throws Exception {
+        ClusterNode nodeToKill = clusterInfo.getNode(storageGroup, 1);
+
+        Integer before = clusterStarter.invoke(nodeZero, clusterSize());
+
+        clusterStarter.killNode(nodeToKill);
+        clusterStarter.ensureServerInstance(nodeToKill);
+
+        Integer after = clusterStarter.invoke(nodeZero, clusterSize());
+
+        assertThat(before, is(after));
+    }
 }

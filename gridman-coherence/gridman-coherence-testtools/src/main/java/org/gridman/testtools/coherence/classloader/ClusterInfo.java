@@ -19,7 +19,8 @@ public class ClusterInfo<T extends ClassloaderLifecycle> {
 
     private String identifier;
     private Properties clusterProperties;
-    private Map<Integer, Properties> localPropertyMap;
+    private Properties globalOverrides;
+    private Map<Integer, Properties> groupProperties;
     private Map<Integer, Class<T>> serverClasses;
 
     private Map<Integer,ClusterNodeGroup> groups;
@@ -40,7 +41,8 @@ public class ClusterInfo<T extends ClassloaderLifecycle> {
     public ClusterInfo(String identifier, Properties properties) {
         this.identifier = identifier;
         clusterProperties = properties;
-        localPropertyMap = new HashMap<Integer, Properties>();
+        globalOverrides = new Properties();
+        groupProperties = new HashMap<Integer, Properties>();
         serverClasses = new HashMap<Integer, Class<T>>();
 
         nodes = new HashMap<Integer,Map<Integer,ClusterNode>>();
@@ -61,6 +63,18 @@ public class ClusterInfo<T extends ClassloaderLifecycle> {
         }
 
 
+    }
+
+    public void addNodeToGroup(ClusterNodeGroup group) {
+        ClusterNodeGroup actualGroup = getGroup(group.getGroupId());
+        if (actualGroup != null) {
+            Map<Integer, ClusterNode> clusterNodeMap = nodes.get(group.getGroupId());
+            int id = clusterNodeMap.size();
+            clusterNodeMap.put(id, new ClusterNode(actualGroup, id));
+
+            String prefix = PROP_CLUSTER_PREFIX + actualGroup.getGroupId();
+            clusterProperties.setProperty(prefix + PROP_SUFFIX_SERVER_COUNT, String.valueOf(id));
+        }
     }
 
     @Override
@@ -117,7 +131,8 @@ public class ClusterInfo<T extends ClassloaderLifecycle> {
     }
 
     @SuppressWarnings({"unchecked"})
-    public Class<T> getServerClass(int groupId) {
+    public Class<T> getServerClass(ClusterNodeGroup group) {
+        int groupId = group.getGroupId();
         if (!serverClasses.containsKey(groupId)) {
             String serverClassName = getServerClassName(groupId);
             if (serverClassName == null) {
@@ -142,8 +157,18 @@ public class ClusterInfo<T extends ClassloaderLifecycle> {
         return serverClasses.get(groupId);
     }
 
-    public Properties getLocalProperties(int groupId) {
-        if (!localPropertyMap.containsKey(groupId)) {
+    public ClusterInfo<T> overrideProperty(String key, String value) {
+        globalOverrides.setProperty(key, value);
+        return this;
+    }
+
+    public ClusterInfo<T> removeOverrideProperty(String key) {
+        globalOverrides.remove(key);
+        return this;
+    }
+
+    public Properties getGroupProperties(int groupId) {
+        if (!groupProperties.containsKey(groupId)) {
             String defaultProperties = getProperty(PROP_DEFAULT_PROPERTIES);
             Properties localProperties = SystemPropertyLoader.loadProperties(defaultProperties);
 
@@ -161,9 +186,12 @@ public class ClusterInfo<T extends ClassloaderLifecycle> {
                 String value = getProperty(argPrefix + ".value");
                 localProperties.setProperty(key, value);
             }
-            localPropertyMap.put(groupId, localProperties);
+            groupProperties.put(groupId, localProperties);
         }
 
-        return localPropertyMap.get(groupId);
+        Properties props = new Properties();
+        props.putAll(groupProperties.get(groupId));
+        props.putAll(globalOverrides);
+        return props;
     }
 }

@@ -69,11 +69,11 @@ public class SecureClusterTest {
     public void startSecureCluster() throws Exception {
         clusterFile = "/coherence/security/kerberos/secure-cluster.properties";
         clusterInfo = new ClusterInfo(clusterFile);
-        clusterStarter
-                .setProperty(JaasHelper.PROP_JAAS_MODULE, "Coherence")
-                .setProperty(GridManCallbackHandler.PROP_USERNAME, "cacheserver")
-                .setProperty(GridManCallbackHandler.PROP_PASSWORD, "secret")
-                .ensureCluster(clusterInfo);
+        clusterInfo.overrideProperty(JaasHelper.PROP_JAAS_MODULE, "Coherence")
+                   .overrideProperty(GridManCallbackHandler.PROP_USERNAME, "cacheserver")
+                   .overrideProperty(GridManCallbackHandler.PROP_PASSWORD, "secret");
+
+        clusterStarter.ensureCluster(clusterInfo);
 
         subjectNULL = null;
         subjectKnightj = JaasHelper.logon("Coherence", "knightj", "secret");
