@@ -39,11 +39,12 @@ public class PartitionRecoveryTest {
         extendProxyGroup = clusterInfo.getGroup(COMMON_EXTENDPROXY_GROUP);
         nodeZero = clusterInfo.getNode(storageGroup, 0);
 
-        clusterStarter
-                .overrideClusterProperty(storageGroup, "tangosol.coherence.cacheconfig", "coherence/backup/storage-node-config.xml")
-                .overrideClusterProperty(storageGroup, "backup.bdb.directory", "target/bdb")
-                .overrideClusterProperty(extendProxyGroup, "tangosol.coherence.cacheconfig", "coherence/backup/extend-proxy-config.xml")
-                .ensureCluster(clusterInfo);
+        storageGroup.overrideProperty("tangosol.coherence.cacheconfig", "coherence/backup/storage-node-config.xml")
+                    .overrideProperty("backup.bdb.directory", "target/bdb");
+        
+        extendProxyGroup.overrideProperty("tangosol.coherence.cacheconfig", "coherence/backup/extend-proxy-config.xml");
+
+        clusterStarter.ensureCluster(clusterInfo);
     }
 
     @After

@@ -34,7 +34,7 @@
                 <scheme-name>backup-scheme</scheme-name>
             </backup-storage>
             <partition-listener>
-                <class-name>org.gridman.coherence.backup.LoggingPartitionListener</class-name>
+                <class-name>org.gridman.coherence.backup.RestorePartitionListener</class-name>
             </partition-listener>
             <partition-count>29</partition-count>
             <autostart>true</autostart>

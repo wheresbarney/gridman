@@ -2,17 +2,12 @@ package org.gridman.testtools.coherence.classloader;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.util.Base;
-import com.tangosol.util.LongArray;
-import com.tangosol.util.SimpleLongArray;
 import org.gridman.testtools.classloader.ClassloaderLifecycle;
 import org.gridman.testtools.classloader.ClassloaderRunner;
 import org.gridman.testtools.classloader.SystemPropertyLoader;
 import org.gridman.testtools.coherence.queries.ClusterQuery;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Utility class that will start a Coherence pseudo-cluster in a single JVM.
@@ -26,11 +21,7 @@ import java.util.Properties;
 public class ClusterStarter extends Base {
     private static ClusterStarter sInstance;
 
-    private Map<String, ClusterInfo> clusters;
-    private Map<String, LongArray> services;
-    private Map<String, Map<Integer, Properties>> servicePropertyOverrides;
-
-    private Properties extraProperties;
+    private Map<ClusterInfo,Map<ClusterNodeGroup,Map<ClusterNode,ClassloaderRunner>>> services;
 
     public static void main(String[] args) throws Exception {
         if (args.length > 0) {
@@ -59,32 +50,7 @@ public class ClusterStarter extends Base {
     }
 
     private ClusterStarter() {
-        clusters = new HashMap<String, ClusterInfo>();
-        services = new HashMap<String, LongArray>();
-        servicePropertyOverrides = new HashMap<String, Map<Integer, Properties>>();
-        extraProperties = new Properties();
-    }
-
-    public ClusterStarter setProperty(String key, String value) {
-        extraProperties.setProperty(key, value);
-        return this;
-    }
-
-    public ClusterStarter overrideClusterProperty(ClusterNodeGroup group, String key, String value) {
-        getPropertyOverrides(group).setProperty(key, value);
-        return this;
-    }
-
-    private Properties getPropertyOverrides(ClusterNodeGroup group) {
-        String identifier = group.getClusterInfo().getIdentifier();
-        if (!servicePropertyOverrides.containsKey(identifier)) {
-            servicePropertyOverrides.put(identifier, new HashMap<Integer, Properties>());
-        }
-        Map<Integer, Properties> groupOverrides = servicePropertyOverrides.get(identifier);
-        if (!groupOverrides.containsKey(group.getGroupId())) {
-            groupOverrides.put(group.getGroupId(), new Properties());
-        }
-        return groupOverrides.get(group.getGroupId());
+        services = new HashMap<ClusterInfo,Map<ClusterNodeGroup,Map<ClusterNode,ClassloaderRunner>>>();
     }
 
     /**
@@ -151,26 +117,25 @@ public class ClusterStarter extends Base {
 
     @SuppressWarnings({"unchecked"})
     private void startServiceInstanceInternal(ClusterNode node, boolean waitForStart) {
-        LongArray serviceList = getServiceList(node.getGroup());
         ClusterInfo clusterInfo = node.getClusterInfo();
         int groupId = node.getGroupId();
         int instanceId = node.getNodeId();
 
-        if (!serviceList.exists(node.getNodeId())) {
-            Class<? extends ClassloaderLifecycle> serverClass = clusterInfo.getServerClass(groupId);
-            Properties localProperties = clusterInfo.getLocalProperties(groupId);
-            localProperties.putAll(extraProperties);
-            localProperties.putAll(getPropertyOverrides(node.getGroup()));
+        Map<ClusterNode, ClassloaderRunner> servicesForGroup = servicesForGroup(node.getGroup());
 
-            ClassloaderRunner runner;
+        if (!servicesForGroup.containsKey(node)) {
             try {
-                runner = new ClassloaderRunner(serverClass.getCanonicalName(), localProperties);
+                Class<? extends ClassloaderLifecycle> serverClass = clusterInfo.getServerClass(node.getGroup());
+                Properties localProperties = clusterInfo.getGroupProperties(groupId);
+                localProperties.putAll(node.getGroup().getOverrideProperties());
+                localProperties.putAll(node.getOverrideProperties());
+
+                ClassloaderRunner runner = new ClassloaderRunner(serverClass.getCanonicalName(), localProperties);
+                servicesForGroup.put(node, runner);
             } catch (Throwable throwable) {
                 throw ensureRuntimeException(throwable, "Error starting server clusterFile=" + clusterInfo.getIdentifier() +
                         " groupId=" + groupId + " instance=" + instanceId);
             }
-
-            serviceList.set(instanceId, runner);
         }
 
         if (waitForStart) {
@@ -202,7 +167,7 @@ public class ClusterStarter extends Base {
      */
     public void shutdown(ClusterNodeGroup group) {
         CacheFactory.log("Shutting down all services : " + group, CacheFactory.LOG_INFO);
-        visitAllServicesInGroup(group, new ServiceShutdownVisitor());
+        visitAllServices(group, new ServiceShutdownVisitor());
         CacheFactory.log("Shut down all services : " + group, CacheFactory.LOG_INFO);
     }
 
@@ -240,7 +205,7 @@ public class ClusterStarter extends Base {
      */
     public void killNode(ClusterNodeGroup group) {
         CacheFactory.log("Killing down all services : " + group, CacheFactory.LOG_INFO);
-        visitAllServicesInGroup(group, new ServiceKillVisitor());
+        visitAllServices(group, new ServiceKillVisitor());
         CacheFactory.log("Killed all services : " + group, CacheFactory.LOG_INFO);
     }
 
@@ -248,12 +213,17 @@ public class ClusterStarter extends Base {
      * Kill the specified server instance in the specified group within the specified cluster properties file.
      * This method will stop a nodes network sockets before stopping the node so simulating node death.
      *
-     * @param instance        - the server instance to kill
+     * @param nodes        - the server instances to kill
      */
-    public void killNode(ClusterNode instance) {
-        CacheFactory.log("Killing service : " + instance, CacheFactory.LOG_INFO);
-        visitService(instance, new ServiceKillVisitor());
-        CacheFactory.log("Killed service : " + instance, CacheFactory.LOG_INFO);
+    public void killNode(ClusterNode... nodes) {
+        CacheFactory.log("Killing service : instances=" + Arrays.toString(nodes), CacheFactory.LOG_INFO);
+        for (ClusterNode node : nodes) {
+            visitService(node, new SuspendNetworkVisitor());
+        }
+        for (ClusterNode node : nodes) {
+            visitService(node, new ServiceShutdownVisitor());
+        }
+        CacheFactory.log("Killed service : instances=" + Arrays.toString(nodes), CacheFactory.LOG_INFO);
     }
 
     /**
@@ -300,62 +270,57 @@ public class ClusterStarter extends Base {
         visitService(node, visitor);
     }
 
-    LongArray getClusterServiceList(ClusterInfo clusterInfo) {
-        String identifier = clusterInfo.getIdentifier();
-        if (!services.containsKey(identifier)) {
-            services.put(identifier, new SimpleLongArray());
+    private Map<ClusterNodeGroup,Map<ClusterNode,ClassloaderRunner>> servicesForCluster(ClusterInfo clusterInfo) {
+        if (!services.containsKey(clusterInfo)) {
+            services.put(clusterInfo, new TreeMap<ClusterNodeGroup,Map<ClusterNode,ClassloaderRunner>>());
         }
-        return services.get(identifier);
+        return services.get(clusterInfo);
     }
 
-    LongArray getServiceList(ClusterNodeGroup group) {
-        LongArray clusterServiceList = getClusterServiceList(group.getClusterInfo());
-        if (!clusterServiceList.exists(group.getGroupId())) {
-            clusterServiceList.set(group.getGroupId(), new SimpleLongArray());
+    private Map<ClusterNode,ClassloaderRunner> servicesForGroup(ClusterNodeGroup group) {
+        Map<ClusterNodeGroup,Map<ClusterNode,ClassloaderRunner>> servicesForCluster = servicesForCluster(group.getClusterInfo());
+        if (!servicesForCluster.containsKey(group)) {
+            servicesForCluster.put(group, new TreeMap<ClusterNode,ClassloaderRunner>());
         }
-        return (LongArray) clusterServiceList.get(group.getGroupId());
+        return servicesForCluster.get(group);
     }
 
-    @SuppressWarnings({"unchecked"})
-    void visitAllServices(ClusterInfo clusterInfo, ServiceVisitor visitor) {
-        LongArray clusterServicesList = getClusterServiceList(clusterInfo);
-        Iterator<LongArray> it = clusterServicesList.iterator();
-        while (it.hasNext()) {
-            LongArray serviceList = it.next();
-            Iterator<ClassloaderRunner> serviceIterator = serviceList.iterator();
-            while (serviceIterator.hasNext()) {
-                ClassloaderRunner service = serviceIterator.next();
-                if (visitor.visit(service)) {
-                    serviceIterator.remove();
-                }
+    private void visitAllServices(ClusterInfo clusterInfo, ServiceVisitor visitor) {
+        Map<ClusterNodeGroup,Map<ClusterNode,ClassloaderRunner>> clusterServices = services.get(clusterInfo);
+        if (clusterServices != null) {
+            TreeSet<ClusterNodeGroup> groups = new TreeSet<ClusterNodeGroup>(clusterServices.keySet());
+            for(ClusterNodeGroup group : groups) {
+                visitAllServices(clusterServices.get(group), visitor);
             }
         }
     }
 
-    @SuppressWarnings({"unchecked"})
-    void visitAllServicesInGroup(ClusterNodeGroup group, ServiceVisitor visitor) {
-        LongArray clusterServicesList = getClusterServiceList(group.getClusterInfo());
-        LongArray serviceList = (LongArray) clusterServicesList.get(group.getGroupId());
-        if (serviceList != null) {
-            Iterator<ClassloaderRunner> serviceIterator = serviceList.iterator();
-            while (serviceIterator.hasNext()) {
-                ClassloaderRunner service = serviceIterator.next();
-                if (visitor.visit(service)) {
-                    serviceIterator.remove();
-                }
-            }
+    private void visitAllServices(ClusterNodeGroup group, ServiceVisitor visitor) {
+        Map<ClusterNodeGroup,Map<ClusterNode,ClassloaderRunner>> clusterServices = services.get(group.getClusterInfo());
+        if (clusterServices != null) {
+            Map<ClusterNode,ClassloaderRunner> nodeServices = clusterServices.get(group);
+            visitAllServices(nodeServices, visitor);
         }
     }
 
-    @SuppressWarnings({"unchecked"})
-    void visitService(ClusterNode node, ServiceVisitor visitor) {
-        LongArray clusterServicesList = getClusterServiceList(node.getClusterInfo());
-        LongArray serviceList = (LongArray) clusterServicesList.get(node.getGroupId());
-        if (serviceList != null) {
-            ClassloaderRunner service = (ClassloaderRunner) serviceList.get(node.getNodeId());
-            if (service != null) {
-                if (visitor.visit(service)) {
-                    serviceList.remove(node.getNodeId());
+    private void visitAllServices(Map<ClusterNode,ClassloaderRunner> nodeServices, ServiceVisitor visitor) {
+        TreeSet<ClusterNode> nodes = new TreeSet<ClusterNode>(nodeServices.keySet());
+        for (ClusterNode node : nodes) {
+            visitService(node, visitor);
+        }
+    }
+
+    private void visitService(ClusterNode node, ServiceVisitor visitor) {
+        ClusterNodeGroup group = node.getGroup();
+        Map<ClusterNodeGroup,Map<ClusterNode,ClassloaderRunner>> clusterServices = services.get(group.getClusterInfo());
+        if (clusterServices != null) {
+            Map<ClusterNode,ClassloaderRunner> nodeServices = clusterServices.get(group);
+            if (nodeServices != null) {
+                ClassloaderRunner service = nodeServices.get(node);
+                if (service != null) {
+                    if (visitor.visit(service)) {
+                        nodeServices.remove(node);
+                    }
                 }
             }
         }

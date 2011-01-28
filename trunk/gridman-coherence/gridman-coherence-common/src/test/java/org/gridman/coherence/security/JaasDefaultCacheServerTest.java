@@ -155,11 +155,11 @@ public class JaasDefaultCacheServerTest {
         String clusterFile = "/coherence/security/kerberos/secure-cluster.properties";
 
         ClusterInfo clusterInfo = new ClusterInfo(clusterFile);
-        clusterStarter
-                .setProperty(JaasHelper.PROP_JAAS_MODULE, "Coherence")
-                .setProperty(GridManCallbackHandler.PROP_USERNAME, "knightj")
-                .setProperty(GridManCallbackHandler.PROP_PASSWORD, "secret")
-                .ensureAllServersInClusterGroup(clusterInfo.getGroup(0));
+        clusterInfo.overrideProperty(JaasHelper.PROP_JAAS_MODULE, "Coherence")
+                   .overrideProperty(GridManCallbackHandler.PROP_USERNAME, "knightj")
+                   .overrideProperty(GridManCallbackHandler.PROP_PASSWORD, "secret");
+
+        clusterStarter.ensureAllServersInClusterGroup(clusterInfo.getGroup(0));
 
         int membersStarted = getClusterSize();
 

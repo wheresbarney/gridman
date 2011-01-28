@@ -18,7 +18,11 @@ public class PacketController {
         if (cluster != null) {
             member = cluster.getLocalMember();
         }
-        System.err.println("****** Suspending DatagramSockets member=" + member);
+        System.err.println("DatagramSockets suspended=" + suspended + "member=" + member);
+    }
+
+    public static boolean isSuspended() {
+        return suspended;
     }
 
     public static void check() throws IOException {

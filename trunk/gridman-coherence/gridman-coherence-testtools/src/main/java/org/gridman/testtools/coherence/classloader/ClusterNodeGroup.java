@@ -1,5 +1,8 @@
 package org.gridman.testtools.coherence.classloader;
 
+import java.util.Properties;
+import java.util.Set;
+
 /**
  * @author Jonathan Knight
  */
@@ -9,9 +12,12 @@ public class ClusterNodeGroup implements Comparable<ClusterNodeGroup> {
 
     private int groupId;
 
+    private Properties overrides;
+
     public ClusterNodeGroup(ClusterInfo clusterInfo, int groupId) {
         this.clusterInfo = clusterInfo;
         this.groupId = groupId;
+        this.overrides = new Properties();
     }
 
     public ClusterInfo getClusterInfo() {
@@ -22,6 +28,24 @@ public class ClusterNodeGroup implements Comparable<ClusterNodeGroup> {
         return groupId;
     }
 
+    public Set<ClusterNode> getNodes() {
+        return clusterInfo.getNodesForGroup(groupId);
+    }
+
+    public ClusterNodeGroup overrideProperty(String key, String value) {
+        overrides.setProperty(key, value);
+        return this;
+    }
+
+    public ClusterNodeGroup removeOverrideProperty(String key) {
+        overrides.remove(key);
+        return this;
+    }
+
+    public Properties getOverrideProperties() {
+        return new Properties(overrides);
+    }
+    
     @Override
     public String toString() {
         return clusterInfo.toString() + " group=" + groupId;

@@ -23,11 +23,11 @@ import java.util.concurrent.Future;
 /**
  * @author Jonathan Knight
  */
-public class LoggingPartitionListener implements PartitionListener {
+public class RestorePartitionListener implements PartitionListener {
 
     private ExecutorService pool;
 
-    public LoggingPartitionListener() {
+    public RestorePartitionListener() {
         pool = Executors.newFixedThreadPool(10);
     }
 
