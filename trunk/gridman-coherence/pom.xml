@@ -17,6 +17,7 @@
   <modules>
     <module>gridman-coherence-testtools</module>
     <module>gridman-coherence-common</module>
+    <module>gridman-coherence-incubator</module>
     <module>gridman-coherence-demo</module>
   </modules>
 
