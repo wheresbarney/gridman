@@ -154,6 +154,16 @@
         <artifactId>coherence-jpa</artifactId>
         <version>${coherence.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.oracle</groupId>
+        <artifactId>coherence-common</artifactId>
+        <version>1.7.3.20019</version>
+      </dependency>
+      <dependency>
+        <groupId>com.oracle</groupId>
+        <artifactId>coherence-commandpattern</artifactId>
+        <version>2.7.3.20019</version>
+      </dependency>
 
       <dependency>
         <groupId>com.sleepycat</groupId>
