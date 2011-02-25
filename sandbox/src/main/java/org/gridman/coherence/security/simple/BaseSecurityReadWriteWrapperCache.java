@@ -19,13 +19,13 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 
-public class SimplePermissionedNamedCache extends WrapperNamedCache {
-    private static final Logger logger = Logger.getLogger(SimplePermissionedNamedCache.class);
+public class BaseSecurityReadWriteWrapperCache extends WrapperNamedCache {
+    private static final Logger logger = Logger.getLogger(BaseSecurityReadWriteWrapperCache.class);
 
-    private CacheSecurityProvider provider;
+    private BaseSecurityCacheProvider provider;
     private String cacheName;
 
-    public SimplePermissionedNamedCache(NamedCache cache, CacheSecurityProvider provider) {
+    public BaseSecurityReadWriteWrapperCache(NamedCache cache, BaseSecurityCacheProvider provider) {
         super(cache, cache.getCacheName());
         cacheName = cache.getCacheName();
         this.provider = provider;

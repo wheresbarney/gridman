@@ -6,6 +6,8 @@ import com.tangosol.net.InvocationService;
 import org.apache.log4j.Logger;
 import org.gridman.classloader.SystemPropertyLoader;
 import org.gridman.coherence.security.simple.CoherenceSecurityUtils;
+import org.gridman.coherence.security.simple.SimpleSecurityPermission;
+import org.gridman.coherence.security.simple.SimpleSecurityProvider;
 
 import javax.security.auth.Subject;
 import javax.swing.*;
@@ -89,6 +91,7 @@ public class DemoSecurityGUI implements ActionListener {
     }
 
     @Override public void actionPerformed(ActionEvent e) {
+        final String permissionCacheName = SimpleSecurityProvider.getInstance().getPermissionCacheName();
         try {
             String action = isAdminGui ? (String)actionBox.getSelectedItem() : "Check";
             final String permissionCommand = (String)permissionBox.getSelectedItem();
@@ -96,21 +99,21 @@ public class DemoSecurityGUI implements ActionListener {
             if(action.equals("Add")) {
                 pAction = new PrivilegedAction<Object>() {
                     @Override public Object run() {
-                        DemoSecurityPermission permission = new DemoSecurityPermission(   roleField.getText(),
+                        SimpleSecurityPermission permission = new SimpleSecurityPermission(   roleField.getText(),
                                                                             resourceField.getText(),
                                                                             !permissionCommand.equals("Invoke"),
                                                                             !permissionCommand.equals("Write"));
-                        return CacheFactory.getCache(DemoSecurityProvider.PERMISSION_CACHE).put(permission, permission);
+                        return CacheFactory.getCache(permissionCacheName).put(permission, permission);
                     }
                 };
             } else if(action.equals("Remove")) {
                 pAction = new PrivilegedAction<Object>() {
                     @Override public Object run() {
-                        DemoSecurityPermission permission = new DemoSecurityPermission(   roleField.getText(),
+                        SimpleSecurityPermission permission = new SimpleSecurityPermission(   roleField.getText(),
                                                                             resourceField.getText(),
                                                                             !permissionCommand.equals("Invoke"),
                                                                             !permissionCommand.equals("Write"));
-                        Object value = CacheFactory.getCache(DemoSecurityProvider.PERMISSION_CACHE).remove(permission);
+                        Object value = CacheFactory.getCache(permissionCacheName).remove(permission);
                         if(value==null) { throw new RuntimeException("Nothing to remove!"); }
                         return null;
                     }
@@ -125,7 +128,7 @@ public class DemoSecurityGUI implements ActionListener {
                         } else if(permissionCommand.equals("Invoke")) {
                             try {
                                 Invocable invocable = (Invocable) Class.forName(resourceField.getText()).newInstance();
-                                ((InvocationService)CacheFactory.getService(DemoSecurityProvider.CLIENT_INVOKE_SERVICE)).query(invocable,null);
+                                ((InvocationService)CacheFactory.getService("ClientInvokeService")).query(invocable,null);
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
