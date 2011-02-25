@@ -9,7 +9,7 @@ import javax.security.auth.Subject;
  * For checking restricting access to Invoke Service.
  * @author Andrew Wilson
  */
-public class CheckInvokeServiceProxy implements InvocationSecurityProvider  {
+public class CheckInvokeServiceProxy implements BaseSecurityInvocationProvider {
     private static final Logger logger = Logger.getLogger(CheckInvokeServiceProxy.class);
 
     public CheckInvokeServiceProxy() {

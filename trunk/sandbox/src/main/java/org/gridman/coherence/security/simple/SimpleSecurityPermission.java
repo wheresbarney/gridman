@@ -1,7 +1,11 @@
-package org.gridman.coherence.security.demo;
+package org.gridman.coherence.security.simple;
 
+import com.tangosol.io.pof.PofReader;
+import com.tangosol.io.pof.PofWriter;
+import com.tangosol.io.pof.PortableObject;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.io.Serializable;
 /**
  * This object is just meant to be a POJO.
@@ -9,17 +13,17 @@ import java.io.Serializable;
  *
  * @todo - Add POF
  */
-public class DemoSecurityPermission implements Serializable {
+public class SimpleSecurityPermission implements Serializable, PortableObject {
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = Logger.getLogger(DemoSecurityPermission.class);
+    private static final Logger logger = Logger.getLogger(SimpleSecurityPermission.class);
 
     private String role;
     private String resourceName;
     private boolean cacheRatherThanInvoke;
     private boolean readOnly;
 
-    public DemoSecurityPermission(String role, String resourceName, boolean cacheRatherThanInvoke, boolean readOnly) {
+    public SimpleSecurityPermission(String role, String resourceName, boolean cacheRatherThanInvoke, boolean readOnly) {
         this.role = role;
         this.resourceName = resourceName;
         this.cacheRatherThanInvoke = cacheRatherThanInvoke;
@@ -52,7 +56,7 @@ public class DemoSecurityPermission implements Serializable {
     @Override public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DemoSecurityPermission that = (DemoSecurityPermission) o;
+        SimpleSecurityPermission that = (SimpleSecurityPermission) o;
         if (cacheRatherThanInvoke != that.cacheRatherThanInvoke) return false;
         if (readOnly != that.readOnly) return false;
         if (resourceName != null ? !resourceName.equals(that.resourceName) : that.resourceName != null) return false;
@@ -69,11 +73,25 @@ public class DemoSecurityPermission implements Serializable {
     }
 
     @Override public String toString() {
-        return "DemoSecurityPermission{" +
+        return "SimpleSecurityPermission{" +
                 "role='" + role + '\'' +
                 ", resourceName='" + resourceName + '\'' +
                 ", cacheRatherThanInvoke=" + cacheRatherThanInvoke +
                 ", readOnly=" + readOnly +
                 '}';
+    }
+
+    @Override public void readExternal(PofReader pofReader) throws IOException {
+        role = pofReader.readString(0);
+        resourceName = pofReader.readString(1);
+        cacheRatherThanInvoke = pofReader.readBoolean(2);
+        readOnly = pofReader.readBoolean(3);
+    }
+
+    @Override public void writeExternal(PofWriter pofWriter) throws IOException {
+        pofWriter.writeString(0,role);
+        pofWriter.writeString(1, resourceName);
+        pofWriter.writeBoolean(2, cacheRatherThanInvoke);
+        pofWriter.writeBoolean(3, readOnly);
     }
 }

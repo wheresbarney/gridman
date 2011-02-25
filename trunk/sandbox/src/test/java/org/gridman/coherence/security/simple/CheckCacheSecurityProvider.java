@@ -10,7 +10,7 @@ import javax.security.auth.Subject;
  * This will be replaced by CacheServiceProxy when it is released by Jason Howse.
  * @author Andrew Wilson
  */
-public class CheckCacheSecurityProvider implements CacheSecurityProvider {
+public class CheckCacheSecurityProvider implements BaseSecurityCacheProvider {
     private static final Logger logger = Logger.getLogger(CheckCacheSecurityProvider.class);
 
     public CheckCacheSecurityProvider() {

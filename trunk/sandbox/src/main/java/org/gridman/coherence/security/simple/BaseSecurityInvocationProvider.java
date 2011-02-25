@@ -7,7 +7,7 @@ import javax.security.auth.Subject;
 /**
  * This is the interface for providing security to Invocation
  */
-public interface InvocationSecurityProvider {
+public interface BaseSecurityInvocationProvider {
     /**     
      * @param subject - the subject that was requested.
      * @param invocable - the invocable

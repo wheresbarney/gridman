@@ -13,23 +13,23 @@ import java.util.Set;
 /**
  * A simple Security Proxy for the Invocation Service. 
  */
-public class SimpleInvokeServiceProxy extends WrapperInvocationService {
-    private static final Logger logger = Logger.getLogger(SimpleInvokeServiceProxy.class);
+public class BaseSecurityInvokeServiceProxy extends WrapperInvocationService {
+    private static final Logger logger = Logger.getLogger(BaseSecurityInvokeServiceProxy.class);
 
-    private InvocationSecurityProvider invocationSecurityProvider;
+    private BaseSecurityInvocationProvider invocationSecurityProvider;
 
-    public SimpleInvokeServiceProxy(InvocationService invocationService, InvocationSecurityProvider invocationSecurityProvider) {
+    public BaseSecurityInvokeServiceProxy(InvocationService invocationService, BaseSecurityInvocationProvider invocationSecurityProvider) {
         super(invocationService);
         this.invocationSecurityProvider = invocationSecurityProvider;
         logger.debug("CheckInvokeServiceProxy()");
     }
 
-    public SimpleInvokeServiceProxy(InvocationService invocationService, String invocationSecurityProviderClass) throws Exception {
-        this(invocationService, (InvocationSecurityProvider)Class.forName(invocationSecurityProviderClass).newInstance());
+    public BaseSecurityInvokeServiceProxy(InvocationService invocationService, String invocationSecurityProviderClass) throws Exception {
+        this(invocationService, (BaseSecurityInvocationProvider)Class.forName(invocationSecurityProviderClass).newInstance());
     }
 
-    public SimpleInvokeServiceProxy(InvocationService invocationService, String invocationSecurityProviderClass, XmlElement xml) throws Exception {
-        this(invocationService, (InvocationSecurityProvider)Class.forName(invocationSecurityProviderClass).newInstance());
+    public BaseSecurityInvokeServiceProxy(InvocationService invocationService, String invocationSecurityProviderClass, XmlElement xml) throws Exception {
+        this(invocationService, (BaseSecurityInvocationProvider)Class.forName(invocationSecurityProviderClass).newInstance());
     }
 
     /**

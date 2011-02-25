@@ -66,7 +66,7 @@ public class ConfigurableCacheServiceProxy extends WrapperCacheService implement
         permissionChecker.checkPermission(permission, CoherenceSecurityUtils.getCurrentSubject());
         NamedCache cache = super.ensureCache(cacheName, classLoader);
         if (fineGrainedPermissions) {
-            //cache = new SimplePermissionedNamedCache(cache, permissionChecker);
+            //cache = new BaseSecurityReadWriteWrapperCache(cache, permissionChecker);
         }
         return cache;
     }
