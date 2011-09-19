@@ -6,7 +6,8 @@ import com.tangosol.net.cache.WrapperNamedCache;
 import com.tangosol.util.Filter;
 import com.tangosol.util.MapListener;
 import com.tangosol.util.ValueExtractor;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.SubjectDomainCombiner;
@@ -19,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class SimplePermissionedNamedCache extends WrapperNamedCache {
-    private static final Logger logger = Logger.getLogger(SimplePermissionedNamedCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimplePermissionedNamedCache.class);
 
     private CacheSecurityProvider provider;
     private String cacheName;

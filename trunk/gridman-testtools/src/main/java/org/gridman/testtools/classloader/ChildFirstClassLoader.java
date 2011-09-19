@@ -1,6 +1,7 @@
 package org.gridman.testtools.classloader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.security.AllPermission;
@@ -14,7 +15,7 @@ import java.util.*;
  * It allows us to Isolate things (eg Coherence nodes).
  */
 public class ChildFirstClassLoader extends PropertyIsolatingClassLoader {
-    private static final Logger logger = Logger.getLogger(ChildFirstClassLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChildFirstClassLoader.class);
 
 	private Map<String, Class> loadedClasses = new HashMap<String, Class>();
 	private Map<String, URL> loadedResources = new HashMap<String, URL>();

@@ -3,7 +3,8 @@ package org.gridman.demo.coherence.security;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Invocable;
 import com.tangosol.net.InvocationService;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.gridman.coherence.security.simple.CoherenceSecurityUtils;
 import org.gridman.testtools.classloader.SystemPropertyLoader;
 
@@ -19,7 +20,7 @@ import java.security.PrivilegedAction;
  * @author Andrew Wilson
  */
 public class DemoSecurityGUI implements ActionListener {
-    private static final Logger logger = Logger.getLogger(DemoSecurityGUI.class);
+    private static final Logger logger = LoggerFactory.getLogger(DemoSecurityGUI.class);
 
     private JTextField userField;
     private JTextField roleField;

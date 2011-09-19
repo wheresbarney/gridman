@@ -1,7 +1,8 @@
 package org.gridman.coherence.security.simple;
 
 import com.tangosol.net.security.IdentityTransformer;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 
@@ -11,7 +12,7 @@ import javax.security.auth.Subject;
  * NOT recommended for production usage.
  */
 public class ClusterLockIdentityTransformer implements IdentityTransformer {
-    private static final Logger logger = Logger.getLogger(ClusterLockIdentityTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClusterLockIdentityTransformer.class);
     protected static final String LOCK = "org.gridman.coherence.security.clusterLock";
 
     public ClusterLockIdentityTransformer() {

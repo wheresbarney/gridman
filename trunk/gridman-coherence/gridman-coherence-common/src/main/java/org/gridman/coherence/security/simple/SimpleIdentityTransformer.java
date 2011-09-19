@@ -1,7 +1,8 @@
 package org.gridman.coherence.security.simple;
 
 import com.tangosol.net.security.IdentityTransformer;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 
@@ -9,7 +10,7 @@ import javax.security.auth.Subject;
  * Simple Identity Transformer, just passes the first principal name through
  */
 public class SimpleIdentityTransformer implements IdentityTransformer {
-    private static final Logger logger = Logger.getLogger(SimpleIdentityTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimpleIdentityTransformer.class);
 
     public SimpleIdentityTransformer() {
         logger.debug(SimpleIdentityTransformer.class.getName());

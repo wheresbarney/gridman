@@ -1,9 +1,16 @@
 package org.gridman.testtools.coherence.classloader;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
+
 import org.gridman.testtools.classloader.ClassloaderLifecycle;
 import org.gridman.testtools.classloader.SystemPropertyLoader;
-
-import java.util.*;
 
 /**
  * A class to hold information about an isolated classloader cluster.
