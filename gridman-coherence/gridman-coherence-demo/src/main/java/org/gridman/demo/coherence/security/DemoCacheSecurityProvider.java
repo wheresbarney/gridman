@@ -1,6 +1,7 @@
 package org.gridman.demo.coherence.security;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.gridman.coherence.security.simple.CacheSecurityProvider;
 import org.gridman.coherence.security.simple.CoherenceSecurityUtils;
 
@@ -10,7 +11,7 @@ import javax.security.auth.Subject;
  * Our Security Provider, it checks the permission in the permissionCache.
  */
 public class DemoCacheSecurityProvider implements CacheSecurityProvider {
-    public static final Logger logger = Logger.getLogger(DemoCacheSecurityProvider.class);
+    public static final Logger logger = LoggerFactory.getLogger(DemoCacheSecurityProvider.class);
 
     public DemoCacheSecurityProvider() {
         logger.debug(DemoCacheSecurityProvider.class.getName());

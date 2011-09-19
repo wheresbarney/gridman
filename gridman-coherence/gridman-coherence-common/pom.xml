@@ -25,10 +25,12 @@
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>coherence</artifactId>
+      <version>${coherence.version.common}</version>
     </dependency>
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>coherence-jpa</artifactId>
+      <version>${coherence.version.common}</version>
     </dependency>
     <dependency>
       <groupId>com.sleepycat</groupId>
@@ -54,8 +56,18 @@
 
     <!-- Logging -->
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <!-- Testing and Mocking -->
@@ -70,11 +82,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>hamcrest</groupId>
+      <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-all</artifactId>
       <scope>test</scope>
     </dependency>
 
   </dependencies>
-  
+
 </project>

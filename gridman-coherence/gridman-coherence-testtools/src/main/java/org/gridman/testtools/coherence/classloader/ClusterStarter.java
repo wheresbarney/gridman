@@ -1,13 +1,20 @@
 package org.gridman.testtools.coherence.classloader;
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.util.Base;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import org.gridman.testtools.classloader.ClassloaderLifecycle;
 import org.gridman.testtools.classloader.ClassloaderRunner;
 import org.gridman.testtools.classloader.SystemPropertyLoader;
 import org.gridman.testtools.coherence.queries.ClusterQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import com.tangosol.util.Base;
 
 /**
  * Utility class that will start a Coherence pseudo-cluster in a single JVM.
@@ -19,6 +26,7 @@ import java.util.*;
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
 public class ClusterStarter extends Base {
+    private static final Logger logger = LoggerFactory.getLogger(ClusterStarter.class);
     private static ClusterStarter sInstance;
 
     private Map<ClusterInfo,Map<ClusterNodeGroup,Map<ClusterNode,ClassloaderRunner>>> services;
@@ -150,14 +158,14 @@ public class ClusterStarter extends Base {
      * @param clusterInfo - the cluster properties file to use to identify the servers to shutdown
      */
     public void shutdown(ClusterInfo clusterInfo) {
-        CacheFactory.log("Shutting down all services : " + clusterInfo, CacheFactory.LOG_INFO);
+        logger.info("Shutting down all services : " + clusterInfo);
         visitAllServices(clusterInfo, new ServiceShutdownVisitor());
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             // ignored
         }
-        CacheFactory.log("Shut down all services : " + clusterInfo, CacheFactory.LOG_INFO);
+        logger.info("Shut down all services : " + clusterInfo);
     }
 
     /**
@@ -166,9 +174,9 @@ public class ClusterStarter extends Base {
      * @param group     - the server group to shut down
      */
     public void shutdown(ClusterNodeGroup group) {
-        CacheFactory.log("Shutting down all services : " + group, CacheFactory.LOG_INFO);
+        logger.info("Shutting down all services : " + group);
         visitAllServices(group, new ServiceShutdownVisitor());
-        CacheFactory.log("Shut down all services : " + group, CacheFactory.LOG_INFO);
+        logger.info("Shut down all services : " + group);
     }
 
     /**
@@ -192,9 +200,9 @@ public class ClusterStarter extends Base {
     }
 
     private void shutdown(ClusterNode node, ServiceVisitor visitor) {
-        CacheFactory.log("Shutting down service : " + node, CacheFactory.LOG_INFO);
+        logger.info("Shutting down service : " + node);
         visitService(node, visitor);
-        CacheFactory.log("Shut down service : " + node, CacheFactory.LOG_INFO);
+        logger.info("Shut down service : " + node);
     }
 
     /**
@@ -204,9 +212,9 @@ public class ClusterStarter extends Base {
      * @param group - the server group containing the server to killNode
      */
     public void killNode(ClusterNodeGroup group) {
-        CacheFactory.log("Killing down all services : " + group, CacheFactory.LOG_INFO);
+        logger.info("Killing down all services : " + group);
         visitAllServices(group, new ServiceKillVisitor());
-        CacheFactory.log("Killed all services : " + group, CacheFactory.LOG_INFO);
+        logger.info("Killed all services : " + group);
     }
 
     /**
@@ -216,14 +224,14 @@ public class ClusterStarter extends Base {
      * @param nodes        - the server instances to kill
      */
     public void killNode(ClusterNode... nodes) {
-        CacheFactory.log("Killing service : instances=" + Arrays.toString(nodes), CacheFactory.LOG_INFO);
+        logger.info("Killing service : instances=" + Arrays.toString(nodes));
         for (ClusterNode node : nodes) {
             visitService(node, new SuspendNetworkVisitor());
         }
         for (ClusterNode node : nodes) {
             visitService(node, new ServiceShutdownVisitor());
         }
-        CacheFactory.log("Killed service : instances=" + Arrays.toString(nodes), CacheFactory.LOG_INFO);
+        logger.info("Killed service : instances=" + Arrays.toString(nodes));
     }
 
     /**
@@ -232,9 +240,9 @@ public class ClusterStarter extends Base {
      * @param instance        - the server instance
      */
     public void suspendNetwork(ClusterNode instance) {
-        CacheFactory.log("Suspending Network service : " + instance, CacheFactory.LOG_INFO);
+        logger.info("Suspending Network service : " + instance);
         visitService(instance, new SuspendNetworkVisitor());
-        CacheFactory.log("Suspended service : " + instance, CacheFactory.LOG_INFO);
+        logger.info("Suspended service : " + instance);
     }
 
     /**
@@ -243,9 +251,9 @@ public class ClusterStarter extends Base {
      * @param instance    - the server instance
      */
     public void unsuspendNetwork(ClusterNode instance) {
-        CacheFactory.log("unuspending Network service : " + instance, CacheFactory.LOG_INFO);
+        logger.info("unuspending Network service : " + instance);
         visitService(instance, new UnsuspendNetworkVisitor());
-        CacheFactory.log("unuspended service : " + instance, CacheFactory.LOG_INFO);
+        logger.info("unuspended service : " + instance);
     }
 
     public <T> T invoke(ClusterNode node, ClusterQuery<T> query) {
@@ -352,12 +360,12 @@ public class ClusterStarter extends Base {
         public boolean visit(ClassloaderRunner service) {
             try {
                 while (!service.isStarted()) {
-                    CacheFactory.log("Waiting for " + service, CacheFactory.LOG_DEBUG);
+                    logger.debug("Waiting for " + service);
                     Thread.sleep(1000);
                 }
                 return false;
             } catch (Exception e) {
-                throw Base.ensureRuntimeException(e, "Error while waiting for service to start - service=" + service);
+                throw new RuntimeException("Error while waiting for service to start - service=" + service, e);
             }
         }
     }
@@ -373,11 +381,11 @@ public class ClusterStarter extends Base {
          */
         public boolean visit(ClassloaderRunner service) {
             try {
-                CacheFactory.log("Shutting down " + service, CacheFactory.LOG_DEBUG);
+                logger.debug("Shutting down " + service);
                 service.shutdown();
                 return true;
             } catch (Exception e) {
-                throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
+                throw new RuntimeException("Error shutting down service " + service, e);
             }
         }
     }
@@ -400,7 +408,7 @@ public class ClusterStarter extends Base {
                 }
                 return true;
             } catch (Exception e) {
-                throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
+                throw new RuntimeException("Error shutting down service " + service, e);
             }
         }
     }
@@ -417,12 +425,12 @@ public class ClusterStarter extends Base {
          */
         public boolean visit(ClassloaderRunner service) {
             try {
-                CacheFactory.log("Shutting down " + service, CacheFactory.LOG_DEBUG);
+                logger.debug("Shutting down " + service);
                 service.suspendNetwork();
                 service.shutdown();
                 return true;
             } catch (Exception e) {
-                throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
+                throw new RuntimeException("Error shutting down service " + service, e);
             }
         }
     }
@@ -458,7 +466,7 @@ public class ClusterStarter extends Base {
                 result = (T) service.invoke(className, methodName, paramTypes, params);
                 return false;
             } catch (Exception e) {
-                throw Base.ensureRuntimeException(e, "Error invoking method on service " + service);
+                throw new RuntimeException("Error invoking method on service " + service, e);
             }
         }
     }
@@ -473,11 +481,11 @@ public class ClusterStarter extends Base {
          */
         public boolean visit(ClassloaderRunner service) {
             try {
-                CacheFactory.log("Suspending Network " + service, CacheFactory.LOG_DEBUG);
+                logger.debug("Suspending Network " + service);
                 service.suspendNetwork();
                 return false;
             } catch (Exception e) {
-                throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
+                throw new RuntimeException("Error shutting down service " + service, e);
             }
         }
     }
@@ -492,11 +500,11 @@ public class ClusterStarter extends Base {
          */
         public boolean visit(ClassloaderRunner service) {
             try {
-                CacheFactory.log("Unsuspending Network " + service);
+                logger.info("Unsuspending Network " + service);
                 service.unsuspendNetwork();
                 return false;
             } catch (Exception e) {
-                throw Base.ensureRuntimeException(e, "Error shutting down service " + service);
+                throw new RuntimeException("Error shutting down service " + service, e);
             }
         }
     }

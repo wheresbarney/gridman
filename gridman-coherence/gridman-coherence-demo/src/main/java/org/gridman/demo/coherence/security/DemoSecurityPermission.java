@@ -1,6 +1,7 @@
 package org.gridman.demo.coherence.security;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 
@@ -13,7 +14,7 @@ import java.io.Serializable;
 public class DemoSecurityPermission implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = Logger.getLogger(DemoSecurityPermission.class);
+    private static final Logger logger = LoggerFactory.getLogger(DemoSecurityPermission.class);
 
     private String role;
     private String resourceName;

@@ -1,7 +1,8 @@
 package org.gridman.demo.coherence.security;
 
 import com.tangosol.net.Invocable;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.gridman.coherence.security.simple.CoherenceSecurityUtils;
 import org.gridman.coherence.security.simple.InvocationSecurityProvider;
 
@@ -14,7 +15,7 @@ import javax.security.auth.Subject;
  * eg. by parameters in the invocation service etc.
  */
 public class DemoInvokeSecurityProvider implements InvocationSecurityProvider {
-    public static final Logger logger = Logger.getLogger(DemoCacheSecurityProvider.class);
+    public static final Logger logger = LoggerFactory.getLogger(DemoCacheSecurityProvider.class);
 
     public DemoInvokeSecurityProvider() throws Throwable {
         logger.debug(DemoInvokeSecurityProvider.class.getName());

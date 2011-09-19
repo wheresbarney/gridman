@@ -5,7 +5,8 @@ import com.tangosol.net.NamedCache;
 import com.tangosol.util.Filter;
 import com.tangosol.util.filter.AndFilter;
 import com.tangosol.util.filter.EqualsFilter;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
@@ -13,7 +14,7 @@ import java.util.Set;
  * Basically a wrapper to the the Permission Cache.
  */
 public class DemoSecurityProvider {
-    static final Logger logger = Logger.getLogger(DemoServer.class);
+    static final Logger logger = LoggerFactory.getLogger(DemoServer.class);
     static final String PERMISSION_CACHE = "PermissionCache";
     static final String CLIENT_INVOKE_SERVICE = "ClientInvokeService";
 

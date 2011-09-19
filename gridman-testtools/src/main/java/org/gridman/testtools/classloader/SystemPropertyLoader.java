@@ -1,6 +1,7 @@
 package org.gridman.testtools.classloader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +14,7 @@ import java.util.Properties;
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
 public class SystemPropertyLoader {
-    private static final Logger logger = Logger.getLogger(SystemPropertyLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(SystemPropertyLoader.class);
     
     public static void loadSystemProperties(String... resourceNames) {
         addProperties(System.getProperties(), resourceNames);

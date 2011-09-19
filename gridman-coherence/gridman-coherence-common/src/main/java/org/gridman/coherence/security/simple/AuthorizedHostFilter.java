@@ -3,7 +3,8 @@ package org.gridman.coherence.security.simple;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.Filter;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 
@@ -15,7 +16,7 @@ import java.net.InetAddress;
  * @author Andrew Wilson 6Apr10
  */
 public class AuthorizedHostFilter implements Filter {
-    private static final Logger logger = Logger.getLogger(AuthorizedHostFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(AuthorizedHostFilter.class);
 
     public AuthorizedHostFilter() {
         logger.debug("AuthorizedHostFilter()");

@@ -1,7 +1,8 @@
 package org.gridman.coherence.security.simple;
 
 import com.tangosol.net.security.IdentityAsserter;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 
@@ -11,7 +12,7 @@ import javax.security.auth.Subject;
  * NOT recommended for production usage. 
  */
 public class ClusterLockIdentityAsserter implements IdentityAsserter {
-    private static final Logger logger = Logger.getLogger(ClusterLockIdentityAsserter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClusterLockIdentityAsserter.class);
 
     public ClusterLockIdentityAsserter() {
         logger.debug(ClusterLockIdentityAsserter.class.getName());

@@ -1,6 +1,7 @@
 package org.gridman.testtools.classloader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
@@ -13,9 +14,9 @@ import java.util.Properties;
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
 public class ClassloaderRunner {
-    public static final Logger logger = Logger.getLogger(ClassloaderRunner.class);
+    public static final Logger logger = LoggerFactory.getLogger(ClassloaderRunner.class);
     private static Throwable ALL_OK = new Throwable("ALL_OK");
-    
+
     private final String className;
     private volatile Throwable throwable;
     private Properties localSystemProperties;
@@ -26,10 +27,9 @@ public class ClassloaderRunner {
         logger.debug("In ClassloaderRunner");
         this.className = className;
         this.localSystemProperties = localSystemProperties;
-        MyRunner myRunner = new MyRunner();
-        if(throwable == null) {
-            synchronized(myRunner) { myRunner.wait(); }
-        }
+        Thread runnerThread = new Thread(new MyRunner());
+        runnerThread.start();
+        runnerThread.join();
         if(throwable != ALL_OK) {
             throw throwable;
         }
@@ -43,7 +43,7 @@ public class ClassloaderRunner {
     public void shutdown() throws Exception {
         logger.info("Calling shutdown");
         aClass.getMethod("shutdown").invoke(instance);
-        logger.info("Called shutdown");        
+        logger.info("Called shutdown");
     }
 
     public void suspendNetwork() throws Exception {
@@ -66,10 +66,6 @@ public class ClassloaderRunner {
 
     private class MyRunner implements Runnable {
 
-        private MyRunner() {
-            new Thread(this).start();
-        }
-
         public void run() {
             try {
                 ClassLoader loader = ChildFirstClassLoader.newInstance(localSystemProperties);
@@ -83,7 +79,6 @@ public class ClassloaderRunner {
                 logger.error("Failed in starting " + className + " : " + t);
                 throwable = t;
             }
-            synchronized(this) { this.notifyAll(); }
         }
     }
 

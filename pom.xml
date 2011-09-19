@@ -10,7 +10,9 @@
   <url>http://code.google.com/p/gridman/</url>
 
   <properties>
-    <coherence.version>3.6.1</coherence.version>
+    <coherence.version>[3.6,3.8)</coherence.version>
+    <!-- gridman-coherence-common won't build with 3.7 -->
+    <coherence.version.common>[3.6,3.7)</coherence.version.common>
     <!--<coherence.version>3.5.3b465</coherence.version>-->
     <apacheds.version>1.5.5</apacheds.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -110,23 +112,23 @@
           <configuration>
             <locales>en</locales>
           </configuration>
-        </plugin>        
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
 
-  <repositories>
-    <repository>
-      <id>Codehaus Snapshots</id>
-      <url>http://snapshots.repository.codehaus.org/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
+<!--  <repositories>-->
+<!--    <repository>-->
+<!--      <id>Codehaus Snapshots</id>-->
+<!--      <url>http://snapshots.repository.codehaus.org/</url>-->
+<!--      <snapshots>-->
+<!--        <enabled>true</enabled>-->
+<!--      </snapshots>-->
+<!--      <releases>-->
+<!--        <enabled>false</enabled>-->
+<!--      </releases>-->
+<!--    </repository>-->
+<!--  </repositories>-->
   <pluginRepositories>
     <pluginRepository>
       <id>Codehaus Snapshots</id>
@@ -219,7 +221,7 @@
         <version>1.8.2</version>
       </dependency>
       <dependency>
-        <groupId>hamcrest</groupId>
+      <groupId>org.hamcrest</groupId>
         <artifactId>hamcrest-all</artifactId>
         <version>1.2</version>
       </dependency>

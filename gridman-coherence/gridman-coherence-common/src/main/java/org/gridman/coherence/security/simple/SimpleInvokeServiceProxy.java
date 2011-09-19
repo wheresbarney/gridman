@@ -5,7 +5,8 @@ import com.tangosol.net.InvocationObserver;
 import com.tangosol.net.InvocationService;
 import com.tangosol.net.WrapperInvocationService;
 import com.tangosol.run.xml.XmlElement;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +15,7 @@ import java.util.Set;
  * A simple Security Proxy for the Invocation Service. 
  */
 public class SimpleInvokeServiceProxy extends WrapperInvocationService {
-    private static final Logger logger = Logger.getLogger(SimpleInvokeServiceProxy.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimpleInvokeServiceProxy.class);
 
     private InvocationSecurityProvider invocationSecurityProvider;
 

@@ -3,14 +3,15 @@ package org.gridman.coherence.security.simple;
 import com.tangosol.net.CacheService;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.WrapperCacheService;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This provides read/write access to particular caches.
  */
 public class SimpleCacheServiceProxy extends WrapperCacheService {
 
-    private static final Logger logger = Logger.getLogger(SimpleCacheServiceProxy.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimpleCacheServiceProxy.class);
 
     private CacheSecurityProvider securityProvider;
 
