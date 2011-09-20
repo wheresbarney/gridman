@@ -11,9 +11,6 @@
 
   <properties>
     <coherence.version>[3.6,3.8)</coherence.version>
-    <!-- gridman-coherence-common won't build with 3.7 -->
-    <coherence.version.common>[3.6,3.7)</coherence.version.common>
-    <!--<coherence.version>3.5.3b465</coherence.version>-->
     <apacheds.version>1.5.5</apacheds.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>

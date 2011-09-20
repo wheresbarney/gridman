@@ -14,6 +14,29 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>org/gridman/coherence/security/**/*.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>org/gridman/coherence/security/**/*.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
 
     <dependency>
@@ -25,12 +48,10 @@
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>coherence</artifactId>
-      <version>${coherence.version.common}</version>
     </dependency>
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>coherence-jpa</artifactId>
-      <version>${coherence.version.common}</version>
     </dependency>
     <dependency>
       <groupId>com.sleepycat</groupId>
