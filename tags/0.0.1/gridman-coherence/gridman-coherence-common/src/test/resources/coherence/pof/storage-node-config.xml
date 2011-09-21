@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config-3.6.dtd">
+
+<!-- secureConfig - config for secure solution -->
+<cache-config>
+
+  <!-- Allow non pof stuff to work for now. -->
+  <defaults>
+    <serializer>
+      <instance>
+        <class-name system-property="org.gridman.coherence.serializer">org.gridman.coherence.pof.PassThroughPofContext</class-name>
+      </instance>
+    </serializer>
+  </defaults>
+
+
+  <caching-scheme-mapping>
+
+    <cache-mapping>
+      <cache-name>*</cache-name>
+      <scheme-name>dist-scheme</scheme-name>
+    </cache-mapping>
+
+  </caching-scheme-mapping>
+
+  <caching-schemes>
+
+    <distributed-scheme>
+      <scheme-name>dist-scheme</scheme-name>
+      <backing-map-scheme>
+        <local-scheme/>
+      </backing-map-scheme>
+      <autostart>true</autostart>
+    </distributed-scheme>
+
+  </caching-schemes>
+</cache-config>

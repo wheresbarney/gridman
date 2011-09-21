@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config-3.6.dtd">
+
+<!-- secureConfig - config for secure solution -->
+<cache-config>
+
+  <!-- Allow non pof stuff to work for now. -->
+  <defaults>
+    <socket-provider system-property="tangosol.coherence.extend.socketprovider"/>
+    <serializer>
+      <instance>
+        <class-name system-property="org.gridman.coherence.serializer">com.tangosol.io.pof.SafeConfigurablePofContext</class-name>
+      </instance>
+    </serializer>
+  </defaults>
+
+
+  <caching-scheme-mapping>
+
+      <cache-mapping>
+          <cache-name>*</cache-name>
+          <scheme-name>dist-scheme</scheme-name>
+      </cache-mapping>
+
+  </caching-scheme-mapping>
+
+  <caching-schemes>
+
+    <distributed-scheme>
+        <scheme-name>dist-scheme</scheme-name>
+        <backing-map-scheme>
+            <local-scheme/>
+        </backing-map-scheme>
+        <backup-storage>
+            <type>scheme</type>
+            <scheme-name>backup-scheme</scheme-name>
+        </backup-storage>
+        <partition-listener>
+            <class-name>org.gridman.coherence.backup.RestorePartitionListener</class-name>
+        </partition-listener>
+        <partition-count>29</partition-count>
+        <autostart>true</autostart>
+    </distributed-scheme>
+
+    <class-scheme>
+        <scheme-name>backupmap-scheme</scheme-name>
+        <class-name>org.gridman.coherence.backup.BackupMap</class-name>
+        <init-params>
+            <init-param>
+                <param-type>java.lang.String</param-type>
+                <param-name>{cache-name}</param-name>
+            </init-param>
+        </init-params>
+    </class-scheme>
+
+    <external-scheme>
+        <scheme-name>backup-scheme</scheme-name>
+        <unit-calculator>BINARY</unit-calculator>
+        <bdb-store-manager>
+            <class-name>org.gridman.coherence.backup.BDBStoreManager</class-name>
+            <directory system-property="backup.bdb.directory"/>
+            <store-name>{cache-name}</store-name>
+        </bdb-store-manager>
+    </external-scheme>
+
+    <proxy-scheme>
+      <service-name>ExtendTcpProxyService</service-name>
+      <thread-count>5</thread-count>
+      <acceptor-config>
+        <tcp-acceptor>
+          <local-address>
+            <address>localhost</address>
+            <port system-property="coherence.extend.port"/>
+          </local-address>
+        </tcp-acceptor>
+      </acceptor-config>
+      <autostart>true</autostart>
+    </proxy-scheme>
+
+    <invocation-scheme>
+      <service-name>ServerInvokeService</service-name>
+      <thread-count>5</thread-count>
+      <autostart>true</autostart>
+    </invocation-scheme>
+
+  </caching-schemes>
+</cache-config>
