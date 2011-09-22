@@ -1,6 +1,7 @@
 package org.gridman.coherence.security.simple;
 
 import com.tangosol.io.pof.PofPrincipal;
+import com.tangosol.net.Service;
 import com.tangosol.net.security.IdentityAsserter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ public class SimpleIdentityAsserter implements IdentityAsserter {
         logger.debug(SimpleIdentityAsserter.class.getName());
     }
 
-    @Override public Subject assertIdentity(Object oToken) throws SecurityException {
+    @Override public Subject assertIdentity(Object oToken, Service arg1) throws SecurityException {
         logger.debug("assertIdentity " + oToken);
         // @todo should we ban guests?
         // if(oToken == null) { oToken = "Guest"; }
