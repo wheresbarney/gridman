@@ -1,4 +1,4 @@
-package org.gridman.testtools.kerberos;
+package org.gridman.testtools.junit;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,9 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * @author Jonathan Knight
- * @deprecated use {@code org.gridman.testtools.junit.RunIsolated} instead
  */
-@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface RunIsolated {
