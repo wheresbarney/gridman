@@ -4,7 +4,6 @@ import org.gridman.testtools.classloader.IsolatedActionException;
 import org.gridman.testtools.classloader.IsolatedExceptionAction;
 import org.gridman.testtools.classloader.PropertyIsolation;
 import org.gridman.testtools.classloader.SystemPropertyLoader;
-import org.gridman.testtools.kerberos.RunIsolated;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -30,6 +29,15 @@ public class IsolationRunner extends BlockJUnit4ClassRunner {
         if (isolated != null) {
             Properties localProperties = SystemPropertyLoader.loadProperties(isolated.properties());
             statement = new IsolatedStatement(statement, localProperties);
+        }
+
+        // Backward compatibility for deprecated kerberos.RunIsolated
+        if (isolated == null) {
+            org.gridman.testtools.kerberos.RunIsolated oldIsolated = method.getAnnotation(org.gridman.testtools.kerberos.RunIsolated.class);
+            if (oldIsolated != null) {
+                Properties localProperties = SystemPropertyLoader.loadProperties(oldIsolated.properties());
+                statement = new IsolatedStatement(statement, localProperties);
+            }
         }
 
         return statement;

@@ -12,6 +12,7 @@ import org.gridman.security.GridManCallbackHandler;
 import org.gridman.security.JaasHelper;
 import org.gridman.testtools.coherence.classloader.ClusterInfo;
 import org.gridman.testtools.coherence.classloader.ClusterStarter;
+import org.gridman.testtools.junit.RunIsolated;
 import org.gridman.testtools.kerberos.*;
 import org.gridman.testtools.kerberos.apacheds.ApacheDsServerContext;
 import org.junit.After;
