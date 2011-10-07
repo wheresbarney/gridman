@@ -7,9 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * @author Jonathan Knight
- * @deprecated use {@code org.gridman.testtools.junit.RunIsolated} instead
  */
-@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface RunIsolated {

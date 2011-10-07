@@ -7,7 +7,6 @@ import org.apache.directory.server.ldap.LdapServer;
 import org.gridman.testtools.classloader.IsolatedExceptionAction;
 import org.gridman.testtools.classloader.PropertyIsolation;
 import org.gridman.testtools.classloader.SystemPropertyLoader;
-import org.gridman.testtools.junit.RunIsolated;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
@@ -242,18 +241,6 @@ public abstract class KdcServerContext {
                     isolatedAction = new IsolatedTest(statement);
                 } else {
                     isolatedAction = new IsolatedPrivilegedTest(subject, privilegedTest);
-                }
-            }
-            // Backward compatibility for deprecated kerberos.RunIsolated
-            if (isolated == null) {
-                org.gridman.testtools.kerberos.RunIsolated oldIsolated = description.getAnnotation(org.gridman.testtools.kerberos.RunIsolated.class);
-                if (oldIsolated != null) {
-                    localProperties = SystemPropertyLoader.loadProperties(oldIsolated.properties());
-                    if (subject == null) {
-                        isolatedAction = new IsolatedTest(statement);
-                    } else {
-                        isolatedAction = new IsolatedPrivilegedTest(subject, privilegedTest);
-                    }
                 }
             }
 

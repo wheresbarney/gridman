@@ -5,7 +5,7 @@ import org.gridman.testtools.coherence.classloader.ClusterNode;
 import org.gridman.testtools.coherence.classloader.ClusterNodeGroup;
 import org.gridman.testtools.coherence.classloader.ClusterStarter;
 import org.gridman.testtools.junit.IsolationRunner;
-import org.gridman.testtools.junit.RunIsolated;
+import org.gridman.testtools.kerberos.RunIsolated;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

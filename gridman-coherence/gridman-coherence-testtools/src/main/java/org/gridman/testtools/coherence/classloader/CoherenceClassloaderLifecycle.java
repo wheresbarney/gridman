@@ -20,8 +20,8 @@ import java.util.List;
  * @author <a href="jk@thegridman.com">Jonathan Knight</a>
  */
 public class CoherenceClassloaderLifecycle implements ClassloaderLifecycle {
-    protected ClassLoader classLoader;
-    protected Cluster cluster;
+    private ClassLoader classLoader;
+    private Cluster cluster;
 
     private String classname = "com.tangosol.net.DefaultCacheServer";
     private String startMethod = "startDaemon";

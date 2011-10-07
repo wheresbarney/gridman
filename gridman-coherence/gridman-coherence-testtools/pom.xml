@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.gridman</groupId>
     <artifactId>gridman-coherence</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.1</version>
   </parent>
 
   <dependencies>

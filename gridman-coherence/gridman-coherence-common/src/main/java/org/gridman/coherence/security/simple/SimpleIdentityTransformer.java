@@ -1,6 +1,5 @@
 package org.gridman.coherence.security.simple;
 
-import com.tangosol.net.Service;
 import com.tangosol.net.security.IdentityTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,7 @@ public class SimpleIdentityTransformer implements IdentityTransformer {
         logger.debug(SimpleIdentityTransformer.class.getName());
     }
 
-    @Override public Object transformIdentity(Subject subject, Service arg1) throws SecurityException {
+    @Override public Object transformIdentity(Subject subject) throws SecurityException {
         String name = CoherenceSecurityUtils.getFirstPrincipalName(subject);
         logger.debug("SimpleIdentityTransformer : " + subject + " : " + name);
         return name;
