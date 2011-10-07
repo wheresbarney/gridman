@@ -1,0 +1,13 @@
+<permissions>
+  <permission>
+    <class-name>org.gridman.coherence.security.CachePermission</class-name>
+    <resource-name>*</resource-name>
+    <action>ALL</action>
+    <qualifiers>
+      <principal>
+        <class-name>org.gridman.security.kerberos.KrbTicket</class-name>
+        <principal-name>knightj</principal-name>
+      </principal>
+    </qualifiers>
+  </permission>
+</permissions>
