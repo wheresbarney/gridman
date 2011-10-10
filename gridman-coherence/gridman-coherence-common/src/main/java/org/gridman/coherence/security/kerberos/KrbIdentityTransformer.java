@@ -1,6 +1,5 @@
 package org.gridman.coherence.security.kerberos;
 
-import com.tangosol.net.Service;
 import com.tangosol.net.security.IdentityTransformer;
 import org.gridman.security.kerberos.KrbHelper;
 
@@ -18,7 +17,7 @@ public class KrbIdentityTransformer implements IdentityTransformer {
     }
 
     @Override
-    public Object transformIdentity(Subject subject, Service arg1) throws SecurityException {
+    public Object transformIdentity(Subject subject) throws SecurityException {
         if (subject == null) {
             throw new SecurityException("Missing Credentials - Subject not present");
         }

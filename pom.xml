@@ -4,13 +4,13 @@
   <packaging>pom</packaging>
   <groupId>org.gridman</groupId>
   <artifactId>gridman</artifactId>
-  <version>0.0.2</version>
+  <version>1.0.0</version>
   <name>GridMan</name>
   <description>GridMan Project</description>
   <url>http://code.google.com/p/gridman/</url>
 
   <properties>
-    <coherence.version>[3.7,3.8)</coherence.version>
+    <coherence.version>[3.6,3.7)</coherence.version>
     <apacheds.version>1.5.5</apacheds.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -37,7 +37,7 @@
     <repository>
       <id>builds</id>
       <name>In-house build repository</name>
-      <url>${internal.maven.repo}/builds</url>
+      <url>${internal.maven.repo}</url>
     </repository>
     <site>
       <id>GridMan</id>

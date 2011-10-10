@@ -1,6 +1,5 @@
 package org.gridman.coherence.security.kerberos;
 
-import com.tangosol.net.Service;
 import com.tangosol.net.security.IdentityAsserter;
 import org.gridman.security.JaasHelper;
 import org.gridman.security.kerberos.KrbHelper;
@@ -57,23 +56,23 @@ public class KrbIdentityAsserter implements IdentityAsserter {
      * Kerberos ticket.
      * </p>
      *
-     * @param token - a byte[] Kerberos ticket
+     * @param token - a byte[] Kerberos ticket 
      * @return a {@link javax.security.auth.Subject}
      * @throws SecurityException
      */
     @Override
-    public Subject assertIdentity(Object token, Service arg1) throws SecurityException {
+    public Subject assertIdentity(Object token) throws SecurityException {
         Subject subject;
 
         if (!(token instanceof byte[])) {
             throw new SecurityException("Invalid Token - expected valid Kerberos ticket in the form of a byte[]");
         }
-
+        
         Set<Principal> principals = new HashSet<Principal>();
 
         KrbTicket principal = KrbHelper.validate(authenticatingSubject, (byte[])token, allowReplays);
         principals.add(principal);
-
+        
         subject = new Subject(true, principals, new HashSet(), new HashSet());
         return subject;
     }

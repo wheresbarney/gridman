@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.gridman</groupId>
     <artifactId>gridman</artifactId>
-    <version>0.0.2</version>
+    <version>1.0.0</version>
   </parent>
 
   <modules>
