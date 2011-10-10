@@ -1,0 +1,138 @@
+dn: dc=example,dc=com
+objectClass: organization
+objectClass: dcObject
+objectClass: top
+dc: example
+o: example.com
+
+dn: ou=Users,dc=example,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: Users
+
+dn: uid=krbtgt,ou=Users,dc=example,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: krb5Principal
+objectClass: inetOrgPerson
+objectClass: krb5KDCEntry
+objectClass: top
+cn: KDC Service
+krb5Key:: MBmgAwIBF6ESBBC0k6aT0vM5wesE6vwx1A/N
+krb5Key:: MCGgAwIBEKEaBBh1a3xUB38c3EZwZ9WAruBkUgdMcBZYnhY=
+krb5Key:: MBmgAwIBEaESBBD5czQvXEbAoUogJ7pP2ona
+krb5Key:: MBGgAwIBA6EKBAhh+/ddMqHyFQ==
+krb5KeyVersionNumber: 0
+krb5PrincipalName: krbtgt/EXAMPLE.COM@EXAMPLE.COM
+sn: Service
+uid: krbtgt
+userPassword:: e1NIQX01ZW42RzZNZXpScm9UM1hLcWtkUE9tWS9CZlE9
+
+dn: uid=ldap,ou=Users,dc=example,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: krb5Principal
+objectClass: inetOrgPerson
+objectClass: krb5KDCEntry
+objectClass: top
+cn: LDAP
+krb5Key:: MBmgAwIBF6ESBBC0k6aT0vM5wesE6vwx1A/N
+krb5Key:: MCGgAwIBEKEaBBhJZBBoJRVrMrnmhp3Zg/1/m+lend+UCAI=
+krb5Key:: MBmgAwIBEaESBBAe0dRWWmXFQk04TvEjv+Yk
+krb5Key:: MBGgAwIBA6EKBAjl/v7VbWj+nQ==
+krb5KeyVersionNumber: 0
+krb5PrincipalName: ldap/localhost@EXAMPLE.COM
+sn: Service
+uid: ldap
+userPassword:: e1NIQX01ZW42RzZNZXpScm9UM1hLcWtkUE9tWS9CZlE9
+
+dn: cn=Jonathan Knight+krb5PrincipalName=knightj@EXAMPLE.COM+sn=Knight+uid=knightj+userPassword=secret,ou=Users,dc=example,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: krb5Principal
+objectClass: krb5KDCEntry
+objectClass: inetOrgPerson
+objectClass: top
+cn: Jonathan Knight
+krb5Key:: MBmgAwIBF6ESBBCHjYAUYGzaKWd6RO+hNT/H
+krb5Key:: MCGgAwIBEKEaBBhtWOWbzuwjXa0NScSb8YZh7McB5oB/GgI=
+krb5Key:: MBmgAwIBEaESBBBYKj43ahu+YqU9O5lcI314
+krb5Key:: MBGgAwIBA6EKBAjlmCZJT2SAdg==
+krb5KeyVersionNumber: 0
+krb5PrincipalName: knightj@EXAMPLE.COM
+sn: Knight
+uid: knightj
+userPassword:: c2VjcmV0
+
+dn: cn=Cache Server+krb5PrincipalName=cacheserver@EXAMPLE.COM+sn=Cache Server+uid=cacheserver+userPassword=secret,ou=Users,dc=example,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: krb5Principal
+objectClass: inetOrgPerson
+objectClass: krb5KDCEntry
+objectClass: top
+cn: Cache Server
+krb5Key:: MBmgAwIBF6ESBBCHjYAUYGzaKWd6RO+hNT/H
+krb5Key:: MCGgAwIBEKEaBBhtsLDqictbMgc+Ma1PVJt6y4WoFqdk4Eo=
+krb5Key:: MBmgAwIBEaESBBAkqKbaqSwkW/V/eanVU219
+krb5Key:: MBGgAwIBA6EKBAhA6gQms/4lfA==
+krb5KeyVersionNumber: 0
+krb5PrincipalName: cacheserver@EXAMPLE.COM
+sn: Cache Server
+uid: cacheserver
+userPassword:: c2VjcmV0
+
+dn: cn=Thomas The Tank+krb5PrincipalName=thomas@EXAMPLE.COM+sn=Tank+uid=thomas+userPassword=secret,ou=Users,dc=example,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: krb5Principal
+objectClass: inetOrgPerson
+objectClass: krb5KDCEntry
+objectClass: top
+cn: Thomas The Tank
+krb5Key:: MBmgAwIBEaESBBBzwlHYoM2bDcs9z8TflFFz
+krb5Key:: MCGgAwIBEKEaBBj7QyNtGcRkwdz9np6b8VjmH9ynnsj48pc=
+krb5Key:: MBmgAwIBF6ESBBCHjYAUYGzaKWd6RO+hNT/H
+krb5Key:: MBGgAwIBA6EKBAgCkgdRO8IL1Q==
+krb5KeyVersionNumber: 0
+krb5PrincipalName: thomas@EXAMPLE.COM
+sn: Tank
+uid: thomas
+userPassword:: c2VjcmV0
+
+dn: cn=James The Red Engine+krb5PrincipalName=james@EXAMPLE.COM+sn=Red Engine+uid=james+userPassword=secret,ou=Users,dc=example,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: krb5Principal
+objectClass: krb5KDCEntry
+objectClass: inetOrgPerson
+objectClass: top
+cn: James The Red Engine
+krb5Key:: MBmgAwIBEaESBBAxdqLss4SNcOrpHZPAh/ay
+krb5Key:: MCGgAwIBEKEaBBgcrS+nrqGtpJs9KRqUXfFSeXoj+DcL0wc=
+krb5Key:: MBmgAwIBF6ESBBCHjYAUYGzaKWd6RO+hNT/H
+krb5Key:: MBGgAwIBA6EKBAjVBOlJ7EAsmw==
+krb5KeyVersionNumber: 0
+krb5PrincipalName: james@EXAMPLE.COM
+sn: Red Engine
+uid: james
+userPassword:: c2VjcmV0
+
+dn: cn=Fat Controller+krb5PrincipalName=fatcontroller@EXAMPLE.COM+sn=Controller+uid=fatcontroller+userPassword=secret,ou=Users,dc=example,dc=com
+objectClass: organizationalPerson
+objectClass: person
+objectClass: krb5Principal
+objectClass: inetOrgPerson
+objectClass: krb5KDCEntry
+objectClass: top
+cn: Fat Controller
+krb5Key:: MBmgAwIBEaESBBD4W+RYtI/gPt4LL48pnOwu
+krb5Key:: MCGgAwIBEKEaBBjl9BqXC5jvjFj3MauwBwE4s7os8atRUZc=
+krb5Key:: MBmgAwIBF6ESBBCHjYAUYGzaKWd6RO+hNT/H
+krb5Key:: MBGgAwIBA6EKBAg+Rj2JYjFJIw==
+krb5KeyVersionNumber: 0
+krb5PrincipalName: fatcontroller@EXAMPLE.COM
+sn: Controller
+uid: fatcontroller
+userPassword:: c2VjcmV0
+
