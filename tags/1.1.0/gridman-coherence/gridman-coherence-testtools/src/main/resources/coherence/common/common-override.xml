@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE coherence SYSTEM "coherence.dtd">
+<coherence>
+
+  <cluster-config>
+    <!-- This changes the timeout from the default of 30s -->
+    <multicast-listener>
+      <join-timeout-milliseconds system-property="coherence.incubator.joinTimeout">1000</join-timeout-milliseconds>
+    </multicast-listener>
+
+    <packet-publisher>
+      <!--<packet-delivery>-->
+        <!--<resend-milliseconds>200</resend-milliseconds>-->
+        <!--<timeout-milliseconds>10000</timeout-milliseconds>-->
+      <!--</packet-delivery>-->
+    </packet-publisher>
+
+    <socket-providers>
+      <socket-provider id="test">
+        <instance>
+          <class-name>org.gridman.testtools.coherence.net.ControllableSystemSocketProvider</class-name>
+        </instance>
+      </socket-provider>
+    </socket-providers>
+
+  </cluster-config>
+
+</coherence>
