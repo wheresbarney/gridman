@@ -42,7 +42,7 @@
     <site>
       <id>GridMan</id>
       <name>GridMan</name>
-      <url>file://~/Sites/gridman</url>
+      <url>${internal.site.repo}</url>
     </site>
   </distributionManagement>
 
@@ -59,6 +59,13 @@
   <build>
     <finalName>gridman-${project.version}</finalName>
 
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+      </plugin>
+    </plugins>
+    
     <pluginManagement>
       <plugins>
         <plugin>
@@ -88,44 +95,103 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <configuration>
-            <outputDirectory>target/classes</outputDirectory>
-            <finalName>${project.name}-src.jar</finalName>
-            <attach>false</attach>
-          </configuration>
+          <version>2.1.2</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <skip>false</skip>
-            <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+            <argLine>-Xms128m -Xmx1024m -XX:MaxPermSize=256m</argLine>
             <disableXmlReport>false</disableXmlReport>
             <forkMode>always</forkMode>
+            <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
+            <excludes>
+              <exclude>**/kerberos/*.java</exclude>
+              <exclude>**/ClusterNodeFailureSimulationTest.java</exclude>
+            </excludes>
           </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
+          <version>3.0</version>
           <configuration>
             <locales>en</locales>
+            <reportPlugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.4.2</version>
+                <configuration>
+                  <aggregate>true</aggregate>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                  <aggregate>true</aggregate>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>taglist-maven-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                  <aggregate>true</aggregate>
+                </configuration>
+              </plugin>
+              <!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration> <configLocation>checkstyle.xml</configLocation> </configuration>
+                </plugin> -->
+              
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                  <aggregate>true</aggregate>
+                </configuration>
+              </plugin>
+              
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                  <aggregate>true</aggregate>
+                </configuration>
+              </plugin>
+              
+            </reportPlugins>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.7</version>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
   </build>
 
-<!--  <repositories>-->
-<!--    <repository>-->
-<!--      <id>Codehaus Snapshots</id>-->
-<!--      <url>http://snapshots.repository.codehaus.org/</url>-->
-<!--      <snapshots>-->
-<!--        <enabled>true</enabled>-->
-<!--      </snapshots>-->
-<!--      <releases>-->
-<!--        <enabled>false</enabled>-->
-<!--      </releases>-->
-<!--    </repository>-->
-<!--  </repositories>-->
   <pluginRepositories>
     <pluginRepository>
       <id>Codehaus Snapshots</id>
@@ -174,16 +240,11 @@
         <artifactId>persistence-api</artifactId>
         <version>1.0</version>
       </dependency>
-        <dependency>
-          <groupId>javax.persistence</groupId>
-          <artifactId>persistence-api</artifactId>
-          <version>1.0</version>
-        </dependency>
-        <dependency>
-          <groupId>asm</groupId>
-          <artifactId>asm-all</artifactId>
-          <version>3.3</version>
-        </dependency>
+      <dependency>
+        <groupId>asm</groupId>
+        <artifactId>asm-all</artifactId>
+        <version>3.3</version>
+      </dependency>
 
       <!-- Logging -->
       <dependency>
@@ -368,54 +429,6 @@
     </dependencies>
 
   </dependencyManagement>
-
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>dashboard-maven-plugin</artifactId>
-        <version>1.0</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.4.2</version>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.0.1</version>
-        <configuration>
-          <xmlOutput>true</xmlOutput>
-          <!-- Optional derectory to put findbugs xdoc xml report -->
-          <xmlOutputDirectory>target/site</xmlOutputDirectory>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>taglist-maven-plugin</artifactId>
-        <version>2.4</version>
-      </plugin>
-      <!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId>
-         <configuration> <configLocation>checkstyle.xml</configLocation> </configuration>
-         </plugin> -->
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jxr-plugin</artifactId>
-        <version>2.2</version>
-        <configuration>
-          <aggregate>true</aggregate>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.7</version>
-      </plugin>
-    </plugins>
-  </reporting>
 
   <profiles>
     <profile>
