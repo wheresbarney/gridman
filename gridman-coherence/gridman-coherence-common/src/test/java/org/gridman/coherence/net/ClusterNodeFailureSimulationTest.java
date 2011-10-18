@@ -13,6 +13,8 @@ import org.junit.runner.RunWith;
 
 import java.util.Set;
 
+import junit.framework.Assert;
+
 import static org.gridman.testtools.Matchers.isFalse;
 import static org.gridman.testtools.coherence.CoherenceTestConstants.*;
 import static org.gridman.testtools.coherence.queries.ClusterQueries.*;
@@ -60,7 +62,7 @@ public class ClusterNodeFailureSimulationTest {
         Integer after = clusterStarter.invoke(nodeZero, clusterSize());
         Set memberSetAfter = clusterStarter.invoke(nodeZero, memberSet());
 
-        assertThat(before - after, is(1));
+        Assert.assertEquals(1, before - after);
         assertThat(memberSetAfter.contains(memberToKill), isFalse());
     }
 
@@ -72,15 +74,17 @@ public class ClusterNodeFailureSimulationTest {
         ClusterNode nodeToKill_2 = clusterInfo.getNode(storageGroup, 2);
 
         Integer before = clusterStarter.invoke(nodeZero, clusterSize());
+        Assert.assertNotNull(before);
         String memberToKill_1 = clusterStarter.invoke(nodeToKill_1, localMember());
         String memberToKill_2 = clusterStarter.invoke(nodeToKill_2, localMember());
 
         clusterStarter.killNode(nodeToKill_1, nodeToKill_2);
 
         Integer after = clusterStarter.invoke(nodeZero, clusterSize());
+        Assert.assertNotNull(after);
         Set memberSetAfter = clusterStarter.invoke(nodeZero, memberSet());
 
-        assertThat(before - after, is(2));
+        Assert.assertEquals(2, before - after);
         assertThat(memberSetAfter.contains(memberToKill_1), isFalse());
         assertThat(memberSetAfter.contains(memberToKill_2), isFalse());
     }
