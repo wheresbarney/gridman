@@ -40,8 +40,8 @@
       <url>${internal.maven.repo}</url>
     </repository>
     <site>
-      <id>GridMan</id>
-      <name>GridMan</name>
+      <id>sites</id>
+      <name>In-house sites repository</name>
       <url>${internal.site.repo}</url>
     </site>
   </distributionManagement>
@@ -58,6 +58,14 @@
 
   <build>
     <finalName>gridman-${project.version}</finalName>
+
+    <extensions>
+      <extension>
+	<groupId>org.apache.maven.wagon</groupId>
+	<artifactId>wagon-webdav-jackrabbit</artifactId>
+	<version>1.0-beta-7</version>
+      </extension>
+    </extensions>
 
     <plugins>
       <plugin>
